@@ -1,0 +1,33 @@
+{
+  "name": "CacheUMLExplorer",
+  "version": "0.0.1",
+  "description": "An UML Class explorer for InterSystems Caché",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "express": "^5.0.0-alpha.1"
+  },
+  "scripts": {
+    "test": "node test/testServer"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZitRos/CacheUMLExplorer"
+  },
+  "keywords": [
+    "UMLExplorer",
+    "Caché",
+    "UML",
+    "diagram"
+  ],
+  "author": "ZitRo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ZitRos/CacheUMLExplorer/issues"
+  },
+  "homepage": "https://github.com/ZitRos/CacheUMLExplorer"
+}
