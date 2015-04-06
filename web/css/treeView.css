@@ -1,7 +1,8 @@
 #treeView {
+    position: relative;
     display: block;
     font-size: 16px;
-    margin: 5px;
+    min-height: 100%;
 }
 
 .tv-package-name.minimized + .tv-package-content {

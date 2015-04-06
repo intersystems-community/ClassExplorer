@@ -6,6 +6,25 @@
 var ClassTree = function (treeViewContainer) {
 
     this.container = treeViewContainer;
+    this.loader = null;
+
+};
+
+ClassTree.prototype.showLoader = function () {
+
+    if (this.loader) return;
+
+    this.loader = document.createElement("div");
+    this.loader.className = "spinner";
+    this.container.appendChild(this.loader);
+
+};
+
+ClassTree.prototype.removeLoader = function () {
+
+    if (!this.loader) return;
+    this.loader.parentNode.removeChild(this.loader);
+    this.loader = null;
 
 };
 
@@ -71,5 +90,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
     };
 
     build(this.container, treeObject);
+
+    this.removeLoader();
 
 };

@@ -18,6 +18,7 @@ CacheUMLExplorer.prototype.init = function () {
 
     var self = this;
 
+    this.classTree.showLoader();
     this.source.getClassTree(function (err, data) {
         if (!err) self.classTree.updateTree(data);
     });
