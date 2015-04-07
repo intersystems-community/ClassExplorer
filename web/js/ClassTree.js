@@ -76,7 +76,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
         }
 
         arr.sort(function (a, b) {
-            if (typeof a.val !== typeof b.val) return typeof a.val === "object" ? 0 : 1;
+            if (typeof a.val !== typeof b.val) return typeof a.val === "object" ? -1 : 1;
             return a.name > b.name ? 1 : -1;
         });
 
