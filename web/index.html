@@ -6,19 +6,29 @@
     <link rel="stylesheet" href="css/interface.css"/>
     <link rel="stylesheet" href="css/treeView.css"/>
     <link rel="stylesheet" href="css/extras.css"/>
+    <link rel="stylesheet" href="css/classView.css"/>
+    <link rel="stylesheet" href="css/joint.min.css"/>
+    <script type="text/javascript" src="js/joint.min.js"></script>
+    <script type="text/javascript" src="js/joint.shapes.uml.min.js"></script>
+    <script type="text/javascript" src="js/joint.layout.DirectedGraph.min.js"></script>
+    <script type="text/javascript" src="js/ClassView.js"></script>
     <script type="text/javascript" src="js/Lib.js"></script>
     <script type="text/javascript" src="js/CacheUMLExplorer.js"></script>
     <script type="text/javascript" src="js/ClassTree.js"></script>
     <script type="text/javascript" src="js/Source.js"></script>
 </head>
-<body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'))">
+<body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
     <div class="ui-body">
         <div class="ui-sideBlock">
             <div id="treeView">
 
             </div>
         </div>
-        <div class="ui-mainBlock"></div>
+        <div class="ui-mainBlock">
+            <div id="classView">
+
+            </div>
+        </div>
     </div>
 </body>
 </html>

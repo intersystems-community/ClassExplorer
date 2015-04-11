@@ -2,11 +2,17 @@
     position: relative;
     display: block;
     font-size: 16px;
-    min-height: 100%;
+    height: 100%;
+    border-right: 1px solid lightgray;
+    overflow: auto;
 }
 
 .tv-package-name.minimized + .tv-package-content {
     display: none;
+}
+
+.tv-class-name.selected {
+    box-shadow: inset 0 0 2px 2px deepskyblue;
 }
 
 .tv-class-name, .tv-package-name {
@@ -14,6 +20,9 @@
     cursor: pointer;
     border-radius: 5px;
     -webkit-transition: all .2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
 .tv-class-name:hover, .tv-package-name:hover {
@@ -58,6 +67,7 @@
 }
 
 .tv-package-name:hover:before {
+    left: 4px;
     width: 22px;
 }
 

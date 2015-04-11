@@ -7,6 +7,8 @@ var ClassTree = function (treeViewContainer) {
 
     this.container = treeViewContainer;
     this.loader = null;
+    this.SELECTED_CLASS_NAME = null;
+    this.SELECTED_ELEMENT = null;
 
 };
 
@@ -28,9 +30,25 @@ ClassTree.prototype.removeLoader = function () {
 
 };
 
+ClassTree.prototype.selectClass = function (element, className) {
+
+    this.SELECTED_CLASS_NAME = className;
+
+    if (element !== this.SELECTED_ELEMENT) {
+        if (this.SELECTED_ELEMENT) this.SELECTED_ELEMENT.classList.remove("selected");
+        this.SELECTED_ELEMENT = element;
+    }
+
+    if (!element.classList.contains("selected")) {
+        element.classList.add("selected");
+    }
+
+};
+
 ClassTree.prototype.updateTree = function (treeObject) {
 
-    var div = function () { return document.createElement("div"); };
+    var self = this,
+        div = function () { return document.createElement("div"); };
 
     var packageClick = function (e) {
 
@@ -44,7 +62,15 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
     };
 
-    var append = function (rootElement, elementName, isPackage) {
+    var classClick = function (e) {
+
+        var el = e.target || e.srcElement;
+
+        self.selectClass(el, el.CLASS_NAME);
+
+    };
+
+    var append = function (rootElement, elementName, isPackage, path) {
 
         var el1 = div(),
             el2, el3;
@@ -58,6 +84,8 @@ ClassTree.prototype.updateTree = function (treeObject) {
         } else {
             el1.className = "tv-class-name";
             el1.textContent = elementName;
+            el1.addEventListener("click", classClick);
+            el1.CLASS_NAME = path + (path ? "." : "") + elementName;
         }
 
         rootElement.appendChild(el1);
@@ -66,7 +94,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
     };
 
-    var build = function (rootElement, object) {
+    var build = function (rootElement, object, path) {
 
         var i, element, rec,
             arr = [];
@@ -82,14 +110,19 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
         for (i in arr) {
             element = arr[i];
-            if (rec = append(rootElement, element.name, typeof element.val === "object")) {
-                build(rec, element.val);
+            if (rec = append(
+                    rootElement,
+                    element.name,
+                    typeof element.val === "object",
+                    path.join(".")
+                )) {
+                build(rec, element.val, path.concat([element.name]));
             }
         }
 
     };
 
-    build(this.container, treeObject);
+    build(this.container, treeObject, []);
 
     this.removeLoader();
 
