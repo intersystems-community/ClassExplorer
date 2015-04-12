@@ -1,3 +1,15 @@
 #classView {
     height: 100%;
 }
+
+.uml-class-name-rect {
+    fill: lightgray;
+}
+
+.uml-class-attrs-rect, .uml-class-methods-rect {
+    fill: white;
+}
+
+text {
+    font-family: monospace;
+}

@@ -1,10 +1,12 @@
 /**
  * Class tree representation.
+ * @param {CacheUMLExplorer} parent
  * @param {HTMLElement} treeViewContainer
  * @constructor
  */
-var ClassTree = function (treeViewContainer) {
+var ClassTree = function (parent, treeViewContainer) {
 
+    this.cacheUMLExplorer = parent;
     this.container = treeViewContainer;
     this.loader = null;
     this.SELECTED_CLASS_NAME = null;
@@ -30,7 +32,9 @@ ClassTree.prototype.removeLoader = function () {
 
 };
 
-ClassTree.prototype.selectClass = function (element, className) {
+ClassTree.prototype.classSelected = function (element, className) {
+
+    var self = this;
 
     this.SELECTED_CLASS_NAME = className;
 
@@ -41,6 +45,13 @@ ClassTree.prototype.selectClass = function (element, className) {
 
     if (!element.classList.contains("selected")) {
         element.classList.add("selected");
+        this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
+            if (err) {
+                console.error(err);
+            } else {
+                self.cacheUMLExplorer.classView.render(data);
+            }
+        });
     }
 
 };
@@ -66,7 +77,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
         var el = e.target || e.srcElement;
 
-        self.selectClass(el, el.CLASS_NAME);
+        self.classSelected(el, el.CLASS_NAME);
 
     };
 

@@ -28,6 +28,6 @@ Lib.prototype.load = function (url, data, callback) {
         }
     };
 
-    xhr.send(JSON.stringify(data));
+    xhr.send(data ? JSON.stringify(data) : undefined);
 
 };
