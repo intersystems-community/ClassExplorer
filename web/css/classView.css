@@ -1,0 +1,30 @@
+#classView {
+    height: 100%;
+}
+
+.uml-class-name-rect {
+    fill: lightgray;
+}
+
+.uml-class-attrs-rect, .uml-class-methods-rect {
+    fill: white;
+}
+
+text {
+    font-family: monospace;
+}
+
+.centralText {
+    display: table;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.centralText > div {
+    display: table-cell;
+    vertical-align: middle;
+}

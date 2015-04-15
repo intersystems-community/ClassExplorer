@@ -1,0 +1,40 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: whitesmoke;
+    font-family: monospace;
+}
+
+.ui-body {
+    height: 100%;
+}
+
+.ui-sideBlock {
+    position: relative;
+    float: left;
+    width: 300px;
+    height: 100%;
+}
+
+.ui-mainBlock {
+    position: relative;
+    margin-left: 300px;
+    height: 100%;
+}
+
+.ui-ClassInfo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: .5em;
+    font-weight: 600;
+    font-size: 18pt;
+}
+
+#className {
+    text-shadow: 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
+}
