@@ -13,3 +13,18 @@
 text {
     font-family: monospace;
 }
+
+.centralText {
+    display: table;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.centralText > div {
+    display: table-cell;
+    vertical-align: middle;
+}

@@ -8,9 +8,15 @@
  */
 var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
 
+    this.elements = {
+        className: document.getElementById("className"),
+        treeViewContainer: treeViewContainer,
+        classViewContainer: classViewContainer
+    };
+
     this.source = new Source();
     this.classTree = new ClassTree(this, treeViewContainer);
-    this.classView = new ClassView(classViewContainer);
+    this.classView = new ClassView(this, classViewContainer);
 
     this.init();
 

@@ -80,7 +80,7 @@ Class contains methods that return structured class data.</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-12 16:26:04.713512">
+<Project name="UMLExplorer" LastModified="2015-04-12 19:03:12.221887">
   <Items>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
@@ -92,12 +92,14 @@ Class contains methods that return structured class data.</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63653,74965.264444</TimeChanged>
+<TimeChanged>63654,68682.349536</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
 <Data><![CDATA[
 <Routes>
+   <Route Url="/" Method="GET" Call="Index"/>
+   <Route Url="/index" Method="GET" Call="Index"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
@@ -172,6 +174,17 @@ Method to test accessibility of REST interface.</Description>
     set resp2.Status = "OK"
     set resp.obj = resp2
     do resp.%ToJSON(, "o")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Index">
+<Description>
+Method returns user application.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    &html<{{replace:HTML}}>
     return $$$OK
 ]]></Implementation>
 </Method>

@@ -45,14 +45,10 @@ ClassTree.prototype.classSelected = function (element, className) {
 
     if (!element.classList.contains("selected")) {
         element.classList.add("selected");
-        this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
-            if (err) {
-                console.error(err);
-            } else {
-                self.cacheUMLExplorer.classView.render(data);
-            }
-        });
+        this.cacheUMLExplorer.classView.loadClass(className);
     }
+
+    this.cacheUMLExplorer.elements.className.textContent = className;
 
 };
 

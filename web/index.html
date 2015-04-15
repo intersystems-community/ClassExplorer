@@ -3,19 +3,23 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Caché UML explorer</title>
+    <!-- build:css -->
     <link rel="stylesheet" href="css/interface.css"/>
     <link rel="stylesheet" href="css/treeView.css"/>
     <link rel="stylesheet" href="css/extras.css"/>
     <link rel="stylesheet" href="css/classView.css"/>
     <link rel="stylesheet" href="css/joint.min.css"/>
-    <script type="text/javascript" src="js/joint.min.js"></script>
-    <script type="text/javascript" src="js/joint.shapes.uml.js"></script>
-    <script type="text/javascript" src="js/joint.layout.DirectedGraph.min.js"></script>
+    <!-- endbuild -->
+    <!-- build:js -->
+    <script type="text/javascript" src="jsLib/joint.min.js"></script>
+    <script type="text/javascript" src="jsLib/joint.shapes.uml.js"></script>
+    <script type="text/javascript" src="jsLib/joint.layout.DirectedGraph.min.js"></script>
     <script type="text/javascript" src="js/ClassView.js"></script>
     <script type="text/javascript" src="js/Lib.js"></script>
     <script type="text/javascript" src="js/CacheUMLExplorer.js"></script>
     <script type="text/javascript" src="js/ClassTree.js"></script>
     <script type="text/javascript" src="js/Source.js"></script>
+    <!-- endbuild -->
 </head>
 <body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
     <div class="ui-body">
@@ -25,6 +29,9 @@
             </div>
         </div>
         <div class="ui-mainBlock">
+            <div class="ui-ClassInfo">
+                <span id="className"></span>
+            </div>
             <div id="classView">
 
             </div>

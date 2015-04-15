@@ -1,6 +1,6 @@
 var Source = function () {
 
-    this.URL = "http://localhost:57773/UMLExplorerREST";
+    this.URL = "http://localhost:57773/UMLExplorer";
 
 };
 
