@@ -131,6 +131,12 @@ ClassView.prototype.render = function (data) {
 
     this.updateSizes();
 
+    var bb = this.paper.getContentBBox(), q = this.paper;
+    this.paper.setOrigin(
+        q.options.width/2 - bb.width/2,
+        q.options.height/2 - Math.min(q.options.height/2 - 100, bb.height/2)
+    );
+
 };
 
 ClassView.prototype.loadClass = function (className) {
@@ -139,7 +145,7 @@ ClassView.prototype.loadClass = function (className) {
 
     this.showLoader();
     this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
-        console.log(data);
+        //console.log(data);
         self.removeLoader();
         if (err) {
             self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
