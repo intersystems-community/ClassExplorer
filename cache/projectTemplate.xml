@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-12 16:26:04">
+<Class name="UMLExplorer.ClassView">
+<Description>
+Class contains methods that return structured class data.</Description>
+<TimeChanged>63654,59126.207802</TimeChanged>
+<TimeCreated>63653,67019.989197</TimeCreated>
+
+<Method name="getClassData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>classDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%ZEN.proxyObject</ReturnType>
+<Implementation><![CDATA[
+    set oClass = ##class(%ZEN.proxyObject).%New()
+    set oProperties = ##class(%ZEN.proxyObject).%New()
+    set oClass.super = classDefinition.Super
+    set oClass.properties = oProperties
+    set count = classDefinition.Properties.Count()
+    for i = 1:1:count {
+        set oProp = ##class(%ZEN.proxyObject).%New()
+        do oProperties.%DispatchSetProperty(classDefinition.Properties.GetAt(i).Name, oProp)
+        do oProp.%DispatchSetProperty("private", classDefinition.Properties.GetAt(i).Private)
+        do oProp.%DispatchSetProperty("readOnly", classDefinition.Properties.GetAt(i).ReadOnly)
+        do oProp.%DispatchSetProperty("type", classDefinition.Properties.GetAt(i).Type)
+    }
+
+    set oMethods = ##class(%ZEN.proxyObject).%New()
+    set oClass.methods = oMethods
+    set count = classDefinition.Methods.Count()
+    for i = 1:1:count {
+        set oMeth = ##class(%ZEN.proxyObject).%New()
+        do oMethods.%DispatchSetProperty(classDefinition.Methods.GetAt(i).Name, oMeth)
+        do oMeth.%DispatchSetProperty("private", classDefinition.Methods.GetAt(i).Private)
+        do oMeth.%DispatchSetProperty("returns", classDefinition.Methods.GetAt(i).ReturnType)
+    }
+
+    return oClass
+]]></Implementation>
+</Method>
+
+<Method name="collectInheritance">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oData:%ZEN.proxyObject,baseClassDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set superParts = $LISTFROMSTRING(baseClassDefinition.Super, ",")
+    if (oData.inheritance.%DispatchGetProperty(baseClassDefinition.Name) = "") {
+        do oData.inheritance.%DispatchSetProperty(baseClassDefinition.Name, ##class(%ZEN.proxyObject).%New())
+    }
+    set oInherit = oData.inheritance.%DispatchGetProperty(baseClassDefinition.Name)
+    for i=1:1:$LISTLENGTH(superParts) {
+        set className = $LISTGET(superParts, i)
+        do oInherit.%DispatchSetProperty(className, 1)
+        if (oData.classes.%DispatchGetProperty(className) = "") {
+            set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+            if (cdef '= "") {
+                do oData.classes.%DispatchSetProperty(className, ..getClassData(cdef))
+                do ..collectInheritance(oData, cdef)
+            }
+        }
+    }
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getClassView">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>baseClassDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<Implementation><![CDATA[
+    set oData = ##class(%ZEN.proxyObject).%New()
+    set oData.classes = ##class(%ZEN.proxyObject).%New()
+    set oData.inheritance = ##class(%ZEN.proxyObject).%New()
+    do oData.classes.%DispatchSetProperty(baseClassDefinition.Name, ..getClassData(baseClassDefinition))
+
+    do ..collectInheritance(oData, baseClassDefinition)
+
+    return oData
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Project name="UMLExplorer" LastModified="2015-04-12 19:03:12.221887">
+  <Items>
+    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Class name="UMLExplorer.Router">
+<Description>
+REST interface for UMLExplorer</Description>
+<Super>%CSP.REST</Super>
+<TimeChanged>63654,68682.349536</TimeChanged>
+<TimeCreated>63648,30450.187229</TimeCreated>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+   <Route Url="/" Method="GET" Call="Index"/>
+   <Route Url="/index" Method="GET" Call="Index"/>
+   <Route Url="/Test" Method="GET" Call="Test"/>
+   <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
+   <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="GetClassTree">
+<Description>
+Method returns whole class tree visible in the current namespace.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set resp = ##class(%ZEN.proxyObject).%New()
+    set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
+    set objects = ##class(%Library.ArrayOfObjects).%New()
+    set lastParts = $LB()
+
+    set level = 1
+    do objects.SetAt(resp, level)
+
+    do classes.Execute()
+    While (classes.Next()) {
+        set name = classes.Data("Name")
+        set parts = $LISTFROMSTRING(name, ".")
+        set i = 0
+        while (i < $LISTLENGTH(parts)) && ($LISTGET(lastParts, i + 1) = $LISTGET(parts, i + 1)) {
+            set i = i + 1
+        }
+        set level = i + 1
+        set resp = objects.GetAt(level)
+        while ($LISTLENGTH(parts) > level) {
+            set level = level + 1
+            set resp = ##class(%ZEN.proxyObject).%New()
+            do objects.GetAt(level - 1).%DispatchSetProperty($LISTGET(parts, level - 1), resp)
+            do objects.SetAt(resp, level)
+        }
+        if ($LISTLENGTH(parts) = level) {
+            do resp.%DispatchSetProperty($LISTGET(parts, level), classes.Data("Hidden"))
+        }
+        set lastParts = parts
+    }
+
+    do objects.GetAt(1).%ToJSON(, "ou")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetClassView">
+<Description>
+Returns classTree by given class name</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>className:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+    if (cdef = "") quit ..Http404()
+    set classData = ##class(UMLExplorer.ClassView).getClassView(cdef)
+    do classData.%ToJSON(, "ou")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Test">
+<Description>
+Method to test accessibility of REST interface.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set resp = ##class(%ZEN.proxyObject).%New()
+    set resp2 = ##class(%ZEN.proxyObject).%New()
+    set resp2.Status = "OK"
+    set resp.obj = resp2
+    do resp.%ToJSON(, "o")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Index">
+<Description>
+Method returns user application.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    &html<{{replace:HTML}}>
+    return $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

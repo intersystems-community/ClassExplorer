@@ -1,0 +1,99 @@
+#treeView {
+    position: relative;
+    display: block;
+    font-size: 16px;
+    height: 100%;
+    border-right: 1px solid lightgray;
+    overflow: auto;
+}
+
+.tv-package-name.minimized + .tv-package-content {
+    display: none;
+}
+
+.tv-class-name.selected {
+    box-shadow: inset 0 0 2px 2px deepskyblue;
+}
+
+.tv-class-name, .tv-package-name {
+    padding: 3px;
+    cursor: pointer;
+    border-radius: 5px;
+    -webkit-transition: all .2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.tv-class-name:hover, .tv-package-name:hover {
+    background: #b9ffff;
+    font-weight: 900;
+    padding-left: 30px;
+}
+
+.tv-package-name {
+    position: relative;
+    padding-left: 20px;
+}
+
+.tv-package-name:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    left: 2px;
+    top: 5px;
+    display: block;
+    width: 8px;
+    height: 4px;
+    background: black;
+    border: 1px solid gray;
+    border-radius: 2px 2px 0 2px;
+    -webkit-transition: all .2s ease;
+}
+
+.tv-package-name:after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    left: 2px;
+    top: 8px;
+    display: block;
+    width: 16px;
+    height: 10px;
+    background: black;
+    border: 1px solid gray;
+    border-radius: 0 2px 2px 2px;
+    -webkit-transition: all .2s ease;
+}
+
+.tv-package-name:hover:before {
+    left: 4px;
+    width: 22px;
+}
+
+.tv-package-name:hover:after {
+    width: 26px;
+}
+
+.tv-class-name {
+    position: relative;
+    padding-left: 20px;
+}
+
+.tv-class-name:after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    left: 6px;
+    top: 7px;
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: black;
+    border: 1px solid gray;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.tv-package .tv-package-content {
+    padding-left: 20px;
+}
