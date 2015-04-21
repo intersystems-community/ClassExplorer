@@ -84,11 +84,11 @@ gulp.task("exportCacheXML", [
         .pipe(replace(/\{\{replace:HTML}}/, fs.readFileSync("build/web/index.html", "utf-8")))
         .pipe(replace(
             /\{\{replace:css}}/,
-            fs.readFileSync("build/web/css/CacheUMLExplorer.css", "utf-8")
+            function () { return fs.readFileSync("build/web/css/CacheUMLExplorer.css", "utf-8"); }
         ))
         .pipe(replace(
             /\{\{replace:js}}/,
-            fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8")
+            function () { return fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8"); }
         ))
         .pipe(rename(function (path) { path.basename += "-v" + pkg["version"]; }))
         .pipe(gulp.dest("build/Cache"));
