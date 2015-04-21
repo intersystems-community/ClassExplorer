@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-12 16:26:04">
+
+<CSP name="CacheUMLExplorer.css" application="">
+<![CDATA[{{replace:css}}]]>
+</CSP>
+
+<CSP name="CacheUMLExplorer.js" application="">
+<![CDATA[{{replace:js}}]]>
+</CSP>
+
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
@@ -184,7 +193,9 @@ Method returns user application.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    &html<{{replace:HTML}}>
+    &html<
+    {{replace:HTML}}
+    >
     return $$$OK
 ]]></Implementation>
 </Method>
