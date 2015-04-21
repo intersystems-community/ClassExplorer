@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-12 16:26:04">
+
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63654,59126.207802</TimeChanged>
+<TimeChanged>63663,69939</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassData">
@@ -84,6 +85,7 @@ Class contains methods that return structured class data.</Description>
   <Items>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
   </Items>
 </Project>
 
@@ -92,7 +94,7 @@ Class contains methods that return structured class data.</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63654,68682.349536</TimeChanged>
+<TimeChanged>63663,76166.562046</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -100,6 +102,8 @@ REST interface for UMLExplorer</Description>
 <Routes>
    <Route Url="/" Method="GET" Call="Index"/>
    <Route Url="/index" Method="GET" Call="Index"/>
+   <Route Url="/css/CacheUMLExplorer.css" Method="GET" Call="GetCss"/>
+   <Route Url="/js/CacheUMLExplorer.js" Method="GET" Call="GetJs"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
@@ -178,15 +182,112 @@ Method to test accessibility of REST interface.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetCss">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set %response.CharSet = "utf-8"
+    set %response.ContentType = "text/css"
+    do ##class(UMLExplorer.StaticContent).WriteCSS()
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetJs">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set %response.CharSet = "utf-8"
+    set %response.ContentType = "text/javascript"
+    do ##class(UMLExplorer.StaticContent).WriteJS()
+    return $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="Index">
 <Description>
 Method returns user application.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    &html<{{replace:HTML}}>
+    &html<
+    <!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Cache UML explorer</title>
+    <link rel="stylesheet" href="css/CacheUMLExplorer.css">
+    <script src="js/CacheUMLExplorer.js"></script>
+</head>
+<body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
+    <div class="ui-body">
+        <div class="ui-sideBlock">
+            <div id="treeView">
+
+            </div>
+        </div>
+        <div class="ui-mainBlock">
+            <div class="ui-ClassInfo">
+                <span id="className"></span>
+            </div>
+            <div id="classView">
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+    >
     return $$$OK
 ]]></Implementation>
 </Method>
+</Class>
+
+
+<Class name="UMLExplorer.StaticContent">
+<TimeChanged>63663,76108.945861</TimeChanged>
+<TimeCreated>63663,71456.865723</TimeCreated>
+
+<Method name="WriteCSS">
+<Description>
+Outputs css code for UMLExplorer application</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||CSS").Data
+    set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
+    while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="WriteJS">
+<Description>
+Outputs js code for UMLExplorer application</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||JS").Data
+    set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
+    while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<XData name="CSS">
+<Data><![CDATA[
+<data>
+{{replace:css}}
+</data>
+]]></Data>
+</XData>
+
+<XData name="JS">
+<Data><![CDATA[
+<data><![CDATA[
+{{replace:js}}
+]]]]><![CDATA[></data>
+]]></Data>
+</XData>
 </Class>
 </Export>

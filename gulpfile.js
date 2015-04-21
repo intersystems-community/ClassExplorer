@@ -4,6 +4,7 @@ var gulp = require("gulp"),
     concat = require("gulp-concat"),
     uglify = require("gulp-uglify"),
     wrap = require("gulp-wrap"),
+    addsrc = require('gulp-add-src'),
     minifyCSS = require("gulp-minify-css"),
     htmlReplace = require("gulp-html-replace"),
     header = require("gulp-header"),
@@ -29,15 +30,10 @@ gulp.task("clean", function () {
 });
 
 gulp.task("gatherScripts", ["clean"], function () {
-    return gulp.src([
-            "web/jsLib/joint.min.js",
-            "web/jsLib/joint.shapes.uml.js",
-            "web/jsLib/joint.layout.DirectedGraph.min.js",
-            "web/js/*.js"
-        ])
+    return gulp.src("web/js/*.js")
         .pipe(concat("CacheUMLExplorer.js"))
         .pipe(replace(/\/\*\{\{replace:version}}\*\//, "\"" + pkg["version"] + "\""))
-        //.pipe(wrap("CacheUMLExplorer = (function(){<%= contents %> return CacheUMLExplorer;}());"))
+        .pipe(wrap("CacheUMLExplorer = (function(){<%= contents %> return CacheUMLExplorer;}());"))
         .pipe(uglify({
             output: {
                 ascii_only: true,
@@ -46,24 +42,19 @@ gulp.task("gatherScripts", ["clean"], function () {
             }
         }))
         .pipe(header(banner, { pkg: pkg }))
+        .pipe(addsrc.prepend([
+            "web/jsLib/joint.min.js",
+            "web/jsLib/joint.shapes.uml.js",
+            "web/jsLib/joint.layout.DirectedGraph.min.js"
+        ]))
+        .pipe(concat("CacheUMLExplorer.js"))
         .pipe(gulp.dest("build/web/js/"));
 });
-
-//gulp.task("concatScripts", ["gatherScripts"], function () {
-//    return gulp.src([
-//            "web/jsLib/joint.min.js",
-//            "web/jsLib/joint.layout.DirectedGraph.min.js",
-//            "web/jsLib/joint.shapes.uml.js",
-//            "build/web/js/CacheUMLExplorer.js"
-//        ])
-//        .pipe(concat("CacheUMLExplorer.js"))
-//        .pipe(gulp.dest("build/web/js/"));
-//});
 
 gulp.task("gatherCSS", ["clean"], function () {
     return gulp.src("web/css/*.css")
         .pipe(concat("CacheUMLExplorer.css"))
-        .pipe(minifyCSS())
+        .pipe(minifyCSS({ keepSpecialComments: 0 }))
         .pipe(gulp.dest("build/web/css/"));
 });
 
@@ -74,16 +65,6 @@ gulp.task("addHTMLFile", ["clean"], function () {
             "js": "js/CacheUMLExplorer.js"
         }))
         .pipe(gulp.dest("build/web/"));
-});
-
-gulp.task("addHTMLZIPFile", ["clean", "gatherScripts", "gatherCSS"], function () {
-    var jsRepl = "<script type='text/javascript'>" + fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8") + "</script>",
-        cssRepl = "<style type='text/css'>" + fs.readFileSync("build/web/css/CacheUMLExplorer.css") + "</style>";
-    return gulp.src("web/index.html")
-        .pipe(concat("ZIPindex.html"))
-        .pipe(replace(/<!\-\- build:js \-\->(.|\r|\n)*<!\-\- endbuild \-\->/, function () { return jsRepl; }))
-        .pipe(replace(/<!\-\- build:css \-\->(.|\r|\n)*<!\-\- endbuild \-\->/, function () { return cssRepl; }))
-        .pipe(gulp.dest("build/web"));
 });
 
 gulp.task("copyLICENSE", ["clean"], function (){
@@ -97,13 +78,18 @@ gulp.task("copyREADME", ["clean"], function (){
 });
 
 gulp.task("exportCacheXML", [
-    "clean", "gatherCSS", "addHTMLFile", "addHTMLZIPFile", "copyLICENSE", "copyREADME"
+    "clean", "gatherCSS", "gatherScripts", "addHTMLFile", "copyLICENSE", "copyREADME"
 ], function () {
     return gulp.src("cache/projectTemplate.xml")
-        .pipe(
-        replace(/\{\{replace:HTML}}/,
-            fs.readFileSync("build/web/ZIPindex.html", "utf-8"))
-        )
+        .pipe(replace(/\{\{replace:HTML}}/, fs.readFileSync("build/web/index.html", "utf-8")))
+        .pipe(replace(
+            /\{\{replace:css}}/,
+            function () { return fs.readFileSync("build/web/css/CacheUMLExplorer.css", "utf-8"); }
+        ))
+        .pipe(replace(
+            /\{\{replace:js}}/,
+            function () { return fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8"); }
+        ))
         .pipe(rename(function (path) { path.basename += "-v" + pkg["version"]; }))
         .pipe(gulp.dest("build/Cache"));
 });
