@@ -16,6 +16,7 @@
 }
 
 .tv-class-name, .tv-package-name {
+    position: relative;
     padding: 3px;
     cursor: pointer;
     border-radius: 5px;
@@ -100,4 +101,15 @@
 
 .tv-package .tv-package-content {
     padding-left: 20px;
+}
+
+.tv-rightListIcon {
+    position: absolute !important;
+    top: 3px;
+    opacity: 0;
+    right: 0;
+}
+
+.tv-package-name:hover .tv-rightListIcon {
+    opacity: 1;
 }

@@ -4,8 +4,47 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63667,81331.819092</TimeChanged>
+<TimeChanged>63668,773.59952</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
+
+<Method name="getClassTree">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%ZEN.proxyObject</ReturnType>
+<Implementation><![CDATA[
+    set resp = ##class(%ZEN.proxyObject).%New()
+
+    set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
+    set objects = ##class(%Library.ArrayOfObjects).%New()
+    set lastParts = $LB()
+
+    set level = 1
+    do objects.SetAt(resp, level)
+
+    do classes.Execute()
+    while (classes.Next()) {
+        set name = classes.Data("Name")
+        set parts = $LISTFROMSTRING(name, ".")
+        set i = 0
+        while (i < $LISTLENGTH(parts)) && ($LISTGET(lastParts, i + 1) = $LISTGET(parts, i + 1)) {
+            set i = i + 1
+        }
+        set level = i + 1
+        set resp = objects.GetAt(level)
+        while ($LISTLENGTH(parts) > level) {
+            set level = level + 1
+            set resp = ##class(%ZEN.proxyObject).%New()
+            do objects.GetAt(level - 1).%DispatchSetProperty($LISTGET(parts, level - 1), resp)
+            do objects.SetAt(resp, level)
+        }
+        if ($LISTLENGTH(parts) = level) {
+            do resp.%DispatchSetProperty($LISTGET(parts, level), classes.Data("Hidden"))
+        }
+        set lastParts = parts
+    }
+
+    quit objects.GetAt(1)
+]]></Implementation>
+</Method>
 
 <Method name="getClassData">
 <ClassMethod>1</ClassMethod>
@@ -13,7 +52,6 @@ Class contains methods that return structured class data.</Description>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set oClass = ##class(%ZEN.proxyObject).%New()
-
 
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oClass.super = classDefinition.Super
@@ -105,13 +143,39 @@ Class contains methods that return structured class data.</Description>
     quit oData
 ]]></Implementation>
 </Method>
+
+<Method name="getPackageView">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>rootPackageName:%String</FormalSpec>
+<ReturnType>%ZEN.proxyObject</ReturnType>
+<Implementation><![CDATA[
+    set oData = ##class(%ZEN.proxyObject).%New()
+    set oData.classes = ##class(%ZEN.proxyObject).%New()
+    set oData.inheritance = ##class(%ZEN.proxyObject).%New()
+
+    set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
+    do classes.Execute()
+    set listLen = $LISTLENGTH($LISTFROMSTRING(rootPackageName, "."))
+    while (classes.Next()) {
+        set className = classes.Data("Name")
+        set packageName = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, listLen), ".")
+        if (packageName = rootPackageName) {
+            set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+            do oData.classes.%DispatchSetProperty(classDef.Name, ..getClassData(classDef))
+            do ..collectInheritance(oData, classDef)
+        }
+    }
+
+    quit oData
+]]></Implementation>
+</Method>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-12 19:03:12.221887">
+<Project name="UMLExplorer" LastModified="2015-04-25 15:46:50.605954">
   <Items>
-    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
   </Items>
 </Project>
@@ -121,7 +185,7 @@ Class contains methods that return structured class data.</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63663,76166.562046</TimeChanged>
+<TimeChanged>63667,85509.960346</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -134,6 +198,7 @@ REST interface for UMLExplorer</Description>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
+   <Route Url="/GetPackageView/:PackageName" Method="GET" Call="GetPackageView"/>
 </Routes>
 ]]></Data>
 </XData>
@@ -144,37 +209,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set resp = ##class(%ZEN.proxyObject).%New()
-    set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
-    set objects = ##class(%Library.ArrayOfObjects).%New()
-    set lastParts = $LB()
-
-    set level = 1
-    do objects.SetAt(resp, level)
-
-    do classes.Execute()
-    While (classes.Next()) {
-        set name = classes.Data("Name")
-        set parts = $LISTFROMSTRING(name, ".")
-        set i = 0
-        while (i < $LISTLENGTH(parts)) && ($LISTGET(lastParts, i + 1) = $LISTGET(parts, i + 1)) {
-            set i = i + 1
-        }
-        set level = i + 1
-        set resp = objects.GetAt(level)
-        while ($LISTLENGTH(parts) > level) {
-            set level = level + 1
-            set resp = ##class(%ZEN.proxyObject).%New()
-            do objects.GetAt(level - 1).%DispatchSetProperty($LISTGET(parts, level - 1), resp)
-            do objects.SetAt(resp, level)
-        }
-        if ($LISTLENGTH(parts) = level) {
-            do resp.%DispatchSetProperty($LISTGET(parts, level), classes.Data("Hidden"))
-        }
-        set lastParts = parts
-    }
-
-    do objects.GetAt(1).%ToJSON(, "ou")
+    do ##class(UMLExplorer.ClassView).getClassTree().%ToJSON(, "ou")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -189,6 +224,19 @@ Returns classTree by given class name</Description>
     set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
     if (cdef = "") quit ..Http404()
     set classData = ##class(UMLExplorer.ClassView).getClassView(cdef)
+    do classData.%ToJSON(, "ou")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPackageView">
+<Description>
+Returns all package class trees by given package name</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>packageName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set classData = ##class(UMLExplorer.ClassView).getPackageView(packageName)
     do classData.%ToJSON(, "ou")
     return $$$OK
 ]]></Implementation>

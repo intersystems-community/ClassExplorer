@@ -132,7 +132,7 @@ ClassView.prototype.render = function (data) {
     }
 
     for (p in data["inheritance"]) {
-        relFrom = classes[p].instance;
+        relFrom = (classes[p] || {}).instance;
         for (pp in data["inheritance"][p]) {
             relTo = (classes[pp] || {}).instance;
             if (relFrom && relTo) {
@@ -173,7 +173,25 @@ ClassView.prototype.loadClass = function (className) {
         self.removeLoader();
         if (err) {
             self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
-            console.error(err);
+            console.error.call(console, err);
+        } else {
+            self.cacheUMLExplorer.classView.render(data);
+        }
+    });
+
+};
+
+ClassView.prototype.loadPackage = function (packageName) {
+
+    var self = this;
+
+    this.showLoader();
+    this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
+        //console.log(data);
+        self.removeLoader();
+        if (err) {
+            self.showLoader("Unable to get package " + packageName);
+            console.error.call(console, err);
         } else {
             self.cacheUMLExplorer.classView.render(data);
         }

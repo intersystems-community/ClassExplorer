@@ -27,6 +27,17 @@ Source.prototype.getClassView = function (className, callback) {
 };
 
 /**
+ * Return class view.
+ * @param {string} packageName
+ * @param {Source~dataCallback} callback
+ */
+Source.prototype.getPackageView = function (packageName, callback) {
+
+    lib.load(this.URL + "/GetPackageView/" + encodeURIComponent(packageName), null, callback);
+
+};
+
+/**
  * This callback handles data received directly from server.
  * @callback Source~dataCallback
  * @param {null|{error:string}} error
