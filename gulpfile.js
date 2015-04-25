@@ -10,6 +10,8 @@ var gulp = require("gulp"),
     htmlReplace = require("gulp-html-replace"),
     header = require("gulp-header"),
     replace = require("gulp-replace"),
+    postcss = require('gulp-postcss'),
+    autoprefixer = require('autoprefixer-core'),
     pkg = require("./package.json"),
     zip = require("gulp-zip"),
     rename = require("gulp-rename");
@@ -72,6 +74,7 @@ gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
 gulp.task("gatherCSS", ["clean"], function () {
     return gulp.src("web/css/*.css")
         .pipe(concat("CacheUMLExplorer.css"))
+        .pipe(postcss([ autoprefixer({ browsers: ["last 3 version"] }) ]))
         .pipe(minifyCSS({ keepSpecialComments: 0 }))
         .pipe(gulp.dest("build/web/css/"));
 });
