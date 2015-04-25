@@ -12,7 +12,7 @@
 }
 
 .tv-class-name.selected {
-    box-shadow: inset 0 0 2px 2px deepskyblue;
+    box-shadow: inset 0 0 2px 2px #ffcc1b;
 }
 
 .tv-class-name, .tv-package-name {
@@ -26,9 +26,13 @@
 }
 
 .tv-class-name:hover, .tv-package-name:hover {
-    background: #b9ffff;
+    background: #ffcc1b;
     font-weight: 900;
     padding-left: 30px;
+}
+
+.tv-package-name:hover {
+    background: #7dcdeb;
 }
 
 .tv-package-name {

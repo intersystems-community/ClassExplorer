@@ -11,7 +11,10 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
     this.elements = {
         className: document.getElementById("className"),
         treeViewContainer: treeViewContainer,
-        classViewContainer: classViewContainer
+        classViewContainer: classViewContainer,
+        zoomInButton: document.getElementById("button.zoomIn"),
+        zoomOutButton: document.getElementById("button.zoomOut"),
+        zoomNormalButton: document.getElementById("button.zoomNormal")
     };
 
     this.source = new Source();

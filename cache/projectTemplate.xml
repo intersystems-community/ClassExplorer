@@ -4,7 +4,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63663,69939</TimeChanged>
+<TimeChanged>63667,81331.819092</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassData">
@@ -13,6 +13,8 @@ Class contains methods that return structured class data.</Description>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set oClass = ##class(%ZEN.proxyObject).%New()
+
+
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oClass.super = classDefinition.Super
     set oClass.properties = oProperties
@@ -35,7 +37,31 @@ Class contains methods that return structured class data.</Description>
         do oMeth.%DispatchSetProperty("returns", classDefinition.Methods.GetAt(i).ReturnType)
     }
 
-    return oClass
+    set oParameters = ##class(%ZEN.proxyObject).%New()
+    set oClass.parameters = oParameters
+    set count = classDefinition.Parameters.Count()
+    for i = 1:1:count {
+        set oPar = ##class(%ZEN.proxyObject).%New()
+        do oParameters.%DispatchSetProperty(classDefinition.Parameters.GetAt(i).Name, oPar)
+        do oPar.%DispatchSetProperty("type", classDefinition.Parameters.GetAt(i).Type)
+    }
+
+    quit oClass
+]]></Implementation>
+</Method>
+
+<Method name="extendClassFromType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>typeName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    return $CASE(typeName,
+        "%String": "%Library.String",
+        "%Integer": "%Library.Integer",
+        "%DataType": "%Library.DataType",
+        "%Status": "%Library.Status",
+        "%CacheString": "%Library.CacheString",
+        :typeName)
 ]]></Implementation>
 </Method>
 
@@ -50,7 +76,7 @@ Class contains methods that return structured class data.</Description>
     }
     set oInherit = oData.inheritance.%DispatchGetProperty(baseClassDefinition.Name)
     for i=1:1:$LISTLENGTH(superParts) {
-        set className = $LISTGET(superParts, i)
+        set className = ..extendClassFromType($LISTGET(superParts, i))
         do oInherit.%DispatchSetProperty(className, 1)
         if (oData.classes.%DispatchGetProperty(className) = "") {
             set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
@@ -60,13 +86,14 @@ Class contains methods that return structured class data.</Description>
             }
         }
     }
-    return $$$OK
+    quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="getClassView">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>baseClassDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set oData = ##class(%ZEN.proxyObject).%New()
     set oData.classes = ##class(%ZEN.proxyObject).%New()
@@ -75,7 +102,7 @@ Class contains methods that return structured class data.</Description>
 
     do ..collectInheritance(oData, baseClassDefinition)
 
-    return oData
+    quit oData
 ]]></Implementation>
 </Method>
 </Class>

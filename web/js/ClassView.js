@@ -60,10 +60,59 @@ ClassView.prototype.resetView = function () {
 
 };
 
+/**
+ * @param {string} name
+ * @param classMetaData
+ * @returns {joint.shapes.uml.Class}
+ */
+ClassView.prototype.createClassInstance = function (name, classMetaData) {
+
+    var attrArr, methArr,
+        classParams = classMetaData["parameters"],
+        classProps = classMetaData["properties"],
+        classMethods = classMetaData["methods"];
+
+    var insertString = function (array, string) {
+        string.match(/.{1,44}/g).forEach(function (p) {
+            array.push(p);
+        });
+    };
+
+    return new joint.shapes.uml.Class({
+        name: name,
+        attributes: attrArr = (function (params, ps) {
+            var arr = [], n;
+            for (n in params) {
+                insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
+            }
+            for (n in ps) {
+                insertString(
+                    arr,
+                    (ps[n]["private"] ? "- " : "+ ") + n
+                        + (ps[n]["type"] ? ": " + ps[n]["type"] : "")
+                );
+            }
+            return arr;
+        })(classParams, classProps),
+        methods: methArr = (function (ps) {
+            var arr = [], n;
+            for (n in ps) {
+                insertString(arr, "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : ""));
+            }
+            return arr;
+        })(classMethods),
+        size: {
+            width: 300,
+            height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
+        }
+    });
+
+};
+
 ClassView.prototype.render = function (data) {
 
-    var p, pp, className, classProps, classMethods, classInstance,
-        uml = joint.shapes.uml, attrArr, methArr, relFrom, relTo,
+    var p, pp, className, classInstance,
+        uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
     if (!data["classes"]) {
@@ -72,36 +121,7 @@ ClassView.prototype.render = function (data) {
     }
 
     for (className in data["classes"]) {
-        classProps = data["classes"][className]["properties"];
-        classMethods = data["classes"][className]["methods"];
-
-        classInstance = new uml.Class({
-            name: className,
-            attributes: attrArr = (function (ps) {
-                var arr = [], n, s;
-                for (n in ps) {
-                    s = (ps[n]["private"] ? "- " : "+ ") + n + ": " + ps[n]["type"];
-                    s.match(/.{1,44}/g).forEach(function (p) {
-                        arr.push(p);
-                    });
-                }
-                return arr;
-            })(classProps),
-            methods: methArr = (function (ps) {
-                var arr = [], n, s;
-                for (n in ps) {
-                    s = "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : "");
-                    s.match(/.{1,44}/g).forEach(function (p) {
-                        arr.push(p);
-                    });
-                }
-                return arr;
-            })(classMethods),
-            size: {
-                width: 300,
-                height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
-            }
-        });
+        classInstance = this.createClassInstance(className, data["classes"][className]);
         this.objects.push(classInstance);
         classes[className] = {
             instance: classInstance
@@ -168,20 +188,26 @@ ClassView.prototype.updateSizes = function () {
 /**
  * Scale view according to delta.
  *
- * @param {number} delta
+ * @param {number|string} delta
  */
 ClassView.prototype.zoom = function (delta) {
 
     var scaleOld = this.PAPER_SCALE, scaleDelta;
-    this.PAPER_SCALE += delta*Math.min(0.5, Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2);
-    this.paper.scale(
-        this.PAPER_SCALE,
-        this.PAPER_SCALE
-    );
+    if (typeof delta === "number") {
+        this.PAPER_SCALE += delta *Math.min(
+                0.5,
+                Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
+            );
+    } else {
+        this.PAPER_SCALE = 1;
+    }
+    this.paper.scale(this.PAPER_SCALE, this.PAPER_SCALE);
     scaleDelta = this.PAPER_SCALE - scaleOld;
     this.paper.setOrigin(
-        this.paper.options.origin.x - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
-        this.paper.options.origin.y - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
+        this.paper.options.origin.x
+            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
+        this.paper.options.origin.y
+            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
     );
 
 };
@@ -243,6 +269,15 @@ ClassView.prototype.init = function () {
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
         self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
+    });
+    this.cacheUMLExplorer.elements.zoomInButton.addEventListener("click", function () {
+        self.zoom(1);
+    });
+    this.cacheUMLExplorer.elements.zoomOutButton.addEventListener("click", function () {
+        self.zoom(-1);
+    });
+    this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
+        self.zoom(null);
     });
 
     //var classes = {

@@ -61,3 +61,71 @@
         transform: rotate(360deg);
     }
 }
+
+.icon {
+    display: inline-block;
+    background-color: #333;
+    border-radius: 12px;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    cursor: pointer;
+    -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.icon:hover {
+    box-shadow: 0 0 5px 2px #ffcc1b;
+}
+
+.icon.plus:before {
+    content: "";
+    background-color: #fff;
+    width: 4px;
+    height: 14px;
+    border-radius: 1px;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+}
+
+.icon.plus:after {
+    content: "";
+    background-color: #fff;
+    width: 14px;
+    height: 4px;
+    border-radius: 1px;
+    position: absolute;
+    top: 10px;
+    left: 5px;
+}
+
+.icon.minus:after {
+    content: "";
+    background-color: #fff;
+    width: 14px;
+    height: 4px;
+    border-radius: 1px;
+    position: absolute;
+    top: 10px;
+    left: 5px;
+}
+
+.icon.scaleNormal:after {
+    content: "1:1";
+    position: absolute;
+    color: #fff;
+    text-align: center;
+    font-weight: 900;
+    font-family: monospace;
+    font-size: 10px;
+    width: 100%;
+    top: 6px;
+    left: 0;
+}
