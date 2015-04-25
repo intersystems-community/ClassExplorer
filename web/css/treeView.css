@@ -12,10 +12,11 @@
 }
 
 .tv-class-name.selected {
-    box-shadow: inset 0 0 2px 2px deepskyblue;
+    box-shadow: inset 0 0 2px 2px #ffcc1b;
 }
 
 .tv-class-name, .tv-package-name {
+    position: relative;
     padding: 3px;
     cursor: pointer;
     border-radius: 5px;
@@ -26,9 +27,13 @@
 }
 
 .tv-class-name:hover, .tv-package-name:hover {
-    background: #b9ffff;
+    background: #ffcc1b;
     font-weight: 900;
     padding-left: 30px;
+}
+
+.tv-package-name:hover {
+    background: #7dcdeb;
 }
 
 .tv-package-name {
@@ -96,4 +101,15 @@
 
 .tv-package .tv-package-content {
     padding-left: 20px;
+}
+
+.tv-rightListIcon {
+    position: absolute !important;
+    top: 3px;
+    opacity: 0;
+    right: 0;
+}
+
+.tv-package-name:hover .tv-rightListIcon {
+    opacity: 1;
 }

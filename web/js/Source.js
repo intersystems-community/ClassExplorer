@@ -1,6 +1,7 @@
 var Source = function () {
 
-    this.URL = "http://localhost:57773/UMLExplorer";
+    this.URL = window.location.protocol + "//" + window.location.hostname + ":" +
+        57773/*build.replace:window.location.port*/ + "/UMLExplorer";
 
 };
 
@@ -22,6 +23,17 @@ Source.prototype.getClassTree = function (callback) {
 Source.prototype.getClassView = function (className, callback) {
 
     lib.load(this.URL + "/GetClassView/" + encodeURIComponent(className), null, callback);
+
+};
+
+/**
+ * Return class view.
+ * @param {string} packageName
+ * @param {Source~dataCallback} callback
+ */
+Source.prototype.getPackageView = function (packageName, callback) {
+
+    lib.load(this.URL + "/GetPackageView/" + encodeURIComponent(packageName), null, callback);
 
 };
 

@@ -4,6 +4,7 @@ var gulp = require("gulp"),
     concat = require("gulp-concat"),
     uglify = require("gulp-uglify"),
     wrap = require("gulp-wrap"),
+    stripComments = require("gulp-strip-comments"),
     addsrc = require('gulp-add-src'),
     minifyCSS = require("gulp-minify-css"),
     htmlReplace = require("gulp-html-replace"),
@@ -14,6 +15,7 @@ var gulp = require("gulp"),
     rename = require("gulp-rename");
 
 var banner = [
+    "",
     "/** <%= pkg.name %>",
     " ** <%= pkg.description %>",
     " ** @author <%= pkg.author %>",
@@ -29,10 +31,30 @@ gulp.task("clean", function () {
         .pipe(clean());
 });
 
-gulp.task("gatherScripts", ["clean"], function () {
+gulp.task("gatherLibs", ["clean"], function () {
+    return gulp.src([
+        "web/jsLib/joint.shapes.uml.js"
+        ])
+        .pipe(uglify({
+            output: {
+                ascii_only: true,
+                width: 30000,
+                max_line_len: 30000
+            }
+        }))
+        .pipe(addsrc.prepend([
+            "web/jsLib/joint.min.js",
+            "web/jsLib/joint.layout.DirectedGraph.min.js"
+        ]))
+        .pipe(stripComments({ safe: true }))
+        .pipe(concat("CacheUMLExplorer.js"))
+        .pipe(gulp.dest("build/web/js/"));
+});
+
+gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
     return gulp.src("web/js/*.js")
         .pipe(concat("CacheUMLExplorer.js"))
-        .pipe(replace(/\/\*\{\{replace:version}}\*\//, "\"" + pkg["version"] + "\""))
+        .pipe(replace(/[^\s]+\/\*build.replace:(.*)\*\//g, "$1"))
         .pipe(wrap("CacheUMLExplorer = (function(){<%= contents %> return CacheUMLExplorer;}());"))
         .pipe(uglify({
             output: {
@@ -42,11 +64,7 @@ gulp.task("gatherScripts", ["clean"], function () {
             }
         }))
         .pipe(header(banner, { pkg: pkg }))
-        .pipe(addsrc.prepend([
-            "web/jsLib/joint.min.js",
-            "web/jsLib/joint.shapes.uml.js",
-            "web/jsLib/joint.layout.DirectedGraph.min.js"
-        ]))
+        .pipe(addsrc.prepend("build/web/js/CacheUMLExplorer.js"))
         .pipe(concat("CacheUMLExplorer.js"))
         .pipe(gulp.dest("build/web/js/"));
 });
@@ -90,7 +108,7 @@ gulp.task("exportCacheXML", [
             /\{\{replace:js}}/,
             function () { return fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8"); }
         ))
-        .pipe(rename(function (path) { path.basename += "-v" + pkg["version"]; }))
+        .pipe(rename(function (path) { path.basename = "CacheUMLExplorer-v" + pkg["version"]; }))
         .pipe(gulp.dest("build/Cache"));
 });
 

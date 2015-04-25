@@ -34,8 +34,6 @@ ClassTree.prototype.removeLoader = function () {
 
 ClassTree.prototype.classSelected = function (element, className) {
 
-    var self = this;
-
     this.SELECTED_CLASS_NAME = className;
 
     if (element !== this.SELECTED_ELEMENT) {
@@ -49,6 +47,22 @@ ClassTree.prototype.classSelected = function (element, className) {
     }
 
     this.cacheUMLExplorer.elements.className.textContent = className;
+
+};
+
+ClassTree.prototype.packageSelected = function (element, packageName) {
+
+    if (element !== this.SELECTED_ELEMENT) {
+        if (this.SELECTED_ELEMENT) this.SELECTED_ELEMENT.classList.remove("selected");
+        this.SELECTED_ELEMENT = element;
+    }
+
+    if (!element.classList.contains("selected")) {
+        element.classList.add("selected");
+        this.cacheUMLExplorer.classView.loadPackage(packageName);
+    }
+
+    this.cacheUMLExplorer.elements.className.textContent = packageName;
 
 };
 
@@ -80,7 +94,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
     var append = function (rootElement, elementName, isPackage, path) {
 
         var el1 = div(),
-            el2, el3;
+            el2, el3, el4;
 
         if (isPackage) {
             el1.className = "tv-package";
@@ -88,6 +102,11 @@ ClassTree.prototype.updateTree = function (treeObject) {
             (el3 = div()).className = "tv-package-content";
             el1.appendChild(el2); el1.appendChild(el3);
             el2.addEventListener("click", packageClick);
+            el2.appendChild(el4 = div());
+            el4.className = "tv-rightListIcon icon list";
+            el4.addEventListener("click", function () {
+                self.packageSelected(el1, (path ? path + "." : path) + elementName);
+            });
         } else {
             el1.className = "tv-class-name";
             el1.textContent = elementName;

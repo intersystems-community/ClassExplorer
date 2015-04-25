@@ -14,6 +14,10 @@ var ClassView = function (parent, container) {
     this.links = [];
     this.objects = [];
 
+    this.PAPER_SCALE = 1;
+    this.MIN_PAPER_SCALE = 0.2;
+    this.MAX_PAPER_SCALE = 5;
+
     this.init();
 
 };
@@ -56,10 +60,59 @@ ClassView.prototype.resetView = function () {
 
 };
 
+/**
+ * @param {string} name
+ * @param classMetaData
+ * @returns {joint.shapes.uml.Class}
+ */
+ClassView.prototype.createClassInstance = function (name, classMetaData) {
+
+    var attrArr, methArr,
+        classParams = classMetaData["parameters"],
+        classProps = classMetaData["properties"],
+        classMethods = classMetaData["methods"];
+
+    var insertString = function (array, string) {
+        string.match(/.{1,44}/g).forEach(function (p) {
+            array.push(p);
+        });
+    };
+
+    return new joint.shapes.uml.Class({
+        name: name,
+        attributes: attrArr = (function (params, ps) {
+            var arr = [], n;
+            for (n in params) {
+                insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
+            }
+            for (n in ps) {
+                insertString(
+                    arr,
+                    (ps[n]["private"] ? "- " : "+ ") + n
+                        + (ps[n]["type"] ? ": " + ps[n]["type"] : "")
+                );
+            }
+            return arr;
+        })(classParams, classProps),
+        methods: methArr = (function (ps) {
+            var arr = [], n;
+            for (n in ps) {
+                insertString(arr, "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : ""));
+            }
+            return arr;
+        })(classMethods),
+        size: {
+            width: 300,
+            height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
+        }
+    });
+
+};
+
 ClassView.prototype.render = function (data) {
 
-    var p, pp, className, classProps, classMethods, classInstance,
-        uml = joint.shapes.uml, attrArr, methArr, relFrom, relTo,
+    var p, pp, className, classInstance,
+        uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
     if (!data["classes"]) {
@@ -68,36 +121,7 @@ ClassView.prototype.render = function (data) {
     }
 
     for (className in data["classes"]) {
-        classProps = data["classes"][className]["properties"];
-        classMethods = data["classes"][className]["methods"];
-
-        classInstance = new uml.Class({
-            name: className,
-            attributes: attrArr = (function (ps) {
-                var arr = [], n, s;
-                for (n in ps) {
-                    s = (ps[n]["private"] ? "- " : "+ ") + n + ": " + ps[n]["type"];
-                    s.match(/.{1,44}/g).forEach(function (p) {
-                        arr.push(p);
-                    });
-                }
-                return arr;
-            })(classProps),
-            methods: methArr = (function (ps) {
-                var arr = [], n, s;
-                for (n in ps) {
-                    s = "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : "");
-                    s.match(/.{1,44}/g).forEach(function (p) {
-                        arr.push(p);
-                    });
-                }
-                return arr;
-            })(classMethods),
-            size: {
-                width: 300,
-                height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
-            }
-        });
+        classInstance = this.createClassInstance(className, data["classes"][className]);
         this.objects.push(classInstance);
         classes[className] = {
             instance: classInstance
@@ -108,7 +132,7 @@ ClassView.prototype.render = function (data) {
     }
 
     for (p in data["inheritance"]) {
-        relFrom = classes[p].instance;
+        relFrom = (classes[p] || {}).instance;
         for (pp in data["inheritance"][p]) {
             relTo = (classes[pp] || {}).instance;
             if (relFrom && relTo) {
@@ -149,7 +173,25 @@ ClassView.prototype.loadClass = function (className) {
         self.removeLoader();
         if (err) {
             self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
-            console.error(err);
+            console.error.call(console, err);
+        } else {
+            self.cacheUMLExplorer.classView.render(data);
+        }
+    });
+
+};
+
+ClassView.prototype.loadPackage = function (packageName) {
+
+    var self = this;
+
+    this.showLoader();
+    this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
+        //console.log(data);
+        self.removeLoader();
+        if (err) {
+            self.showLoader("Unable to get package " + packageName);
+            console.error.call(console, err);
         } else {
             self.cacheUMLExplorer.classView.render(data);
         }
@@ -159,6 +201,33 @@ ClassView.prototype.loadClass = function (className) {
 
 ClassView.prototype.updateSizes = function () {
     this.paper.setDimensions(this.container.offsetWidth, this.container.offsetHeight);
+};
+
+/**
+ * Scale view according to delta.
+ *
+ * @param {number|string} delta
+ */
+ClassView.prototype.zoom = function (delta) {
+
+    var scaleOld = this.PAPER_SCALE, scaleDelta;
+    if (typeof delta === "number") {
+        this.PAPER_SCALE += delta *Math.min(
+                0.5,
+                Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
+            );
+    } else {
+        this.PAPER_SCALE = 1;
+    }
+    this.paper.scale(this.PAPER_SCALE, this.PAPER_SCALE);
+    scaleDelta = this.PAPER_SCALE - scaleOld;
+    this.paper.setOrigin(
+        this.paper.options.origin.x
+            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
+        this.paper.options.origin.y
+            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
+    );
+
 };
 
 ClassView.prototype.init = function () {
@@ -216,6 +285,18 @@ ClassView.prototype.init = function () {
 
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
+    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
+        self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
+    });
+    this.cacheUMLExplorer.elements.zoomInButton.addEventListener("click", function () {
+        self.zoom(1);
+    });
+    this.cacheUMLExplorer.elements.zoomOutButton.addEventListener("click", function () {
+        self.zoom(-1);
+    });
+    this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
+        self.zoom(null);
+    });
 
     //var classes = {
     //
