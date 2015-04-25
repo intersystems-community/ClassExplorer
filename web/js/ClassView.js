@@ -14,6 +14,10 @@ var ClassView = function (parent, container) {
     this.links = [];
     this.objects = [];
 
+    this.PAPER_SCALE = 1;
+    this.MIN_PAPER_SCALE = 0.2;
+    this.MAX_PAPER_SCALE = 5;
+
     this.init();
 
 };
@@ -161,6 +165,27 @@ ClassView.prototype.updateSizes = function () {
     this.paper.setDimensions(this.container.offsetWidth, this.container.offsetHeight);
 };
 
+/**
+ * Scale view according to delta.
+ *
+ * @param {number} delta
+ */
+ClassView.prototype.zoom = function (delta) {
+
+    var scaleOld = this.PAPER_SCALE, scaleDelta;
+    this.PAPER_SCALE += delta*Math.min(0.5, Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2);
+    this.paper.scale(
+        this.PAPER_SCALE,
+        this.PAPER_SCALE
+    );
+    scaleDelta = this.PAPER_SCALE - scaleOld;
+    this.paper.setOrigin(
+        this.paper.options.origin.x - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
+        this.paper.options.origin.y - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
+    );
+
+};
+
 ClassView.prototype.init = function () {
 
     var p, self = this,
@@ -216,6 +241,9 @@ ClassView.prototype.init = function () {
 
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
     this.cacheUMLExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
+    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
+        self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
+    });
 
     //var classes = {
     //
