@@ -174,9 +174,9 @@ Class contains methods that return structured class data.</Description>
 
 <Project name="UMLExplorer" LastModified="2015-04-25 15:46:50.605954">
   <Items>
-    <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.ClassView" type="CLS"/>
+    <ProjectItem name="UMLExplorer.Router" type="CLS"/>
+    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"/>
   </Items>
 </Project>
 

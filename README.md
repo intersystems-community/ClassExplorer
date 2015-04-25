@@ -1,5 +1,5 @@
 # CacheUMLExplorer
-An UML Class explorer for InterSystems Caché. It can build UML class diagram for any class in Caché.
+An UML Class explorer for InterSystems Caché. It can build UML class diagram for any class or even for whole package in Caché.
 
 ## Screenshots
 
