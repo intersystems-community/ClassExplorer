@@ -1,6 +1,7 @@
 var Source = function () {
 
-    this.URL = "http://localhost:57773/UMLExplorer";
+    this.URL = window.location.protocol + "//" + window.location.hostname + ":" +
+        57773/*build.replace:window.location.port*/ + "/UMLExplorer";
 
 };
 
