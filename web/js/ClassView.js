@@ -16,7 +16,7 @@ var ClassView = function (parent, container) {
 
     this.PAPER_SCALE = 1;
     this.MIN_PAPER_SCALE = 0.2;
-    this.MAX_PAPER_SCALE = 5;
+    this.MAX_PAPER_SCALE = 4;
 
     this.init();
 
@@ -244,21 +244,23 @@ ClassView.prototype.updateSizes = function () {
 ClassView.prototype.zoom = function (delta) {
 
     var scaleOld = this.PAPER_SCALE, scaleDelta;
+    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+        side = delta > 0 ? 1 : -1,
+        ox = this.paper.options.origin.x,
+        oy = this.paper.options.origin.y;
     if (typeof delta === "number") {
-        this.PAPER_SCALE += delta *Math.min(
-                0.5,
-                Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
-            );
-    } else {
-        this.PAPER_SCALE = 1;
-    }
+        this.PAPER_SCALE += delta * Math.min(
+            0.3,
+            Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
+        );
+    } else { this.PAPER_SCALE = 1; }
     this.paper.scale(this.PAPER_SCALE, this.PAPER_SCALE);
-    scaleDelta = this.PAPER_SCALE - scaleOld;
+    scaleDelta = side *
+        (side > 0 ? this.PAPER_SCALE / scaleOld - 1 : (scaleOld - this.PAPER_SCALE) / scaleOld);
     this.paper.setOrigin(
-        this.paper.options.origin.x
-            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
-        this.paper.options.origin.y
-            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
+        ox - (sw/2 - ox)*scaleDelta,
+        oy - (sh/2 - oy)*scaleDelta
     );
 
 };
@@ -281,6 +283,8 @@ ClassView.prototype.init = function () {
             y: 0
         }
     });
+
+    setTimeout(function () {self.paper.setOrigin(0,0)},100);
 
     // enables links re-routing when dragging objects
     this.graph.on("change:position", function (object) {

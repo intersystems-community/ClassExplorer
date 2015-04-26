@@ -24405,7 +24405,7 @@ joint.routers.manhattan = (function() {
     var config = {
 
         // size of the step to find a route
-        step: 20,
+        step: 25,
 
         // use of the perpendicular linkView option to connect center of element with first vertex
         perpendicular: true,
