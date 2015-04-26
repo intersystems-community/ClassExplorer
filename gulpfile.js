@@ -18,7 +18,7 @@ var gulp = require("gulp"),
 
 var banner = [
     "",
-    "/** <%= pkg.name %>",
+    "/*! <%= pkg.name %>",
     " ** <%= pkg.description %>",
     " ** @author <%= pkg.author %>",
     " ** @version <%= pkg.version %>",
@@ -35,17 +35,18 @@ gulp.task("clean", function () {
 
 gulp.task("gatherLibs", ["clean"], function () {
     return gulp.src([
-        "web/jsLib/joint.shapes.uml.js"
+            "web/jsLib/joint.js",
+            "web/jsLib/joint.shapes.uml.js"
         ])
         .pipe(uglify({
             output: {
                 ascii_only: true,
                 width: 30000,
                 max_line_len: 30000
-            }
+            },
+            preserveComments: "some"
         }))
-        .pipe(addsrc.prepend([
-            "web/jsLib/joint.min.js",
+        .pipe(addsrc.append([
             "web/jsLib/joint.layout.DirectedGraph.min.js"
         ]))
         .pipe(stripComments({ safe: true }))
@@ -63,7 +64,8 @@ gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
                 ascii_only: true,
                 width: 30000,
                 max_line_len: 30000
-            }
+            },
+            preserveComments: "some"
         }))
         .pipe(header(banner, { pkg: pkg }))
         .pipe(addsrc.prepend("build/web/js/CacheUMLExplorer.js"))
