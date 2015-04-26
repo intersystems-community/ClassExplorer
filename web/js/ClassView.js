@@ -179,6 +179,8 @@ ClassView.prototype.loadClass = function (className) {
         }
     });
 
+    location.hash = "class:" + className;
+
 };
 
 ClassView.prototype.loadPackage = function (packageName) {
@@ -196,6 +198,8 @@ ClassView.prototype.loadPackage = function (packageName) {
             self.cacheUMLExplorer.classView.render(data);
         }
     });
+
+    location.hash = "package:" + packageName;
 
 };
 
