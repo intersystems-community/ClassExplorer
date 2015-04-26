@@ -154,8 +154,24 @@ ClassView.prototype.render = function (data) {
         }
     }
 
+    for (p in data["aggregation"]) {
+        relTo = (classes[p] || {}).instance;
+        for (pp in data["aggregation"][p]) {
+            relFrom = (classes[pp] || {}).instance;
+            if (relFrom && relTo) {
+                this.graph.addCell(connector = new uml.Aggregation({
+                    source: { id: relFrom.id },
+                    target: { id: relTo.id },
+                    router: { name: "manhattan" },
+                    connector: { name: "rounded" }
+                }));
+                this.links.push(connector);
+            }
+        }
+    }
+
     joint.layout.DirectedGraph.layout(this.graph, {
-        setLinkVertices: true,
+        setLinkVertices: false,
         nodeSep: 100,
         rankSep: 100
     });
@@ -190,6 +206,7 @@ ClassView.prototype.loadClass = function (className) {
         }
     });
 
+    this.cacheUMLExplorer.elements.className.textContent = className;
     location.hash = "class:" + className;
 
 };
@@ -210,6 +227,7 @@ ClassView.prototype.loadPackage = function (packageName) {
         }
     });
 
+    this.cacheUMLExplorer.elements.className.textContent = packageName;
     location.hash = "package:" + packageName;
 
 };
@@ -256,7 +274,7 @@ ClassView.prototype.init = function () {
         el: this.container,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
-        gridSize: 30,
+        gridSize: 20,
         model: this.graph,
         origin: {
             x: 0,
