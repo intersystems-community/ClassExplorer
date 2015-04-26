@@ -16,7 +16,7 @@ var ClassView = function (parent, container) {
 
     this.PAPER_SCALE = 1;
     this.MIN_PAPER_SCALE = 0.2;
-    this.MAX_PAPER_SCALE = 5;
+    this.MAX_PAPER_SCALE = 4;
 
     this.init();
 
@@ -72,9 +72,9 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"];
 
-    var insertString = function (array, string) {
+    var insertString = function (array, string, extraString) {
         string.match(/.{1,44}/g).forEach(function (p) {
-            array.push(p);
+            array.push(p + (extraString ? extraString : ""));
         });
     };
 
@@ -94,10 +94,17 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classParams, classProps),
-        methods: methArr = (function (ps) {
+        methods: methArr = (function (met) {
             var arr = [], n;
-            for (n in ps) {
-                insertString(arr, "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : ""));
+            for (n in met) {
+                insertString(
+                    arr,
+                    "+ " + n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    (met[n]["classMethod"] ?
+                        "\x1b" + JSON.stringify({STYLES:{
+                            textDecoration: "underline"
+                        }}) : "")
+                );
             }
             return arr;
         })(classMethods),
@@ -147,6 +154,22 @@ ClassView.prototype.render = function (data) {
         }
     }
 
+    for (p in data["aggregation"]) {
+        relTo = (classes[p] || {}).instance;
+        for (pp in data["aggregation"][p]) {
+            relFrom = (classes[pp] || {}).instance;
+            if (relFrom && relTo) {
+                this.graph.addCell(connector = new uml.Aggregation({
+                    source: { id: relFrom.id },
+                    target: { id: relTo.id },
+                    router: { name: "manhattan" },
+                    connector: { name: "rounded" }
+                }));
+                this.links.push(connector);
+            }
+        }
+    }
+
     joint.layout.DirectedGraph.layout(this.graph, {
         setLinkVertices: false,
         nodeSep: 100,
@@ -154,6 +177,10 @@ ClassView.prototype.render = function (data) {
     });
 
     this.updateSizes();
+
+    for (var i in this.links) {
+        this.paper.findViewByModel(this.links[i]).update();
+    }
 
     var bb = this.paper.getContentBBox(), q = this.paper;
     this.paper.setOrigin(
@@ -179,6 +206,9 @@ ClassView.prototype.loadClass = function (className) {
         }
     });
 
+    this.cacheUMLExplorer.elements.className.textContent = className;
+    location.hash = "class:" + className;
+
 };
 
 ClassView.prototype.loadPackage = function (packageName) {
@@ -197,6 +227,9 @@ ClassView.prototype.loadPackage = function (packageName) {
         }
     });
 
+    this.cacheUMLExplorer.elements.className.textContent = packageName;
+    location.hash = "package:" + packageName;
+
 };
 
 ClassView.prototype.updateSizes = function () {
@@ -211,21 +244,23 @@ ClassView.prototype.updateSizes = function () {
 ClassView.prototype.zoom = function (delta) {
 
     var scaleOld = this.PAPER_SCALE, scaleDelta;
+    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+        side = delta > 0 ? 1 : -1,
+        ox = this.paper.options.origin.x,
+        oy = this.paper.options.origin.y;
     if (typeof delta === "number") {
-        this.PAPER_SCALE += delta *Math.min(
-                0.5,
-                Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
-            );
-    } else {
-        this.PAPER_SCALE = 1;
-    }
+        this.PAPER_SCALE += delta * Math.min(
+            0.3,
+            Math.abs(this.PAPER_SCALE - (delta < 0 ? this.MIN_PAPER_SCALE : this.MAX_PAPER_SCALE))/2
+        );
+    } else { this.PAPER_SCALE = 1; }
     this.paper.scale(this.PAPER_SCALE, this.PAPER_SCALE);
-    scaleDelta = this.PAPER_SCALE - scaleOld;
+    scaleDelta = side *
+        (side > 0 ? this.PAPER_SCALE / scaleOld - 1 : (scaleOld - this.PAPER_SCALE) / scaleOld);
     this.paper.setOrigin(
-        this.paper.options.origin.x
-            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetWidth/2,
-        this.paper.options.origin.y
-            - scaleDelta*this.cacheUMLExplorer.elements.classViewContainer.offsetHeight/2
+        ox - (sw/2 - ox)*scaleDelta,
+        oy - (sh/2 - oy)*scaleDelta
     );
 
 };
@@ -241,7 +276,7 @@ ClassView.prototype.init = function () {
         el: this.container,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
-        gridSize: 30,
+        gridSize: 20,
         model: this.graph,
         origin: {
             x: 0,
@@ -297,72 +332,5 @@ ClassView.prototype.init = function () {
     this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
         self.zoom(null);
     });
-
-    //var classes = {
-    //
-    //    mammal: new uml.Interface({
-    //        position: { x:300  , y: 50 },
-    //        size: { width: 240, height: 100 },
-    //        name: 'Mammal',
-    //        attributes: ['dob: Date'],
-    //        methods: ['+ setDateOfBirth(dob: Date): Void','+ getAgeAsDays(): Numeric']
-    //    }),
-    //
-    //    person: new uml.Abstract({
-    //        position: { x:300  , y: 300 },
-    //        size: { width: 240, height: 100 },
-    //        name: 'Person',
-    //        attributes: ['firstName: String','lastName: String'],
-    //        methods: ['+ setName(first: String, last: String): Void','+ getName(): String']
-    //    }),
-    //
-    //    bloodgroup: new uml.Class({
-    //        position: { x:20  , y: 190 },
-    //        size: { width: 220, height: 100 },
-    //        name: 'BloodGroup',
-    //        attributes: ['bloodGroup: String'],
-    //        methods: ['+ isCompatible(bG: String): Boolean']
-    //    }),
-    //
-    //    address: new uml.Class({
-    //        position: { x:630  , y: 190 },
-    //        size: { width: 160, height: 100 },
-    //        name: 'Address',
-    //        attributes: ['houseNumber: Integer','streetName: String','town: String','postcode: String'],
-    //        methods: []
-    //    }),
-    //
-    //    man: new uml.Class({
-    //        position: { x:200  , y: 500 },
-    //        size: { width: 180, height: 50 },
-    //        name: 'Man'
-    //    }),
-    //
-    //    woman: new uml.Class({
-    //        position: { x:450  , y: 500 },
-    //        size: { width: 180, height: 50 },
-    //        name: 'Woman',
-    //        methods: ['+ giveABrith(): Person []']
-    //    })
-    //
-    //
-    //};
-    //
-    //_.each(classes, function(c) { graph.addCell(c); });
-    //
-    //var relations = [
-    //    new uml.Generalization({
-    //        source: { id: classes.man.id },
-    //        target: { id: classes.person.id },
-    //        router: { name: 'manhattan' },
-    //        connector: { name: 'rounded' }
-    //    }),
-    //    new uml.Generalization({ source: { id: classes.woman.id }, target: { id: classes.person.id }}),
-    //    new uml.Implementation({ source: { id: classes.person.id }, target: { id: classes.mammal.id }}),
-    //    new uml.Aggregation({ source: { id: classes.person.id }, target: { id: classes.address.id }}),
-    //    new uml.Composition({ source: { id: classes.person.id }, target: { id: classes.bloodgroup.id }})
-    //];
-    //
-    //_.each(relations, function(r) { graph.addCell(r); });
 
 };

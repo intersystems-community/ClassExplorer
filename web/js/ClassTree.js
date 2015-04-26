@@ -46,8 +46,6 @@ ClassTree.prototype.classSelected = function (element, className) {
         this.cacheUMLExplorer.classView.loadClass(className);
     }
 
-    this.cacheUMLExplorer.elements.className.textContent = className;
-
 };
 
 ClassTree.prototype.packageSelected = function (element, packageName) {
@@ -61,8 +59,6 @@ ClassTree.prototype.packageSelected = function (element, packageName) {
         element.classList.add("selected");
         this.cacheUMLExplorer.classView.loadPackage(packageName);
     }
-
-    this.cacheUMLExplorer.elements.className.textContent = packageName;
 
 };
 

@@ -27,11 +27,20 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
 
 CacheUMLExplorer.prototype.init = function () {
 
-    var self = this;
+    var self = this,
+        hash = location.hash;
 
     this.classTree.showLoader();
     this.source.getClassTree(function (err, data) {
         if (!err) self.classTree.updateTree(data);
     });
+
+    if (hash) {
+        if (hash.indexOf("class:") === 1) {
+            this.classView.loadClass(hash.substr(7));
+        } else if (hash.indexOf("package:") === 1) {
+            this.classView.loadPackage(hash.substr(9));
+        }
+    }
 
 };
