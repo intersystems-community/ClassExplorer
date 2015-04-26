@@ -17205,12 +17205,25 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
             for (; i < lines.length; i++) {
 
+				var jj, setup;
+
                 // Shift all the <tspan> but first by one line (`1em`)
                 tspan = V('tspan', { dy: (i == 0 ? '0em' : opt.lineHeight || '1em'), x: this.attr('x') || 0 });
                 tspan.addClass('line');
                 if (!lines[i]) {
                     tspan.addClass('empty-line');
                 }
+				//tspan.node.style.textDecoration = "underline";
+				if (lines[i].indexOf("\x1b") !== -1) {
+					jj = lines[i].split("\x1b");
+					lines[i] = jj[0];
+					setup = JSON.parse(jj[1]);
+					if (setup["STYLES"]) {
+						for (var j in setup["STYLES"]) {
+							tspan.node.style[j] = setup["STYLES"][j];
+						}
+					}
+				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.

@@ -72,9 +72,9 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"];
 
-    var insertString = function (array, string) {
+    var insertString = function (array, string, extraString) {
         string.match(/.{1,44}/g).forEach(function (p) {
-            array.push(p);
+            array.push(p + (extraString ? extraString : ""));
         });
     };
 
@@ -94,10 +94,17 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classParams, classProps),
-        methods: methArr = (function (ps) {
+        methods: methArr = (function (met) {
             var arr = [], n;
-            for (n in ps) {
-                insertString(arr, "+ " + n + (ps[n]["returns"] ? ": " + ps[n]["returns"] : ""));
+            for (n in met) {
+                insertString(
+                    arr,
+                    "+ " + n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    (met[n]["classMethod"] ?
+                        "\x1b" + JSON.stringify({STYLES:{
+                            textDecoration: "underline"
+                        }}) : "")
+                );
             }
             return arr;
         })(classMethods),

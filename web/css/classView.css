@@ -1,5 +1,6 @@
 #classView {
     height: 100%;
+    cursor: -webkit-grab; cursor: -moz-grab;
 }
 
 .uml-class-name-rect {
