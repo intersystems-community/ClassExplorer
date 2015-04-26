@@ -284,8 +284,6 @@ ClassView.prototype.init = function () {
         }
     });
 
-    setTimeout(function () {self.paper.setOrigin(0,0)},100);
-
     // enables links re-routing when dragging objects
     this.graph.on("change:position", function (object) {
         if (_.contains(self.objects, object))
