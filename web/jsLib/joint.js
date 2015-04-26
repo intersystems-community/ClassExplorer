@@ -17198,10 +17198,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 textNode = textPath.node;
             }
 
-            if (lines.length === 1) {
-                textNode.textContent = content;
-                return this;
-            }
+            //if (lines.length === 1) {
+            //    textNode.textContent = content;
+            //    return this;
+            //}
 
             for (; i < lines.length; i++) {
 
@@ -17213,7 +17213,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 if (!lines[i]) {
                     tspan.addClass('empty-line');
                 }
-				//tspan.node.style.textDecoration = "underline";
 				if (lines[i].indexOf("\x1b") !== -1) {
 					jj = lines[i].split("\x1b");
 					lines[i] = jj[0];
