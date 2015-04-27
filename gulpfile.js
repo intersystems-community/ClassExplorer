@@ -51,6 +51,8 @@ gulp.task("gatherLibs", ["clean"], function () {
         ]))
         .pipe(stripComments({ safe: true }))
         .pipe(concat("CacheUMLExplorer.js"))
+        .pipe(replace(//g, "\\x0B"))
+        .pipe(replace(/\x1b/g, "\\x1B"))
         .pipe(gulp.dest("build/web/js/"));
 });
 
@@ -70,6 +72,7 @@ gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
         .pipe(header(banner, { pkg: pkg }))
         .pipe(addsrc.prepend("build/web/js/CacheUMLExplorer.js"))
         .pipe(concat("CacheUMLExplorer.js"))
+        .pipe(replace(/\x1b/g, "\\x1B"))
         .pipe(gulp.dest("build/web/js/"));
 });
 
