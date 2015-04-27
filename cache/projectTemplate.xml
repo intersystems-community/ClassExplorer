@@ -329,32 +329,7 @@ Method returns user application.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     &html<
-    <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>Cache UML explorer</title>
-    <link rel="stylesheet" href="css/CacheUMLExplorer.css">
-    <script src="js/CacheUMLExplorer.js"></script>
-</head>
-<body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
-    <div class="ui-body">
-        <div class="ui-sideBlock">
-            <div id="treeView">
-
-            </div>
-        </div>
-        <div class="ui-mainBlock">
-            <div class="ui-ClassInfo">
-                <span id="className"></span>
-            </div>
-            <div id="classView">
-
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    {{replace:html}}
     >
     return $$$OK
 ]]></Implementation>

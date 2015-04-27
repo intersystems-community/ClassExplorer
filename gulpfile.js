@@ -116,6 +116,10 @@ gulp.task("exportCacheXML", [
             /\{\{replace:js}}/,
             function () { return fs.readFileSync("build/web/js/CacheUMLExplorer.js", "utf-8"); }
         ))
+        .pipe(replace(
+            /\{\{replace:html}}/,
+            function () { return fs.readFileSync("build/web/index.html", "utf-8"); }
+        ))
         .pipe(rename(function (path) { path.basename = "CacheUMLExplorer-v" + pkg["version"]; }))
         .pipe(gulp.dest("build/Cache"));
 });
