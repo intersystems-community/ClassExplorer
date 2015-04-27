@@ -4,10 +4,12 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63668,773.59952</TimeChanged>
+<TimeChanged>63668,60898.691763</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
+<Description>
+Returns structured class tree with all classes available in current namespace</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
@@ -47,8 +49,10 @@ Class contains methods that return structured class data.</Description>
 </Method>
 
 <Method name="getClassData">
+<Description>
+return structured data about class</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>classDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,classDefinition:%Dictionary.ClassDefinition</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set oClass = ##class(%ZEN.proxyObject).%New()
@@ -59,10 +63,12 @@ Class contains methods that return structured class data.</Description>
     set count = classDefinition.Properties.Count()
     for i = 1:1:count {
         set oProp = ##class(%ZEN.proxyObject).%New()
-        do oProperties.%DispatchSetProperty(classDefinition.Properties.GetAt(i).Name, oProp)
-        do oProp.%DispatchSetProperty("private", classDefinition.Properties.GetAt(i).Private)
-        do oProp.%DispatchSetProperty("readOnly", classDefinition.Properties.GetAt(i).ReadOnly)
-        do oProp.%DispatchSetProperty("type", classDefinition.Properties.GetAt(i).Type)
+        set p = classDefinition.Properties.GetAt(i)
+        do oProperties.%DispatchSetProperty(p.Name, oProp)
+        do oProp.%DispatchSetProperty("private", p.Private)
+        do oProp.%DispatchSetProperty("readOnly", p.ReadOnly)
+        do oProp.%DispatchSetProperty("type", p.Type)
+        do ..collectAggregation(oData, classDefinition.Name, p.Type)
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
@@ -70,9 +76,11 @@ Class contains methods that return structured class data.</Description>
     set count = classDefinition.Methods.Count()
     for i = 1:1:count {
         set oMeth = ##class(%ZEN.proxyObject).%New()
-        do oMethods.%DispatchSetProperty(classDefinition.Methods.GetAt(i).Name, oMeth)
-        do oMeth.%DispatchSetProperty("private", classDefinition.Methods.GetAt(i).Private)
-        do oMeth.%DispatchSetProperty("returns", classDefinition.Methods.GetAt(i).ReturnType)
+        set met = classDefinition.Methods.GetAt(i)
+        do oMethods.%DispatchSetProperty(met.Name, oMeth)
+        do oMeth.%DispatchSetProperty("private", met.Private)
+        do oMeth.%DispatchSetProperty("returns", met.ReturnType)
+        do oMeth.%DispatchSetProperty("classMethod", met.ClassMethod)
     }
 
     set oParameters = ##class(%ZEN.proxyObject).%New()
@@ -80,8 +88,9 @@ Class contains methods that return structured class data.</Description>
     set count = classDefinition.Parameters.Count()
     for i = 1:1:count {
         set oPar = ##class(%ZEN.proxyObject).%New()
-        do oParameters.%DispatchSetProperty(classDefinition.Parameters.GetAt(i).Name, oPar)
-        do oPar.%DispatchSetProperty("type", classDefinition.Parameters.GetAt(i).Type)
+        set p = classDefinition.Parameters.GetAt(i)
+        do oParameters.%DispatchSetProperty(p.Name, oPar)
+        do oPar.%DispatchSetProperty("type", p.Type)
     }
 
     quit oClass
@@ -99,6 +108,7 @@ Class contains methods that return structured class data.</Description>
         "%DataType": "%Library.DataType",
         "%Status": "%Library.Status",
         "%CacheString": "%Library.CacheString",
+        "%Persistent": "%Library.Persistent",
         :typeName)
 ]]></Implementation>
 </Method>
@@ -119,12 +129,45 @@ Class contains methods that return structured class data.</Description>
         if (oData.classes.%DispatchGetProperty(className) = "") {
             set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
             if (cdef '= "") {
-                do oData.classes.%DispatchSetProperty(className, ..getClassData(cdef))
+                do oData.classes.%DispatchSetProperty(className, ..getClassData(oData, cdef))
                 do ..collectInheritance(oData, cdef)
             }
         }
     }
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="collectAggregation">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oData:%ZEN.proxyObject,className:%String,type:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(type)
+    if (classDef '= "") {
+        set oAgg = oData.aggregation.%DispatchGetProperty(className)
+        if (oAgg = "") {
+            set oAgg = ##class(%ZEN.proxyObject).%New()
+            do oData.aggregation.%DispatchSetProperty(className, oAgg)
+        }
+    } else { quit $$$OK }
+
+    do oAgg.%DispatchSetProperty(type, "1..1")
+    do ..collectClass(oData, classDef)
+
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="collectClass">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oData:%ZEN.proxyObject,cdef:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    if (oData.classes.%DispatchGetProperty(cdef.Name) '= "") { quit $$$OK }
+    do oData.classes.%DispatchSetProperty(cdef.Name, "IDLE")
+    do oData.classes.%DispatchSetProperty(cdef.Name, ..getClassData(oData, cdef))
+    do ..collectInheritance(oData, cdef)
 ]]></Implementation>
 </Method>
 
@@ -136,9 +179,8 @@ Class contains methods that return structured class data.</Description>
     set oData = ##class(%ZEN.proxyObject).%New()
     set oData.classes = ##class(%ZEN.proxyObject).%New()
     set oData.inheritance = ##class(%ZEN.proxyObject).%New()
-    do oData.classes.%DispatchSetProperty(baseClassDefinition.Name, ..getClassData(baseClassDefinition))
-
-    do ..collectInheritance(oData, baseClassDefinition)
+    set oData.aggregation = ##class(%ZEN.proxyObject).%New()
+    do ..collectClass(oData, baseClassDefinition)
 
     quit oData
 ]]></Implementation>
@@ -152,6 +194,7 @@ Class contains methods that return structured class data.</Description>
     set oData = ##class(%ZEN.proxyObject).%New()
     set oData.classes = ##class(%ZEN.proxyObject).%New()
     set oData.inheritance = ##class(%ZEN.proxyObject).%New()
+    set oData.aggregation = ##class(%ZEN.proxyObject).%New()
 
     set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
     do classes.Execute()
@@ -161,7 +204,7 @@ Class contains methods that return structured class data.</Description>
         set packageName = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, listLen), ".")
         if (packageName = rootPackageName) {
             set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
-            do oData.classes.%DispatchSetProperty(classDef.Name, ..getClassData(classDef))
+            do oData.classes.%DispatchSetProperty(classDef.Name, ..getClassData(oData, classDef))
             do ..collectInheritance(oData, classDef)
         }
     }
@@ -172,7 +215,7 @@ Class contains methods that return structured class data.</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-25 15:46:50.605954">
+<Project name="UMLExplorer" LastModified="2015-04-26 00:42:57.542208">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"/>
     <ProjectItem name="UMLExplorer.Router" type="CLS"/>
@@ -286,32 +329,7 @@ Method returns user application.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     &html<
-    <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>Cache UML explorer</title>
-    <link rel="stylesheet" href="css/CacheUMLExplorer.css">
-    <script src="js/CacheUMLExplorer.js"></script>
-</head>
-<body onload="var cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
-    <div class="ui-body">
-        <div class="ui-sideBlock">
-            <div id="treeView">
-
-            </div>
-        </div>
-        <div class="ui-mainBlock">
-            <div class="ui-ClassInfo">
-                <span id="className"></span>
-            </div>
-            <div id="classView">
-
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    {{replace:html}}
     >
     return $$$OK
 ]]></Implementation>
