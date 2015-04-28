@@ -14,6 +14,7 @@
     <script type="text/javascript" src="jsLib/joint.js"></script>
     <script type="text/javascript" src="jsLib/joint.shapes.uml.js"></script>
     <script type="text/javascript" src="jsLib/joint.layout.DirectedGraph.min.js"></script>
+    <script type="text/javascript" src="jsLib/ImageExporter.js"></script>
     <script type="text/javascript" src="js/ClassView.js"></script>
     <script type="text/javascript" src="js/Lib.js"></script>
     <script type="text/javascript" src="js/CacheUMLExplorer.js"></script>
@@ -32,7 +33,10 @@
             <div class="ui-ClassInfo">
                 <span id="className"></span>
             </div>
-            <div class="ui-toolBar">
+            <div class="ui-leftBottomToolBar">
+                <div id="button.downloadSVG" class="icon download"></div>
+            </div>
+            <div class="ui-rightBottomToolBar">
                 <div id="button.zoomIn" class="icon plus"></div>
                 <div id="button.zoomNormal" class="icon scaleNormal"></div>
                 <div id="button.zoomOut" class="icon minus"></div>
@@ -42,5 +46,6 @@
             </div>
         </div>
     </div>
+    <canvas id="canvas" width="1000px" height="600px"></canvas>
 </body>
 </html>

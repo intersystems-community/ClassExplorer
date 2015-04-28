@@ -36,7 +36,8 @@ gulp.task("clean", function () {
 gulp.task("gatherLibs", ["clean"], function () {
     return gulp.src([
             "web/jsLib/joint.js",
-            "web/jsLib/joint.shapes.uml.js"
+            "web/jsLib/joint.shapes.uml.js",
+            "web/jsLib/ImageExporter.js"
         ])
         .pipe(uglify({
             output: {
