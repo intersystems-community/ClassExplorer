@@ -79,7 +79,7 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
-    var attrArr, methArr,
+    var attrArr, methArr, nameArr,
         classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
@@ -92,7 +92,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
     };
 
     return new joint.shapes.uml.Class({
-        name: name + "\x1b" + JSON.stringify({ url: function () {alert(name)} }),
+        name: nameArr = (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
         attributes: attrArr = (function (params, ps) {
             var arr = [], n;
             for (n in params) {
@@ -129,7 +129,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         },
         size: {
             width: 300,
-            height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
+            height: Math.max(nameArr.length*12.1, 0) + Math.max(attrArr.length*12.1, 0)
+                + Math.max(methArr.length*12.1, 0) + 30
         }
     });
 
