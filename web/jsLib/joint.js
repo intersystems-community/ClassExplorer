@@ -17223,7 +17223,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 						}
 					}
 					if (opt.clickHandler) {
-						console.log(1);
 						tspan.node.onclick = opt.clickHandler;
 					}
 				}

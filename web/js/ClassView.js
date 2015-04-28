@@ -112,7 +112,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in met) {
                 insertString(
                     arr,
-                    "+ " + n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    (met[n]["private"] ? "- " : "+ ") + n
+                        + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
                     (met[n]["classMethod"] ?
                         "\x1b" + JSON.stringify({STYLES:{
                             textDecoration: "underline"
