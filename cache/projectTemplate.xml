@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-12 16:26:04">
-
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-28 19:50:48">
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63668,60898.691763</TimeChanged>
+<TimeChanged>63670,70761.169478</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -57,6 +56,8 @@ return structured data about class</Description>
 <Implementation><![CDATA[
     set oClass = ##class(%ZEN.proxyObject).%New()
 
+    set basePack = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
+
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oClass.NAMESPACE = $NAMESPACE
     set oClass.super = classDefinition.Super
@@ -70,6 +71,7 @@ return structured data about class</Description>
         do oProp.%DispatchSetProperty("readOnly", p.ReadOnly)
         do oProp.%DispatchSetProperty("type", p.Type)
         do ..collectAggregation(oData, classDefinition.Name, p.Type)
+        do ..collectAggregation(oData, classDefinition.Name, basePack _ "." _ p.Type)
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
@@ -216,11 +218,11 @@ return structured data about class</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-26 00:42:57.542208">
+<Project name="UMLExplorer" LastModified="2015-04-28 19:17:47.344256">
   <Items>
-    <ProjectItem name="UMLExplorer.ClassView" type="CLS"/>
-    <ProjectItem name="UMLExplorer.Router" type="CLS"/>
-    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"/>
+    <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
   </Items>
 </Project>
 
@@ -229,7 +231,7 @@ return structured data about class</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63667,85509.960346</TimeChanged>
+<TimeChanged>63670,71431.319061</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -286,52 +288,39 @@ Returns all package class trees by given package name</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="Test">
-<Description>
-Method to test accessibility of REST interface.</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    set resp = ##class(%ZEN.proxyObject).%New()
-    set resp2 = ##class(%ZEN.proxyObject).%New()
-    set resp2.Status = "OK"
-    set resp.obj = resp2
-    do resp.%ToJSON(, "o")
-    return $$$OK
-]]></Implementation>
-</Method>
-
 <Method name="GetCss">
+<Description>
+Method returns user application CSS.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set %response.CharSet = "utf-8"
     set %response.ContentType = "text/css"
-    do ##class(UMLExplorer.StaticContent).WriteCSS()
+    do ##class(StaticContent).Write("CSS")
     return $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="GetJs">
+<Description>
+Method returns user application JavaScript.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set %response.CharSet = "utf-8"
     set %response.ContentType = "text/javascript"
-    do ##class(UMLExplorer.StaticContent).WriteJS()
+    do ##class(StaticContent).Write("JS")
     return $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="Index">
 <Description>
-Method returns user application.</Description>
+Method returns user application HTML.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    &html<
-    {{replace:html}}
-    >
+    do ##class(StaticContent).Write("HTML")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -339,40 +328,36 @@ Method returns user application.</Description>
 
 
 <Class name="UMLExplorer.StaticContent">
-<TimeChanged>63663,76108.945861</TimeChanged>
+<TimeChanged>63670,71368.846177</TimeChanged>
 <TimeCreated>63663,71456.865723</TimeCreated>
 
-<Method name="WriteCSS">
+<Method name="Write">
 <Description>
-Outputs css code for UMLExplorer application</Description>
+Write the contents of xData tag</Description>
 <ClassMethod>1</ClassMethod>
+<FormalSpec>Const:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||CSS").Data
+    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||"_Const).Data
     set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
     while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
     return $$$OK
 ]]></Implementation>
 </Method>
 
-<Method name="WriteJS">
-<Description>
-Outputs js code for UMLExplorer application</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||JS").Data
-    set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
-    while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
-    return $$$OK
-]]></Implementation>
-</Method>
+<XData name="HTML">
+<Data><![CDATA[
+<data><![CDATA[
+{{replace:html}}
+]]]]><![CDATA[></data>
+]]></Data>
+</XData>
 
 <XData name="CSS">
 <Data><![CDATA[
-<data>
+<data><![CDATA[
 {{replace:css}}
-</data>
+]]]]><![CDATA[></data>
 ]]></Data>
 </XData>
 
