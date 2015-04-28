@@ -11,7 +11,7 @@
     display: none;
 }
 
-.tv-class-name.selected {
+.tv-class-name.selected, .tv-package-name.selected {
     box-shadow: inset 0 0 2px 2px #ffcc1b;
 }
 

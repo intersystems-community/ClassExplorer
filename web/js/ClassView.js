@@ -18,6 +18,8 @@ var ClassView = function (parent, container) {
     this.MIN_PAPER_SCALE = 0.2;
     this.MAX_PAPER_SCALE = 4;
 
+    this.CLASS_DOC_PATH = "/csp/documatic/%25CSP.Documatic.cls";
+
     this.init();
 
 };
@@ -60,6 +62,16 @@ ClassView.prototype.resetView = function () {
 
 };
 
+ClassView.prototype.openClassDoc = function (className, nameSpace) {
+
+    window.open(
+        this.CLASS_DOC_PATH + "?LIBRARY=" + encodeURIComponent(nameSpace)
+            + "&CLASSNAME=" + encodeURIComponent(className),
+        "_blank"
+    );
+
+};
+
 /**
  * @param {string} name
  * @param classMetaData
@@ -67,10 +79,11 @@ ClassView.prototype.resetView = function () {
  */
 ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
-    var attrArr, methArr,
+    var attrArr, methArr, nameArr,
         classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
-        classMethods = classMetaData["methods"];
+        classMethods = classMetaData["methods"],
+        self = this;
 
     var insertString = function (array, string, extraString) {
         string.match(/.{1,44}/g).forEach(function (p) {
@@ -79,7 +92,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
     };
 
     return new joint.shapes.uml.Class({
-        name: name,
+        name: nameArr = (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
         attributes: attrArr = (function (params, ps) {
             var arr = [], n;
             for (n in params) {
@@ -99,7 +112,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in met) {
                 insertString(
                     arr,
-                    "+ " + n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    (met[n]["private"] ? "- " : "+ ") + n
+                        + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
                     (met[n]["classMethod"] ?
                         "\x1b" + JSON.stringify({STYLES:{
                             textDecoration: "underline"
@@ -108,9 +122,15 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classMethods),
+        directProps: {
+            nameClickHandler: function () {
+                self.openClassDoc(name, classMetaData["NAMESPACE"]);
+            }
+        },
         size: {
             width: 300,
-            height: Math.max(attrArr.length*12.1, 15) + Math.max(methArr.length*12.1, 15) + 40
+            height: Math.max(nameArr.length*12.1, 0) + Math.max(attrArr.length*12.1, 0)
+                + Math.max(methArr.length*12.1, 0) + 30
         }
     });
 
@@ -194,6 +214,7 @@ ClassView.prototype.loadClass = function (className) {
 
     var self = this;
 
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = className;
     this.showLoader();
     this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
         //console.log(data);
@@ -215,6 +236,7 @@ ClassView.prototype.loadPackage = function (packageName) {
 
     var self = this;
 
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = packageName;
     this.showLoader();
     this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
         //console.log(data);

@@ -58,6 +58,7 @@ return structured data about class</Description>
     set oClass = ##class(%ZEN.proxyObject).%New()
 
     set oProperties = ##class(%ZEN.proxyObject).%New()
+    set oClass.NAMESPACE = $NAMESPACE
     set oClass.super = classDefinition.Super
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()

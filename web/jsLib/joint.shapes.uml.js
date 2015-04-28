@@ -82,7 +82,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
     updateRectangles: function() {
 
-        var attrs = this.get('attrs');
+        var attrs = this.get('attrs'),
+            self = this;
 
         var rects = [
             { type: 'name', text: this.getClassName() },
@@ -92,15 +93,20 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         var offsetY = 0;
 
+        var dp = self.get("directProps") || {},
+            nameClickHandler = dp.nameClickHandler;
+
         _.each(rects, function(rect) {
 
             var lines = _.isArray(rect.text) ? rect.text : [rect.text];
 	        var rectHeight = lines.length * 20 + 20;
 
             attrs['.uml-class-' + rect.type + '-text'].text = lines.join('\n');
+            if (nameClickHandler) {
+                if (rect.type === "name") attrs['.uml-class-' + rect.type + '-text'].clickHandler = nameClickHandler;
+            }
             attrs['.uml-class-' + rect.type + '-rect'].height = rectHeight;
             attrs['.uml-class-' + rect.type + '-rect'].transform = 'translate(0,'+ offsetY + ')';
-
             offsetY += rectHeight;
 
         });

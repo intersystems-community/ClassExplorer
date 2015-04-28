@@ -17222,6 +17222,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 							tspan.node.style[j] = setup["STYLES"][j];
 						}
 					}
+					if (opt.clickHandler) {
+						tspan.node.onclick = opt.clickHandler;
+					}
 				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
@@ -20943,7 +20946,7 @@ joint.dia.ElementView = joint.dia.CellView.extend({
 
                 $selected.each(function() {
 
-                    V(this).text(attrs.text + '', { lineHeight: attrs.lineHeight, textPath: attrs.textPath });
+                    V(this).text(attrs.text + '', attrs);
                 });
                 specialAttributes.push('lineHeight','textPath');
             }

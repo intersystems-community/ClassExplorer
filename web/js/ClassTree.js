@@ -65,7 +65,9 @@ ClassTree.prototype.packageSelected = function (element, packageName) {
 ClassTree.prototype.updateTree = function (treeObject) {
 
     var self = this,
-        div = function () { return document.createElement("div"); };
+        div = function () { return document.createElement("div");},
+        selectedClassElement = this.SELECTED_CLASS_NAME ? this.SELECTED_CLASS_NAME.split(".") : [],
+        sce = 0; // selectedClassElement level index
 
     var packageClick = function (e) {
 
@@ -87,24 +89,32 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
     };
 
-    var append = function (rootElement, elementName, isPackage, path) {
+    var append = function (rootElement, elementName, isPackage, path, level) {
 
-        var el1 = div(),
+        var sel = selectedClassElement.length
+                && sce === level && selectedClassElement[sce] === elementName ? ++sce : null,
+            el1 = div(),
             el2, el3, el4;
 
         if (isPackage) {
             el1.className = "tv-package";
-            (el2 = div()).className = "tv-package-name minimized"; el2.textContent = elementName;
+            (el2 = div()).className = "tv-package-name" + (sel ? "" : " minimized");
+            el2.textContent = elementName;
+            if (sel && sce === selectedClassElement.length) {
+                el2.className += " selected";
+                self.SELECTED_ELEMENT = el2;
+            }
             (el3 = div()).className = "tv-package-content";
             el1.appendChild(el2); el1.appendChild(el3);
             el2.addEventListener("click", packageClick);
             el2.appendChild(el4 = div());
             el4.className = "tv-rightListIcon icon list";
             el4.addEventListener("click", function () {
-                self.packageSelected(el1, (path ? path + "." : path) + elementName);
+                self.packageSelected(el2, (path ? path + "." : path) + elementName);
             });
         } else {
-            el1.className = "tv-class-name";
+            if (sel) self.SELECTED_ELEMENT = el1;
+            el1.className = "tv-class-name" + (sel ? " selected" : "");
             el1.textContent = elementName;
             el1.addEventListener("click", classClick);
             el1.CLASS_NAME = path + (path ? "." : "") + elementName;
@@ -116,7 +126,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
     };
 
-    var build = function (rootElement, object, path) {
+    var build = function (rootElement, object, path, level) {
 
         var i, element, rec,
             arr = [];
@@ -136,15 +146,16 @@ ClassTree.prototype.updateTree = function (treeObject) {
                     rootElement,
                     element.name,
                     typeof element.val === "object",
-                    path.join(".")
+                    path.join("."),
+                    level
                 )) {
-                build(rec, element.val, path.concat([element.name]));
+                build(rec, element.val, path.concat([element.name]), level + 1);
             }
         }
 
     };
 
-    build(this.container, treeObject, []);
+    build(this.container, treeObject, [], 0);
 
     this.removeLoader();
 
