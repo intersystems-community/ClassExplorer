@@ -214,6 +214,7 @@ ClassView.prototype.loadClass = function (className) {
 
     var self = this;
 
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = className;
     this.showLoader();
     this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
         //console.log(data);
@@ -235,6 +236,7 @@ ClassView.prototype.loadPackage = function (packageName) {
 
     var self = this;
 
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = packageName;
     this.showLoader();
     this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
         //console.log(data);
