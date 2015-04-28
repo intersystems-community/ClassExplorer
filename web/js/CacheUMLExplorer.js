@@ -43,4 +43,6 @@ CacheUMLExplorer.prototype.init = function () {
         }
     }
 
+    enableSVGDownload(this.classTree);
+
 };

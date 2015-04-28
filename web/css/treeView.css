@@ -21,9 +21,12 @@
     cursor: pointer;
     border-radius: 5px;
     -webkit-transition: all .2s ease;
-    user-select: none;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
     -webkit-user-select: none;
     -ms-user-select: none;
+    user-select: none;
 }
 
 .tv-class-name:hover, .tv-package-name:hover {
@@ -54,6 +57,9 @@
     border: 1px solid gray;
     border-radius: 2px 2px 0 2px;
     -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
 }
 
 .tv-package-name:after {
@@ -69,6 +75,9 @@
     border: 1px solid gray;
     border-radius: 0 2px 2px 2px;
     -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
 }
 
 .tv-package-name:hover:before {

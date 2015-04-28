@@ -117,6 +117,29 @@
     left: 5px;
 }
 
+.icon.download:before {
+    content: "";
+    border: 8px solid transparent;
+    border-right-width: 0;
+    border-left-color: #fff;
+    left: 8px;
+    right: auto;
+    position: absolute;
+    top: 16px;
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.icon.download:after {
+    content: "";
+    background-color: #fff;
+    width: 6px;
+    height: 10px;
+    border-radius: 1px;
+    position: absolute;
+    top: 5px;
+    left: 9px;
+}
+
 .icon.scaleNormal:after {
     content: "1:1";
     position: absolute;

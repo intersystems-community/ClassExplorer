@@ -138,7 +138,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
 ClassView.prototype.render = function (data) {
 
-    var p, pp, className, classInstance,
+    var self = this, p, pp, className, classInstance,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
@@ -158,37 +158,29 @@ ClassView.prototype.render = function (data) {
 
     }
 
-    for (p in data["inheritance"]) {
-        relFrom = (classes[p] || {}).instance;
-        for (pp in data["inheritance"][p]) {
-            relTo = (classes[pp] || {}).instance;
-            if (relFrom && relTo) {
-                this.graph.addCell(connector = new uml.Generalization({
-                    source: { id: relFrom.id },
-                    target: { id: relTo.id },
-                    router: { name: "manhattan" },
-                    connector: { name: "rounded" }
-                }));
-                this.links.push(connector);
+    var link = function (type) {
+        var name = type === "inheritance" ? "Generalization" :
+                type === "aggregation" ? "Aggregation" : "Composition";
+        for (p in data[type]) {
+            relFrom = (classes[p] || {}).instance;
+            for (pp in data[type][p]) {
+                relTo = (classes[pp] || {}).instance;
+                if (relFrom && relTo) {
+                    self.graph.addCell(connector = new uml[name]({
+                        source: { id: type === "inheritance" ? relFrom.id : relTo.id },
+                        target: { id: type === "inheritance" ? relTo.id : relFrom.id },
+                        router: { name: "manhattan" },
+                        connector: { name: "rounded" }
+                    }));
+                    self.links.push(connector);
+                }
             }
         }
-    }
+    };
 
-    for (p in data["aggregation"]) {
-        relTo = (classes[p] || {}).instance;
-        for (pp in data["aggregation"][p]) {
-            relFrom = (classes[pp] || {}).instance;
-            if (relFrom && relTo) {
-                this.graph.addCell(connector = new uml.Aggregation({
-                    source: { id: relFrom.id },
-                    target: { id: relTo.id },
-                    router: { name: "manhattan" },
-                    connector: { name: "rounded" }
-                }));
-                this.links.push(connector);
-            }
-        }
-    }
+    link("inheritance");
+    link("composition");
+    link("aggregation");
 
     joint.layout.DirectedGraph.layout(this.graph, {
         setLinkVertices: false,
