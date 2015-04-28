@@ -3,7 +3,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63670,70761.169478</TimeChanged>
+<TimeChanged>63670,72515.130814</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -70,8 +70,8 @@ return structured data about class</Description>
         do oProp.%DispatchSetProperty("private", p.Private)
         do oProp.%DispatchSetProperty("readOnly", p.ReadOnly)
         do oProp.%DispatchSetProperty("type", p.Type)
-        do ..collectAggregation(oData, classDefinition.Name, p.Type)
-        do ..collectAggregation(oData, classDefinition.Name, basePack _ "." _ p.Type)
+        do ..collectAggregation(oData, classDefinition.Name, p.Type, p.Private)
+        do ..collectAggregation(oData, classDefinition.Name, basePack _ "." _ p.Type, p.Private)
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
@@ -143,15 +143,16 @@ return structured data about class</Description>
 
 <Method name="collectAggregation">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,className:%String,type:%String</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,className:%String,type:%String,private:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(type)
     if (classDef '= "") {
-        set oAgg = oData.aggregation.%DispatchGetProperty(className)
+        if (private) { set t = "composition" } else { set t = "aggregation" }
+        set oAgg = oData.%DispatchGetProperty(t).%DispatchGetProperty(className)
         if (oAgg = "") {
             set oAgg = ##class(%ZEN.proxyObject).%New()
-            do oData.aggregation.%DispatchSetProperty(className, oAgg)
+            do oData.%DispatchGetProperty(t).%DispatchSetProperty(className, oAgg)
         }
     } else { quit $$$OK }
 
@@ -198,6 +199,7 @@ return structured data about class</Description>
     set oData.classes = ##class(%ZEN.proxyObject).%New()
     set oData.inheritance = ##class(%ZEN.proxyObject).%New()
     set oData.aggregation = ##class(%ZEN.proxyObject).%New()
+    set oData.composition = ##class(%ZEN.proxyObject).%New()
 
     set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
     do classes.Execute()
@@ -218,7 +220,7 @@ return structured data about class</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-28 19:17:47.344256">
+<Project name="UMLExplorer" LastModified="2015-04-28 19:55:49.450783">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>

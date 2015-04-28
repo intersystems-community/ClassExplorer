@@ -190,7 +190,7 @@ joint.shapes.uml.Aggregation = joint.dia.Link.extend({
 joint.shapes.uml.Composition = joint.dia.Link.extend({
     defaults: {
         type: 'uml.Composition',
-        attrs: { '.marker-target': { d: 'M 40 10 L 20 20 L 0 10 L 20 0 z', fill: 'black' }}
+        attrs: { '.marker-target': { d: 'M 20 10 L 10 15 L 0 10 L 10 5 z', fill: 'black' }}
     }
 });
 
