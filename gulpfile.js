@@ -60,7 +60,10 @@ gulp.task("gatherLibs", ["clean"], function () {
 gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
     return gulp.src("web/js/*.js")
         .pipe(concat("CacheUMLExplorer.js"))
-        .pipe(replace(/[^\s]+\/\*build.replace:(.*)\*\//g, "$1"))
+        .pipe(replace(/[^\s]+\/\*build\.replace:(.*)\*\//g, function (part, match) {
+            var s = match.toString();
+            return s.replace(/pkg\.([a-zA-Z]+)/g, function (p,a) { return pkg[a]; });
+        }))
         .pipe(wrap("CacheUMLExplorer = (function(){<%= contents %> return CacheUMLExplorer;}());"))
         .pipe(uglify({
             output: {
