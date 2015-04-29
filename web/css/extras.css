@@ -140,6 +140,28 @@
     left: 9px;
 }
 
+.icon.info:after {
+    content: "";
+    background-color: #fff;
+    width: 4px;
+    height: 10px;
+    border-radius: 1px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.icon.info:before {
+    content: "";
+    background-color: #fff;
+    width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    position: absolute;
+    top: 4px;
+    left: 10px;
+}
+
 .icon.scaleNormal:after {
     content: "1:1";
     position: absolute;

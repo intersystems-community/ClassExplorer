@@ -103,7 +103,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
             attrs['.uml-class-' + rect.type + '-text'].text = lines.join('\n');
             if (nameClickHandler) {
-                if (rect.type === "name") attrs['.uml-class-' + rect.type + '-text'].clickHandler = nameClickHandler;
+                if (rect.type === "name") {
+                    attrs['.uml-class-' + rect.type + '-text'].clickHandler = nameClickHandler;
+                }
             }
             attrs['.uml-class-' + rect.type + '-rect'].height = rectHeight;
             attrs['.uml-class-' + rect.type + '-rect'].transform = 'translate(0,'+ offsetY + ')';
