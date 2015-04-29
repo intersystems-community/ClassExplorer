@@ -17222,9 +17222,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 							tspan.node.style[j] = setup["STYLES"][j];
 						}
 					}
-					if (opt.clickHandler) {
-						tspan.node.onclick = opt.clickHandler;
-					}
+				}
+				if (opt.clickHandler) {
+					tspan.node.onclick = opt.clickHandler;
 				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly

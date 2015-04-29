@@ -3,7 +3,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured class data.</Description>
-<TimeChanged>63670,72515.130814</TimeChanged>
+<TimeChanged>63671,64479.682329</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -60,6 +60,7 @@ return structured data about class</Description>
 
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oClass.NAMESPACE = $NAMESPACE
+    set oClass.ABSTRACT = classDefinition.Abstract
     set oClass.super = classDefinition.Super
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
@@ -220,7 +221,7 @@ return structured data about class</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-28 19:55:49.450783">
+<Project name="UMLExplorer" LastModified="2015-04-28 23:30:37.941872">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
