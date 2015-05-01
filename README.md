@@ -8,7 +8,7 @@ An UML Class explorer for InterSystems Caché. It is able to build UML class dia
 ## Installation
 
 ###### Import classes to Caché
-To install Caché UML class explorer, download the [latest release](https://github.com/ZitRos/CacheUMLExplorer/releases) or build project by yourself. Then import XML file inside <code>Cache</code> directory of archive or directory.
+To install Caché UML class explorer, download the [latest release](https://github.com/intersystems-ru/UMLExplorer/releases) or build project by yourself. Then import XML file inside <code>Cache</code> directory of archive or directory.
 
 ###### Set up WEB application
 When you have imported and compiled <b>UMLExplorer package</b> in Caché, make sure the namespace is the same you have imported classes to. Then go to <code>system management portal -> administering -> security -> applications -> web applications</code> and create there a new web application. Fill the <code>name</code> field of it with <code>/UMLExplorer</code> (slash is required) and set the value of <code>dispatch class</code> to <code>UMLExplorer.Router</code>. Click save. Now your WEB application is ready.
