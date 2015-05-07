@@ -3,7 +3,7 @@ An UML Class explorer for InterSystems Caché. It is able to build UML class dia
 
 ## Screenshots
 
-![2015-04-21_214058](https://cloud.githubusercontent.com/assets/4989256/7396518/65ba1924-eeaa-11e4-808b-5f648c0011e4.png)
+![2015-04-21_214058](https://cloud.githubusercontent.com/assets/4989256/7525432/180dafd8-f512-11e4-80dc-3c5721d3b858.png)
 
 ## Installation
 

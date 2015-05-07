@@ -79,25 +79,26 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
-    var attrArr, methArr, nameArr,
-        classParams = classMetaData["parameters"],
+    var classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
         self = this;
 
     var insertString = function (array, string, extraString) {
-        string.match(/.{1,44}/g).forEach(function (p) {
-            array.push(p + (extraString ? extraString : ""));
-        });
+        array.push(string + (extraString ? extraString : ""));
     };
 
-    return new joint.shapes.uml.Class({
-        name: nameArr = (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
-        attributes: attrArr = (function (params, ps) {
+    var classInstance = new joint.shapes.uml.Class({
+        name: (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
+        params: (function (params) {
             var arr = [], n;
             for (n in params) {
                 insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
             }
+            return arr;
+        })(classParams),
+        attributes: (function (ps) {
+            var arr = [], n;
             for (n in ps) {
                 insertString(
                     arr,
@@ -106,8 +107,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 );
             }
             return arr;
-        })(classParams, classProps),
-        methods: methArr = (function (met) {
+        })(classProps),
+        methods: (function (met) {
             var arr = [], n;
             for (n in met) {
                 insertString(
@@ -126,19 +127,19 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             nameClickHandler: function () {
                 self.openClassDoc(name, classMetaData["NAMESPACE"]);
             }
-        },
-        size: {
-            width: 300,
-            height: Math.max(nameArr.length*12.1, 0) + Math.max(attrArr.length*12.1, 0)
-                + Math.max(methArr.length*12.1, 0) + 30
         }
     });
+
+    this.objects.push(classInstance);
+    this.graph.addCell(classInstance);
+
+    return classInstance;
 
 };
 
 ClassView.prototype.render = function (data) {
 
-    var self = this, p, pp, className, classInstance,
+    var self = this, p, pp, className,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
@@ -148,14 +149,9 @@ ClassView.prototype.render = function (data) {
     }
 
     for (className in data["classes"]) {
-        classInstance = this.createClassInstance(className, data["classes"][className]);
-        this.objects.push(classInstance);
         classes[className] = {
-            instance: classInstance
+            instance: this.createClassInstance(className, data["classes"][className])
         };
-
-        this.graph.addCell(classInstance);
-
     }
 
     var link = function (type) {
@@ -165,6 +161,11 @@ ClassView.prototype.render = function (data) {
             relFrom = (classes[p] || {}).instance;
             for (pp in data[type][p]) {
                 relTo = (classes[pp] || {}).instance;
+                if (!relTo) {
+                    classes[pp] = {
+                        instance: relTo = self.createClassInstance(pp, {})
+                    };
+                }
                 if (relFrom && relTo) {
                     self.graph.addCell(connector = new uml[name]({
                         source: { id: type === "inheritance" ? relFrom.id : relTo.id },
@@ -185,7 +186,8 @@ ClassView.prototype.render = function (data) {
     joint.layout.DirectedGraph.layout(this.graph, {
         setLinkVertices: false,
         nodeSep: 100,
-        rankSep: 100
+        rankSep: 100,
+        edgeSep: 20
     });
 
     this.updateSizes();

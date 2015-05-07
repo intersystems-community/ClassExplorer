@@ -18,6 +18,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * Date: 2013-07-03T13:30Z
  */
+/*
+ * Modified by ZitRo
+ */
 (function( window, undefined ) {
 
 // Can't do this because several apps including ASP.NET trace
@@ -17145,7 +17148,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 	    // in the top left corner we translate the `<text>` element by `0.8em`.
 	    // See `http://www.w3.org/Graphics/SVG/WG/wiki/How_to_determine_dominant_baseline`.
 	    // See also `http://apike.ca/prog_svg_text_style.html`.
-	    this.attr('y', '0.8em');
+	    this.attr('y', opt.paddingTop || '0.8em');
 
             // An empty text gets rendered into the DOM in webkit-based browsers.
             // In order to unify this behaviour across all browsers
@@ -20943,9 +20946,7 @@ joint.dia.ElementView = joint.dia.CellView.extend({
             // Vectorizer `text()` method sets on the element its own attributes and it has to be possible
             // to rewrite them, if needed. (i.e display: 'none')
             if (!_.isUndefined(attrs.text)) {
-
                 $selected.each(function() {
-
                     V(this).text(attrs.text + '', attrs);
                 });
                 specialAttributes.push('lineHeight','textPath');
