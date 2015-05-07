@@ -18,6 +18,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * Date: 2013-07-03T13:30Z
  */
+/*
+ * Modified by ZitRo
+ */
 (function( window, undefined ) {
 
 // Can't do this because several apps including ASP.NET trace

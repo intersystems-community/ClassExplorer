@@ -2,8 +2,8 @@
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-28 19:50:48">
 <Class name="UMLExplorer.ClassView">
 <Description>
-Class contains methods that return structured class data.</Description>
-<TimeChanged>63671,64479.682329</TimeChanged>
+Class contains methods that return structured classes/packages data.</Description>
+<TimeChanged>63680,165.360933</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -47,21 +47,27 @@ Returns structured class tree with all classes available in current namespace</D
 ]]></Implementation>
 </Method>
 
-<Method name="getClassData">
+<Method name="setClassData">
 <Description>
-return structured data about class</Description>
+Return structured data about class.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,classDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,className:%String</FormalSpec>
+<Private>1</Private>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
+    set classDefinition = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+    if (classDefinition = "") || (oData.classes.%DispatchGetProperty(classDefinition.Name) '= "") quit ""
+
     set oClass = ##class(%ZEN.proxyObject).%New()
-
-    set basePack = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
-
+    do oData.classes.%DispatchSetProperty(classDefinition.Name, oClass) // prevent from recursive setup
+    set package = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oClass.NAMESPACE = $NAMESPACE
     set oClass.ABSTRACT = classDefinition.Abstract
     set oClass.super = classDefinition.Super
+
+    if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
+
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
     for i = 1:1:count {
@@ -71,8 +77,8 @@ return structured data about class</Description>
         do oProp.%DispatchSetProperty("private", p.Private)
         do oProp.%DispatchSetProperty("readOnly", p.ReadOnly)
         do oProp.%DispatchSetProperty("type", p.Type)
-        do ..collectAggregation(oData, classDefinition.Name, p.Type, p.Private)
-        do ..collectAggregation(oData, classDefinition.Name, basePack _ "." _ p.Type, p.Private)
+        do ..collectAggregation(oData, classDefinition, p.Type, p.Private)
+        do ..collectAggregation(oData, classDefinition, package _ "." _ p.Type, p.Private)
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
@@ -97,121 +103,156 @@ return structured data about class</Description>
         do oPar.%DispatchSetProperty("type", p.Type)
     }
 
+    do ..collectInheritance(oData, classDefinition, package)
+
     quit oClass
 ]]></Implementation>
 </Method>
 
+<Method name="inPackage">
+<Description><![CDATA[
+Returns if <var>packageName</var> is in <var>basePackageName</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>basePackageName:%String,packageName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[    quit $FIND(packageName, basePackageName) - $LENGTH(basePackageName) = 1
+]]></Implementation>
+</Method>
+
 <Method name="extendClassFromType">
+<Description>
+Wrap registered types to class names</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>typeName:%String</FormalSpec>
+<Private>1</Private>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-    return $CASE(typeName,
+    return typeName
+        /*$CASE(typeName,
         "%String": "%Library.String",
         "%Integer": "%Library.Integer",
         "%DataType": "%Library.DataType",
         "%Status": "%Library.Status",
         "%CacheString": "%Library.CacheString",
         "%Persistent": "%Library.Persistent",
-        :typeName)
+        :typeName)*/
 ]]></Implementation>
 </Method>
 
 <Method name="collectInheritance">
+<Description>
+Fill inheritance data</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,baseClassDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,baseClassDefinition:%Dictionary.ClassDefinition,basePack:%String</FormalSpec>
+<Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set superParts = $LISTFROMSTRING(baseClassDefinition.Super, ",")
-    if (oData.inheritance.%DispatchGetProperty(baseClassDefinition.Name) = "") {
-        do oData.inheritance.%DispatchSetProperty(baseClassDefinition.Name, ##class(%ZEN.proxyObject).%New())
-    }
-    set oInherit = oData.inheritance.%DispatchGetProperty(baseClassDefinition.Name)
+    set oInherit = ##class(%ZEN.proxyObject).%New()
+    do oData.inheritance.%DispatchSetProperty(baseClassDefinition.Name, oInherit)
     for i=1:1:$LISTLENGTH(superParts) {
         set className = ..extendClassFromType($LISTGET(superParts, i))
-        do oInherit.%DispatchSetProperty(className, 1)
-        if (oData.classes.%DispatchGetProperty(className) = "") {
-            set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
-            if (cdef '= "") {
-                do oData.classes.%DispatchSetProperty(className, ..getClassData(oData, cdef))
-                do ..collectInheritance(oData, cdef)
-            }
+
+        // try to find class with base package, if not successfull - try to add class as it is
+        if (..classExists(basePack_"."_className)) {
+            set clsName = basePack_"."_className
+        } else {
+            set clsName = className
         }
+
+        do oInherit.%DispatchSetProperty(clsName, 1)
+        do ..setClassData(oData, clsName)
     }
     quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="collectAggregation">
+<Description>
+Fill aggregation/composition data</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,className:%String,type:%String,private:%String</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,classDef:%Dictionary.ClassDefinition,aggClassName:%String,private:%String</FormalSpec>
+<Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(type)
-    if (classDef '= "") {
+    set aggClassDef = ##class(%Dictionary.ClassDefinition).%OpenId(aggClassName)
+    if (aggClassDef '= "") {
         if (private) { set t = "composition" } else { set t = "aggregation" }
-        set oAgg = oData.%DispatchGetProperty(t).%DispatchGetProperty(className)
+        set oAgg = oData.%DispatchGetProperty(t).%DispatchGetProperty(classDef.Name)
         if (oAgg = "") {
             set oAgg = ##class(%ZEN.proxyObject).%New()
-            do oData.%DispatchGetProperty(t).%DispatchSetProperty(className, oAgg)
+            do oData.%DispatchGetProperty(t).%DispatchSetProperty(classDef.Name, oAgg)
         }
     } else { quit $$$OK }
 
-    do oAgg.%DispatchSetProperty(type, "1..1")
-    do ..collectClass(oData, classDef)
+    do oAgg.%DispatchSetProperty(aggClassName, "1..1")
+    do ..setClassData(oData, aggClassName)
 
     quit $$$OK
 ]]></Implementation>
 </Method>
 
-<Method name="collectClass">
+<Method name="getBaseOData">
+<Description>
+Setup basic output data object</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,cdef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
+<FormalSpec>packageName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
-    if (oData.classes.%DispatchGetProperty(cdef.Name) '= "") { quit $$$OK }
-    do oData.classes.%DispatchSetProperty(cdef.Name, "IDLE")
-    do oData.classes.%DispatchSetProperty(cdef.Name, ..getClassData(oData, cdef))
-    do ..collectInheritance(oData, cdef)
+    set oData = ##class(%ZEN.proxyObject).%New()
+    set oData.basePackageName = packageName
+    set oData.restrictPackage = 1 // expand classes only in base package
+    set oData.classes = ##class(%ZEN.proxyObject).%New()
+    set oData.inheritance = ##class(%ZEN.proxyObject).%New()
+    set oData.aggregation = ##class(%ZEN.proxyObject).%New()
+    set oData.composition = ##class(%ZEN.proxyObject).%New()
+    quit oData
+]]></Implementation>
+</Method>
+
+<Method name="classExists">
+<Description>
+Returns if class with given name exists.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>className:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[    quit ##class(%Dictionary.ClassDefinition).%OpenId(className) '= ""
 ]]></Implementation>
 </Method>
 
 <Method name="getClassView">
+<Description>
+Returns structured class data</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>baseClassDefinition:%Dictionary.ClassDefinition</FormalSpec>
+<FormalSpec>className:%String</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
-    set oData = ##class(%ZEN.proxyObject).%New()
-    set oData.classes = ##class(%ZEN.proxyObject).%New()
-    set oData.inheritance = ##class(%ZEN.proxyObject).%New()
-    set oData.aggregation = ##class(%ZEN.proxyObject).%New()
-    do ..collectClass(oData, baseClassDefinition)
-
+    set package = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, *-1), ".")
+    set oData = ..getBaseOData(package)
+    do ..setClassData(oData, className)
     quit oData
 ]]></Implementation>
 </Method>
 
 <Method name="getPackageView">
+<Description>
+Returns structured package data</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>rootPackageName:%String</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
-    set oData = ##class(%ZEN.proxyObject).%New()
-    set oData.classes = ##class(%ZEN.proxyObject).%New()
-    set oData.inheritance = ##class(%ZEN.proxyObject).%New()
-    set oData.aggregation = ##class(%ZEN.proxyObject).%New()
-    set oData.composition = ##class(%ZEN.proxyObject).%New()
-
+    set oData = ..getBaseOData(rootPackageName)
     set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
     do classes.Execute()
-    set listLen = $LISTLENGTH($LISTFROMSTRING(rootPackageName, "."))
+    set listLen = $LISTLENGTH($LISTFROMSTRING(rootPackageName, ".")) // bottom level of package to extract
+
     while (classes.Next()) {
         set className = classes.Data("Name")
         set packageName = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, listLen), ".")
         if (packageName = rootPackageName) {
-            set classDef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
-            do oData.classes.%DispatchSetProperty(classDef.Name, ..getClassData(oData, classDef))
-            do ..collectInheritance(oData, classDef)
+            do ..setClassData(oData, className)
         }
     }
 
@@ -221,7 +262,7 @@ return structured data about class</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-04-28 23:30:37.941872">
+<Project name="UMLExplorer" LastModified="2015-04-29 19:47:03.727613">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
@@ -234,7 +275,7 @@ return structured data about class</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63670,71431.319061</TimeChanged>
+<TimeChanged>63679,81701.423669</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -270,9 +311,7 @@ Returns classTree by given class name</Description>
 <FormalSpec>className:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set cdef = ##class(%Dictionary.ClassDefinition).%OpenId(className)
-    if (cdef = "") quit ..Http404()
-    set classData = ##class(UMLExplorer.ClassView).getClassView(cdef)
+    set classData = ##class(UMLExplorer.ClassView).getClassView(className)
     do classData.%ToJSON(, "ou")
     return $$$OK
 ]]></Implementation>

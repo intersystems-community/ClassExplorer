@@ -5,21 +5,9 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-if (typeof exports === 'object') {
-
-    var joint = {
-        util: require('../src/core').util,
-        shapes: {
-            basic: require('./joint.shapes.basic')
-        },
-        dia: {
-            ElementView: require('../src/joint.dia.element').ElementView,
-            Link: require('../src/joint.dia.link').Link
-        }
-    };
-    var _ = require('lodash');
-}
-
+/*
+ * Modified by ZitRo
+ */
 joint.shapes.uml = {};
 
 joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
@@ -367,8 +355,3 @@ joint.shapes.uml.Transition = joint.dia.Link.extend({
         }
     }
 });
-
-if (typeof exports === 'object') {
-
-    module.exports = joint.shapes.uml;
-}

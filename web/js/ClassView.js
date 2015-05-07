@@ -88,7 +88,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         array.push(string + (extraString ? extraString : ""));
     };
 
-    return new joint.shapes.uml.Class({
+    var classInstance = new joint.shapes.uml.Class({
         name: (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
         params: (function (params) {
             var arr = [], n;
@@ -130,11 +130,16 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         }
     });
 
+    this.objects.push(classInstance);
+    this.graph.addCell(classInstance);
+
+    return classInstance;
+
 };
 
 ClassView.prototype.render = function (data) {
 
-    var self = this, p, pp, className, classInstance,
+    var self = this, p, pp, className,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
@@ -144,14 +149,9 @@ ClassView.prototype.render = function (data) {
     }
 
     for (className in data["classes"]) {
-        classInstance = this.createClassInstance(className, data["classes"][className]);
-        this.objects.push(classInstance);
         classes[className] = {
-            instance: classInstance
+            instance: this.createClassInstance(className, data["classes"][className])
         };
-
-        this.graph.addCell(classInstance);
-
     }
 
     var link = function (type) {
@@ -161,6 +161,11 @@ ClassView.prototype.render = function (data) {
             relFrom = (classes[p] || {}).instance;
             for (pp in data[type][p]) {
                 relTo = (classes[pp] || {}).instance;
+                if (!relTo) {
+                    classes[pp] = {
+                        instance: relTo = self.createClassInstance(pp, {})
+                    };
+                }
                 if (relFrom && relTo) {
                     self.graph.addCell(connector = new uml[name]({
                         source: { id: type === "inheritance" ? relFrom.id : relTo.id },
@@ -181,7 +186,8 @@ ClassView.prototype.render = function (data) {
     joint.layout.DirectedGraph.layout(this.graph, {
         setLinkVertices: false,
         nodeSep: 100,
-        rankSep: 100
+        rankSep: 100,
+        edgeSep: 20
     });
 
     this.updateSizes();
