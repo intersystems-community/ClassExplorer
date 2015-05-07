@@ -15,15 +15,15 @@ Lib.prototype.load = function (url, data, callback) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
+            //try {
                 return callback(null, JSON.parse(xhr.responseText) || {})
-            } catch (e) {
-                console.error(e);
-                return callback(
-                    "<h1>Unable to parse server response</h1><p>" + xhr.responseText + "</p>",
-                    null
-                );
-            }
+            //} catch (e) {
+            //    console.error(e);
+            //    return callback(
+            //        "<h1>Unable to parse server response</h1><p>" + xhr.responseText + "</p>",
+            //        null
+            //    );
+            //}
         } else if (xhr.readyState === 4) {
             callback(xhr.responseText + ", " + xhr.status + ": " + xhr.statusText);
         }

@@ -37,3 +37,21 @@ text {
 .uml-class-name-text:hover {
     fill: red;
 }
+
+.uml-class-attrs-label {
+    font-family: monospace;
+    font-weight: 900;
+    fill: orange;
+}
+
+.uml-class-methods-label {
+    font-family: monospace;
+    font-weight: 900;
+    fill: blue;
+}
+
+.uml-class-params-label {
+    font-family: monospace;
+    font-weight: 900;
+    fill: magenta;
+}

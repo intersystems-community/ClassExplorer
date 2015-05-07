@@ -79,25 +79,26 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
-    var attrArr, methArr, nameArr,
-        classParams = classMetaData["parameters"],
+    var classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
         self = this;
 
     var insertString = function (array, string, extraString) {
-        string.match(/.{1,44}/g).forEach(function (p) {
-            array.push(p + (extraString ? extraString : ""));
-        });
+        array.push(string + (extraString ? extraString : ""));
     };
 
     return new joint.shapes.uml.Class({
-        name: nameArr = (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
-        attributes: attrArr = (function (params, ps) {
+        name: (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
+        params: (function (params) {
             var arr = [], n;
             for (n in params) {
                 insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
             }
+            return arr;
+        })(classParams),
+        attributes: (function (ps) {
+            var arr = [], n;
             for (n in ps) {
                 insertString(
                     arr,
@@ -106,8 +107,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 );
             }
             return arr;
-        })(classParams, classProps),
-        methods: methArr = (function (met) {
+        })(classProps),
+        methods: (function (met) {
             var arr = [], n;
             for (n in met) {
                 insertString(
@@ -126,11 +127,6 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             nameClickHandler: function () {
                 self.openClassDoc(name, classMetaData["NAMESPACE"]);
             }
-        },
-        size: {
-            width: 300,
-            height: Math.max(nameArr.length*12.1, 0) + Math.max(attrArr.length*12.1, 0)
-                + Math.max(methArr.length*12.1, 0) + 30
         }
     });
 

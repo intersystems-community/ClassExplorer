@@ -27,9 +27,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
     markup: [
         '<g class="rotatable">',
           '<g class="scalable">',
-            '<rect class="uml-class-name-rect"/><rect class="uml-class-attrs-rect"/><rect class="uml-class-methods-rect"/>',
+            '<rect class="uml-class-name-rect"/><rect class="uml-class-params-rect"/><text class="uml-class-params-label">Parameters</text><rect class="uml-class-attrs-rect"/><text class="uml-class-attrs-label">Properties</text><rect class="uml-class-methods-rect"/><text class="uml-class-methods-label">Methods</text>',
           '</g>',
-          '<text class="uml-class-name-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/>',
+          '<text class="uml-class-name-text"/><text class="uml-class-params-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/>',
         '</g>'
     ].join(''),
 
@@ -37,28 +37,46 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         type: 'uml.Class',
 
+        size: { width: 300, height: 300 },
+
         attrs: {
             rect: { 'width': 200 },
 
             '.uml-class-name-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#3498db' },
+            '.uml-class-params-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': 'white' },
             '.uml-class-attrs-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
             '.uml-class-methods-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
 
             '.uml-class-name-text': {
                 'ref': '.uml-class-name-rect', 'ref-y': .5, 'ref-x': .5, 'text-anchor': 'middle', 'y-alignment': 'middle', 'font-weight': 'bold',
-                'fill': 'black', 'font-size': 12, 'font-family': 'Times New Roman'
+                'fill': 'black', 'font-size': 12
+            },
+            '.uml-class-params-text': {
+                'ref': '.uml-class-params-rect', 'ref-y': 5, 'ref-x': 5,
+                'fill': 'black', 'font-size': 12
             },
             '.uml-class-attrs-text': {
                 'ref': '.uml-class-attrs-rect', 'ref-y': 5, 'ref-x': 5,
-                'fill': 'black', 'font-size': 12, 'font-family': 'Times New Roman'
+                'fill': 'black', 'font-size': 12
             },
             '.uml-class-methods-text': {
                 'ref': '.uml-class-methods-rect', 'ref-y': 5, 'ref-x': 5,
-                'fill': 'black', 'font-size': 12, 'font-family': 'Times New Roman'
+                'fill': 'black', 'font-size': 12
+            },
+            '.uml-class-attrs-label': {
+                ref: '.uml-class-attrs-label', fill: "black", 'font-size': 10,
+                xPos: -56
+            },
+            '.uml-class-methods-label': {
+                ref: '.uml-class-methods-label', fill: "black", 'font-size': 10
+            },
+            '.uml-class-params-label': {
+                ref: '.uml-class-methods-label', fill: "black", 'font-size': 10
             }
         },
 
         name: [],
+        params: [],
         attributes: [],
         methods: []
 
@@ -68,7 +86,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         this.on('change:name change:attributes change:methods', function() {
             this.updateRectangles();
-	    this.trigger('uml-update');
+	        this.trigger('uml-update');
         }, this);
 
         this.updateRectangles();
@@ -87,31 +105,55 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         var rects = [
             { type: 'name', text: this.getClassName() },
+            { type: 'params', text: this.get('params') },
             { type: 'attrs', text: this.get('attributes') },
             { type: 'methods', text: this.get('methods') }
         ];
 
-        var offsetY = 0;
+        var offsetY = 0,
+            maxWidth = 100;
 
         var dp = self.get("directProps") || {},
             nameClickHandler = dp.nameClickHandler;
 
+        _.each(rects, function (rect) {
+            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) { var t = s.split("\x1b")[0].length*6.66 + 8; if (t > maxWidth) {
+                maxWidth = t;
+            }});
+        });
+
+        this.attributes.size.width = maxWidth; // max width assign
+
         _.each(rects, function(rect) {
 
-            var lines = _.isArray(rect.text) ? rect.text : [rect.text];
-	        var rectHeight = lines.length * 20 + 20;
+            var lines = _.isArray(rect.text) ? rect.text : [rect.text],
+                rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
+                rectText = attrs['.uml-class-' + rect.type + '-text'],
+                rectRect = attrs['.uml-class-' + rect.type + '-rect'],
+                rectLabel = attrs['.uml-class-' + rect.type + '-label'];
 
-            attrs['.uml-class-' + rect.type + '-text'].text = lines.join('\n');
+            rectText.text = lines.join('\n');
             if (nameClickHandler) {
                 if (rect.type === "name") {
-                    attrs['.uml-class-' + rect.type + '-text'].clickHandler = nameClickHandler;
+                    rectText.clickHandler = nameClickHandler;
                 }
             }
-            attrs['.uml-class-' + rect.type + '-rect'].height = rectHeight;
-            attrs['.uml-class-' + rect.type + '-rect'].transform = 'translate(0,'+ offsetY + ')';
+            rectRect.transform = 'translate(0,'+ offsetY + ')';
+            if (rectLabel) {
+                if (lines.length) {
+                    rectText.paddingTop = "17px"; rectHeight += 5;
+                    rectLabel.transform = 'translate(' + (2) + ','+ (offsetY + 9) + ')';
+                } else {
+                    rectLabel.display = "none";
+                }
+            }
+            rectRect.height = rectHeight;
             offsetY += rectHeight;
 
         });
+
+        this.attributes.size.height = offsetY;
+        this.attributes.attrs.rect.width = maxWidth;
     }
 
 });
@@ -135,6 +177,7 @@ joint.shapes.uml.Abstract = joint.shapes.uml.Class.extend({
         type: 'uml.Abstract',
         attrs: {
             '.uml-class-name-rect': { fill : '#e74c3c' },
+            '.uml-class-params-rect': { fill : '#c0392b' },
             '.uml-class-attrs-rect': { fill : '#c0392b' },
             '.uml-class-methods-rect': { fill : '#c0392b' }
         }
@@ -258,12 +301,10 @@ joint.shapes.uml.State = joint.shapes.basic.Generic.extend({
     },
 
     updateName: function() {
-
         this.attr('.uml-state-name/text', this.get('name'));
     },
 
     updateEvents: function() {
-
         this.attr('.uml-state-events/text', this.get('events').join('\n'));
     },
 
