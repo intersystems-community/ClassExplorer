@@ -15,9 +15,20 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
     markup: [
         '<g class="rotatable">',
           '<g class="scalable">',
-            '<rect class="uml-class-name-rect"/><rect class="uml-class-params-rect"/><text class="uml-class-params-label">Parameters</text><rect class="uml-class-attrs-rect"/><text class="uml-class-attrs-label">Properties</text><rect class="uml-class-methods-rect"/><text class="uml-class-methods-label">Methods</text>',
+            '<rect class="uml-class-name-rect"/>',
+            '<rect class="uml-class-params-rect"/>',
+            '<text class="uml-class-params-label">Parameters</text>',
+            '<rect class="uml-class-attrs-rect"/>',
+            '<text class="uml-class-attrs-label">Properties</text>',
+            '<rect class="uml-class-methods-rect"/>',
+            '<text class="uml-class-methods-label">Methods</text>',
           '</g>',
-          '<text class="uml-class-name-text"/><text class="uml-class-params-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/>',
+          //'<image xlink:href="img/icons/yellowCube.png" x="3" y="3" width="12" height="12"/>',
+          //'<text fill="black" font-size="12" x="16" y="13">System</text>',
+          '<text class="uml-class-name-text"/>',
+          '<text class="uml-class-params-text"/>',
+          '<text class="uml-class-attrs-text"/>',
+          '<text class="uml-class-methods-text"/>',
         '</g>'
     ].join(''),
 
@@ -89,7 +100,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
     updateRectangles: function() {
 
         var attrs = this.get('attrs'),
-            self = this;
+            self = this,
+            SYMBOL_12_WIDTH = this.get('SYMBOL_12_WIDTH') || 6.6;
 
         var rects = [
             { type: 'name', text: this.getClassName() },
@@ -105,7 +117,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             nameClickHandler = dp.nameClickHandler;
 
         _.each(rects, function (rect) {
-            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) { var t = s.split("\x1b")[0].length*6.66 + 8; if (t > maxWidth) {
+            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) { var t = s.split("\x1b")[0].length*SYMBOL_12_WIDTH + 8; if (t > maxWidth) {
                 maxWidth = t;
             }});
         });
@@ -114,8 +126,11 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         _.each(rects, function(rect) {
 
-            var lines = _.isArray(rect.text) ? rect.text : [rect.text],
-                rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
+            var lines = _.isArray(rect.text) ? rect.text : [rect.text];
+
+            //if (rect.type === "name") lines.unshift("");
+
+            var rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
                 rectText = attrs['.uml-class-' + rect.type + '-text'],
                 rectRect = attrs['.uml-class-' + rect.type + '-rect'],
                 rectLabel = attrs['.uml-class-' + rect.type + '-label'];

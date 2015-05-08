@@ -19,11 +19,11 @@ var UI = function (cacheUMLExplorer) {
 /**
  * Display hovering message.
  *
- * @param {string} text
+ * @param {string|HTMLElement} content
  * @param {boolean} [removeByClick] - Define whether user be able to remove message by clicking on
  *                                    it.
  */
-UI.prototype.displayMessage = function (text, removeByClick) {
+UI.prototype.displayMessage = function (content, removeByClick) {
 
     this.removeMessage();
 
@@ -34,7 +34,11 @@ UI.prototype.displayMessage = function (text, removeByClick) {
 
     d1.className = "central message";
     d1.style.opacity = 0;
-    d3.innerHTML = text;
+    if (content instanceof HTMLElement) {
+        d3.appendChild(content);
+    } else {
+        d3.innerHTML = content;
+    }
     d2.appendChild(d3);
     d1.appendChild(d2);
     this.BODY.appendChild(d1);
