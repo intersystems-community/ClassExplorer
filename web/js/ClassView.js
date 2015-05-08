@@ -19,6 +19,7 @@ var ClassView = function (parent, container) {
     this.MAX_PAPER_SCALE = 4;
 
     this.CLASS_DOC_PATH = "/csp/documatic/%25CSP.Documatic.cls";
+    this.SYMBOL_12_WIDTH = 6.6;
 
     this.init();
 
@@ -127,7 +128,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             nameClickHandler: function () {
                 self.openClassDoc(name, classMetaData["NAMESPACE"]);
             }
-        }
+        },
+        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
     this.objects.push(classInstance);
@@ -138,6 +140,61 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
 };
 
 ClassView.prototype.render = function (data) {
+
+    var self = this,
+        number = lib.countProperties(data["classes"]);
+
+    if (number < 30) return this.confirmRender(data);
+
+    var c = document.createElement("div"),
+        c1 = document.createElement("h3"),
+        cS = document.createElement("h6"),
+        c2 = document.createElement("div"),
+        load = document.createElement("div"),
+        lt = document.createElement("div"),
+        spinner = document.createElement("div"),
+        bOk = document.createElement("button"),
+        bOff = document.createElement("button");
+
+    c1.textContent = "Warning!";
+    cS.textContent = "There are a huge number of classes to render (over " + (number - (number % 10))
+        + " elements)"
+        + (function(n){var s=n<40?".":"!",c=0; while (n>50) { s+="!"; n-=10+c++; } return s; })(number)
+        + " Rendering may take a lot of time.";
+
+    bOk.textContent = "Render this!";
+    bOk.style.color = "red";
+    bOff.textContent = "No, thanks";
+    load.style.textAlign = "center";
+    spinner.className = "spinner";
+    lt.innerHTML = "<br/><br/><br/><br/>Rendering, please wait...";
+    lt.style.textAlign = "center";
+
+    bOk.addEventListener("click", function () {
+        c.appendChild(load);
+        c1.parentNode.removeChild(c1);
+        cS.parentNode.removeChild(cS);
+        c2.parentNode.removeChild(c2);
+        setTimeout(function () {
+            self.confirmRender(data); self.cacheUMLExplorer.UI.removeMessage();
+        }, 25);
+    });
+    bOff.addEventListener("click", function () {
+        self.cacheUMLExplorer.UI.removeMessage();
+    });
+
+    c.appendChild(c1);
+    c.appendChild(cS);
+    c.appendChild(c2);
+    c2.appendChild(bOk);
+    c2.appendChild(bOff);
+    load.appendChild(lt);
+    load.appendChild(spinner);
+    this.cacheUMLExplorer.UI.displayMessage(c, false);
+
+};
+
+ClassView.prototype.confirmRender = function (data) {
 
     var self = this, p, pp, className,
         uml = joint.shapes.uml, relFrom, relTo,
@@ -348,5 +405,21 @@ ClassView.prototype.init = function () {
     this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
         self.zoom(null);
     });
+
+    this.SYMBOL_12_WIDTH = (function () {
+        var e = document.createElementNS("http://www.w3.org/2000/svg", "text"),
+            s = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
+            w;
+        s.appendChild(e);
+        s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        s.setAttribute("version", "1.1");
+        e.setAttribute("font-family", "monospace");
+        e.setAttribute("font-size", "12");
+        e.textContent = "aBcDeFgGhH";
+        document.body.appendChild(s);
+        w = e.getBBox().width/10;
+        s.parentNode.removeChild(s);
+        return w;
+    })();
 
 };
