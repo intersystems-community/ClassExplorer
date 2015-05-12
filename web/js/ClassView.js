@@ -74,6 +74,48 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
 };
 
 /**
+ * Returns array of signs to render or empry array.
+ *
+ * @private
+ * @param classMetaData
+ */
+ClassView.prototype.getClassSigns = function (classMetaData) {
+
+    var signs = [];
+
+    if (classMetaData["classType"]) signs.push({
+        icon: lib.image.greenPill,
+        text: classMetaData["classType"],
+        textStyle: "fill:rgb(130,0,255)"
+    });
+    if (classMetaData["ABSTRACT"]) signs.push({
+        icon: lib.image.iceCube,
+        text: "Abstract",
+        textStyle: "fill:rgb(130,0,255)"
+    });
+    if (classMetaData["FINAL"]) signs.push({
+        icon: lib.image.blueFlag,
+        text: "Final",
+        textStyle: "fill:rgb(130,0,255)"
+    });
+    if (classMetaData["SYSTEM"]) signs.push({
+        icon: lib.image.chip,
+        text: "System/" + classMetaData["SYSTEM"]
+    });
+    if (classMetaData["PROCEDUREBLOCK"] === 0) signs.push({
+        icon: lib.image.moleculeCubeCross,
+        text: "NotProcBlock"
+    });
+    if (classMetaData["HIDDEN"]) signs.push({
+        icon: lib.image.ghost,
+        text: "Hidden"
+    });
+
+    return signs;
+
+};
+
+/**
  * @param {string} name
  * @param classMetaData
  * @returns {joint.shapes.uml.Class}
@@ -90,7 +132,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
     };
 
     var classInstance = new joint.shapes.uml.Class({
-        name: (classMetaData["ABSTRACT"] ? ["<<Abstract>>", name] : [name]),
+        name: name,
         params: (function (params) {
             var arr = [], n;
             for (n in params) {
@@ -129,6 +171,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 self.openClassDoc(name, classMetaData["NAMESPACE"]);
             }
         },
+        classSigns: this.getClassSigns(classMetaData),
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 

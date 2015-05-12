@@ -97,12 +97,12 @@ gulp.task("addHTMLFile", ["clean"], function () {
         .pipe(gulp.dest("build/web/"));
 });
 
-gulp.task("copyLICENSE", ["clean"], function (){
+gulp.task("copyLICENSE", ["clean"], function () {
     return gulp.src("LICENSE")
         .pipe(gulp.dest("build/"));
 });
 
-gulp.task("copyREADME", ["clean"], function (){
+gulp.task("copyREADME", ["clean"], function () {
     return gulp.src("readme.md")
         .pipe(gulp.dest("build/"));
 });
