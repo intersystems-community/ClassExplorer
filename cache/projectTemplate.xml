@@ -3,7 +3,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63680,46308.140173</TimeChanged>
+<TimeChanged>63684,52343.305666</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -62,10 +62,14 @@ Return structured data about class.</Description>
     do oData.classes.%DispatchSetProperty(classDefinition.Name, oClass) // prevent from recursive setup
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
     set oProperties = ##class(%ZEN.proxyObject).%New()
+    set oClass.super = classDefinition.Super
     set oClass.NAMESPACE = $NAMESPACE
     set oClass.SYSTEM = classDefinition.System
+    set oClass.PROCEDUREBLOCK = classDefinition.ProcedureBlock
     set oClass.ABSTRACT = classDefinition.Abstract
-    set oClass.super = classDefinition.Super
+    set oClass.FINAL = classDefinition.Final
+    set oClass.HIDDEN = classDefinition.Hidden
+    set oClass.classType = classDefinition.ClassType
 
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
 
@@ -263,7 +267,7 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-08 00:09:34.590786">
+<Project name="UMLExplorer" LastModified="2015-05-08 19:38:35.423206">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>

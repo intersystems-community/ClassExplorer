@@ -23,8 +23,6 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             '<rect class="uml-class-methods-rect"/>',
             '<text class="uml-class-methods-label">Methods</text>',
           '</g>',
-          //'<image xlink:href="img/icons/yellowCube.png" x="3" y="3" width="12" height="12"/>',
-          //'<text fill="black" font-size="12" x="16" y="13">System</text>',
           '<text class="uml-class-name-text"/>',
           '<text class="uml-class-params-text"/>',
           '<text class="uml-class-attrs-text"/>',
@@ -32,14 +30,17 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         '</g>'
     ].join(''),
 
+    HEAD_EMPTY_LINES: 0, // controls number of empty lines in header
+
     defaults: joint.util.deepSupplement({
 
         type: 'uml.Class',
 
-        size: { width: 300, height: 300 },
+        MIN_WIDTH: 100,
+        size: { width: 0, height: 300 },
 
         attrs: {
-            rect: { 'width': 200 },
+            rect: { 'width': 0 },
 
             '.uml-class-name-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#3498db' },
             '.uml-class-params-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': 'white' },
@@ -77,13 +78,57 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         name: [],
         params: [],
         attributes: [],
-        methods: []
+        methods: [],
+        classSigns: []
 
     }, joint.shapes.basic.Generic.prototype.defaults),
 
-    initialize: function() {
+    initialize: function () {
 
-        this.on('change:name change:attributes change:methods', function() {
+        var rects = [
+                { type: 'name', text: this.getClassName() },
+                { type: 'params', text: this.get('params') },
+                { type: 'attrs', text: this.get('attributes') },
+                { type: 'methods', text: this.get('methods') }
+            ],
+            self = this,
+            classSigns = this.get('classSigns'),
+            SYMBOL_12_WIDTH = this.get('SYMBOL_12_WIDTH') || 6.6,
+            i, blockWidth, left = 3, top = 3, w;
+
+        // preserve space for sub-labels
+        w = 0; for (i in classSigns) {
+            w += classSigns[i].text.length * SYMBOL_12_WIDTH + (classSigns[i].icon ? 13 : 0) + (i ? 3 : 0);
+            i = 1;
+        }
+
+        this.defaults.size.width = Math.max(this.defaults.MIN_WIDTH, Math.min(w, 250));
+        _.each(rects, function (rect) {
+            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) {
+                var t = s.split("\x1b")[0].length*SYMBOL_12_WIDTH + 8;
+                if (t > self.defaults.size.width) {
+                    self.defaults.size.width = t;
+                }
+            });
+        });
+
+        blockWidth = this.defaults.size.width;
+
+        if (classSigns.length) this.HEAD_EMPTY_LINES = 1;
+
+        for (i in classSigns) {
+            w = classSigns[i].text.length*SYMBOL_12_WIDTH + (classSigns[i].icon ? 13 : 0);
+            if (left + w - 3 > blockWidth) { top += 12; left = 3; this.HEAD_EMPTY_LINES++; }
+            this.markup += '<g transform="translate(' + left + ', ' + top + ')">' +
+                (classSigns[i].icon ? '<image xlink:href="' + classSigns[i].icon +
+                '" width="13" height="13"/>' : '') + '<text fill="black" font-size="11" ' +
+                (classSigns[i].textStyle ? 'style="' + classSigns[i].textStyle + '"' : '') +
+                ' x="' + (classSigns[i].icon ? 13 : 0) + '" y="10">' + classSigns[i].text +
+                '</text></g>';
+            left += w + 3;
+        }
+
+        this.on('change:name change:attributes change:methods', function () {
             this.updateRectangles();
 	        this.trigger('uml-update');
         }, this);
@@ -91,13 +136,14 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         this.updateRectangles();
 
         joint.shapes.basic.Generic.prototype.initialize.apply(this, arguments);
+
     },
 
-    getClassName: function() {
+    getClassName: function () {
         return this.get('name');
     },
 
-    updateRectangles: function() {
+    updateRectangles: function () {
 
         var attrs = this.get('attrs'),
             self = this,
@@ -110,25 +156,19 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             { type: 'methods', text: this.get('methods') }
         ];
 
-        var offsetY = 0,
-            maxWidth = 100;
+        var offsetY = 0;
 
         var dp = self.get("directProps") || {},
             nameClickHandler = dp.nameClickHandler;
-
-        _.each(rects, function (rect) {
-            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) { var t = s.split("\x1b")[0].length*SYMBOL_12_WIDTH + 8; if (t > maxWidth) {
-                maxWidth = t;
-            }});
-        });
-
-        this.attributes.size.width = maxWidth; // max width assign
 
         _.each(rects, function(rect) {
 
             var lines = _.isArray(rect.text) ? rect.text : [rect.text];
 
-            //if (rect.type === "name") lines.unshift("");
+            if (rect.type === "name") {
+                if (self.HEAD_EMPTY_LINES) lines.unshift("");
+                for (var i = 0; i < self.HEAD_EMPTY_LINES; i++) lines.unshift("");
+            }
 
             var rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
                 rectText = attrs['.uml-class-' + rect.type + '-text'],
@@ -156,7 +196,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         });
 
         this.attributes.size.height = offsetY;
-        this.attributes.attrs.rect.width = maxWidth;
+        this.attributes.size.width = this.defaults.size.width; // max width assign
+        this.attributes.attrs.rect.width = this.defaults.size.width;
+
     }
 
 });
