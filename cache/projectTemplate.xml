@@ -3,7 +3,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63684,52343.305666</TimeChanged>
+<TimeChanged>63686,4398.893381</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -70,18 +70,19 @@ Return structured data about class.</Description>
     set oClass.FINAL = classDefinition.Final
     set oClass.HIDDEN = classDefinition.Hidden
     set oClass.classType = classDefinition.ClassType
+    set oClass.serverOnly = classDefinition.ServerOnly // -
 
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
 
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
-    for i = 1:1:count {
+    for i=1:1:count {
         set oProp = ##class(%ZEN.proxyObject).%New()
         set p = classDefinition.Properties.GetAt(i)
         do oProperties.%DispatchSetProperty(p.Name, oProp)
-        do oProp.%DispatchSetProperty("private", p.Private)
-        do oProp.%DispatchSetProperty("readOnly", p.ReadOnly)
-        do oProp.%DispatchSetProperty("type", p.Type)
+        set oProp.private = p.Private
+        set oProp.readOnly = p.ReadOnly
+        set oProp.type = p.Type
         do ..collectAggregation(oData, classDefinition, p.Type, p.Private)
         do ..collectAggregation(oData, classDefinition, package _ "." _ p.Type, p.Private)
     }
@@ -89,19 +90,29 @@ Return structured data about class.</Description>
     set oMethods = ##class(%ZEN.proxyObject).%New()
     set oClass.methods = oMethods
     set count = classDefinition.Methods.Count()
-    for i = 1:1:count {
+    for i=1:1:count {
         set oMeth = ##class(%ZEN.proxyObject).%New()
         set met = classDefinition.Methods.GetAt(i)
         do oMethods.%DispatchSetProperty(met.Name, oMeth)
-        do oMeth.%DispatchSetProperty("private", met.Private)
-        do oMeth.%DispatchSetProperty("returns", met.ReturnType)
-        do oMeth.%DispatchSetProperty("classMethod", met.ClassMethod)
+        set oMeth.private = met.Private
+        set oMeth.returns = met.ReturnType
+        set oMeth.classMethod = met.ClassMethod
+        set oMeth.clientMethod = met.ClientMethod
+        set oMeth.final = met.Final
+        set oMeth.abstract = met.Abstract
+        set oMeth.language = met.Language
+        set oMeth.notInheritable = met.NotInheritable
+        set oMeth.serverOnly = met.ServerOnly
+        set oMeth.sqlProc = met.SqlProc
+        set oMeth.sqlName = met.SqlName
+        set oMeth.webMethod = met.WebMethod
+        set oMeth.zenMethod = met.ZenMethod
     }
 
     set oParameters = ##class(%ZEN.proxyObject).%New()
     set oClass.parameters = oParameters
     set count = classDefinition.Parameters.Count()
-    for i = 1:1:count {
+    for i=1:1:count {
         set oPar = ##class(%ZEN.proxyObject).%New()
         set p = classDefinition.Parameters.GetAt(i)
         do oParameters.%DispatchSetProperty(p.Name, oPar)
@@ -111,6 +122,30 @@ Return structured data about class.</Description>
     do ..collectInheritance(oData, classDefinition, package)
 
     quit oClass
+]]></Implementation>
+</Method>
+
+<Method name="getMethod">
+<Description>
+Return method data.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>className:%String,methodName:%String</FormalSpec>
+<ReturnType>%ZEN.proxyObject</ReturnType>
+<Implementation><![CDATA[
+    set oMeth = ##class(%ZEN.proxyObject).%New()
+    set met = ##class(%Dictionary.MethodDefinition).%OpenId(className _ "||" _ methodName)
+    if (met = "") { set oMeth.error = 1 quit oMeth }
+
+    set oMeth.description = met.Description
+    set oMeth.arguments = met.FormalSpec
+    set oMeth.returns = met.ReturnType
+    set oMeth.code = ""
+    do {
+        set chars = met.Implementation.Read()
+        set oMeth.code = oMeth.code _ chars
+    } while (chars)
+
+    quit oMeth
 ]]></Implementation>
 </Method>
 
@@ -280,7 +315,7 @@ Returns structured package data</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63679,81701.423669</TimeChanged>
+<TimeChanged>63685,85586.177035</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -294,6 +329,7 @@ REST interface for UMLExplorer</Description>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
    <Route Url="/GetPackageView/:PackageName" Method="GET" Call="GetPackageView"/>
+   <Route Url="/GetMethod/:ClassName/:MethodName" Method="GET" Call="GetMethod"/>
 </Routes>
 ]]></Data>
 </XData>
@@ -331,6 +367,19 @@ Returns all package class trees by given package name</Description>
 <Implementation><![CDATA[
     set classData = ##class(UMLExplorer.ClassView).getPackageView(packageName)
     do classData.%ToJSON(, "ou")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetMethod">
+<Description>
+Returns method description and code</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>className:%String,methodName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set methodData = ##class(ClassView).getMethod(className, methodName)
+    do methodData.%ToJSON(, "ou")
     return $$$OK
 ]]></Implementation>
 </Method>

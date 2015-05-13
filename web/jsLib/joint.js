@@ -17229,6 +17229,11 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 				if (opt.clickHandler) {
 					tspan.node.onclick = opt.clickHandler;
 				}
+
+				if (opt.lineClickHandlers && opt.lineClickHandlers[i]) {
+					tspan.node.addEventListener("click", opt.lineClickHandlers[i]);
+					tspan.node.setAttribute("class", tspan.node.getAttribute("class") + " line-clickable");
+				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.

@@ -16,6 +16,22 @@ Source.prototype.getClassTree = function (callback) {
 };
 
 /**
+ * Return method data.
+ * @param {string} className
+ * @param {string} methodName
+ * @param {Source~dataCallback} callback
+ */
+Source.prototype.getMethod = function (className, methodName, callback) {
+
+    lib.load(
+        this.URL + "/GetMethod/" + encodeURIComponent(className) + "/"
+            + encodeURIComponent(methodName),
+        null,
+        callback);
+
+};
+
+/**
  * Return class view.
  * @param {string} className
  * @param {Source~dataCallback} callback
