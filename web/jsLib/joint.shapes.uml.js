@@ -94,11 +94,15 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             self = this,
             classSigns = this.get('classSigns'),
             SYMBOL_12_WIDTH = this.get('SYMBOL_12_WIDTH') || 6.6,
-            i, blockWidth, left = 3, top = 3, w;
+            i, j, blockWidth, left = 3, top = 3, w, positions = [], sign;
+
+        var subLabelWidth = function (sign) { // object
+            return sign.text.length * SYMBOL_12_WIDTH + (sign.icon ? 13 : 0)
+        };
 
         // preserve space for sub-labels
         w = 0; for (i in classSigns) {
-            w += classSigns[i].text.length * SYMBOL_12_WIDTH + (classSigns[i].icon ? 13 : 0) + (i ? 3 : 0);
+            w += subLabelWidth(classSigns[i]);
             i = 1;
         }
 
@@ -116,16 +120,28 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         if (classSigns.length) this.HEAD_EMPTY_LINES = 1;
 
+        // centering algorithm - first, remember position without centering
+        j = 0;
         for (i in classSigns) {
             w = classSigns[i].text.length*SYMBOL_12_WIDTH + (classSigns[i].icon ? 13 : 0);
-            if (left + w - 3 > blockWidth) { top += 12; left = 3; this.HEAD_EMPTY_LINES++; }
-            this.markup += '<g transform="translate(' + left + ', ' + top + ')">' +
-                (classSigns[i].icon ? '<image xlink:href="' + classSigns[i].icon +
-                '" width="13" height="13"/>' : '') + '<text fill="black" font-size="11" ' +
-                (classSigns[i].textStyle ? 'style="' + classSigns[i].textStyle + '"' : '') +
-                ' x="' + (classSigns[i].icon ? 13 : 0) + '" y="10">' + classSigns[i].text +
-                '</text></g>';
+            if (left + w - 3 > blockWidth) { top += 12; left = 3; this.HEAD_EMPTY_LINES++; j++; }
+            if (!positions[j]) positions[j] = [];
+            positions[j].push({ top: top, left: left, o: classSigns[i] });
             left += w + 3;
+        }
+
+        // then draw on position with computed seek by X to center content
+        for (i = 0; i < positions.length; i++) { // repeat positions and draw signs
+            w = (blockWidth - (sign = positions[i][positions[i].length - 1]).left - subLabelWidth(sign.o)) / 2;
+            for (j = 0; j < positions[i].length; j++) {
+                sign = positions[i][j];
+                this.markup += '<g transform="translate(' + (sign.left + w) + ', ' + sign.top + ')">' +
+                    (sign.o.icon ? '<image xlink:href="' + sign.o.icon +
+                    '" width="13" height="13"/>' : '') + '<text fill="black" font-size="11" ' +
+                    (sign.o.textStyle ? 'style="' + sign.o.textStyle + '"' : '') +
+                    ' x="' + (sign.o.icon ? 13 : 0) + '" y="10">' + sign.o.text +
+                    '</text></g>';
+            }
         }
 
         this.on('change:name change:attributes change:methods', function () {
