@@ -4,6 +4,13 @@ svg {
 }
 
 #classView {
+    position: relative;
+    height: 100%;
+}
+
+#svgContainer {
+    z-index: 0;
+    position: relative;
     height: 100%;
     cursor: -webkit-grab; cursor: -moz-grab;
 }
@@ -37,6 +44,10 @@ text {
 
 .uml-class-name-text {
     cursor: help;
+    -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
 }
 
 .uml-class-name-text:hover {
@@ -59,4 +70,16 @@ text {
     font-family: monospace;
     font-weight: 900;
     fill: magenta;
+}
+
+.line-clickable {
+    cursor: pointer;
+    -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
+}
+
+.line-clickable:hover {
+    fill: red;
 }

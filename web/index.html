@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/extras.css"/>
     <link rel="stylesheet" href="css/classView.css"/>
     <link rel="stylesheet" href="css/joint.min.css"/>
+    <link rel="stylesheet" href="css/methodCodeView.css"/>
     <!-- endbuild -->
     <!-- build:js -->
     <script type="text/javascript" src="jsLib/joint.js"></script>
@@ -23,7 +24,7 @@
     <script type="text/javascript" src="js/UI.js"></script>
     <!-- endbuild -->
 </head>
-<body onload="cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('classView'))">
+<body onload="cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('svgContainer'))">
     <div class="ui-body" id="ui-body">
         <div class="ui-sideBlock">
             <div id="treeView">
@@ -46,7 +47,23 @@
                 <div id="button.zoomOut" class="icon minus"></div>
             </div>
             <div id="classView">
+                <div id="methodCodeView">
+                    <div class="head">
+                        <div id="closeMethodCodeView" class="icon cross"></div>
+                        <h2 id="methodLabel"></h2>
+                    </div>
+                    <div id="methodViewBounds">
+                        <div id="methodDescription">
 
+                        </div>
+                        <div id="methodCode">
+
+                        </div>
+                    </div>
+                </div>
+                <div id="svgContainer">
+
+                </div>
             </div>
         </div>
     </div>

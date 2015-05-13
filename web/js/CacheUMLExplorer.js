@@ -18,7 +18,15 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         zoomInButton: id("button.zoomIn"),
         zoomOutButton: id("button.zoomOut"),
         zoomNormalButton: id("button.zoomNormal"),
-        infoButton: id("button.showInfo")
+        infoButton: id("button.showInfo"),
+        methodCodeView: id("methodCodeView"),
+        closeMethodCodeView: id("closeMethodCodeView"),
+        methodLabel: id("methodLabel"),
+        methodCode: id("methodCode"),
+        classView: id("classView"),
+        svgContainer: id("svgContainer"),
+        methodDescription: id("methodDescription"),
+        methodViewBounds: id("methodViewBounds")
     };
 
     this.UI = new UI(this);

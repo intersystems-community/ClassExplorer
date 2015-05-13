@@ -85,11 +85,12 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
     initialize: function () {
 
-        var rects = [
+        var o,
+            rects = [
                 { type: 'name', text: this.getClassName() },
-                { type: 'params', text: this.get('params') },
-                { type: 'attrs', text: this.get('attributes') },
-                { type: 'methods', text: this.get('methods') }
+                { type: 'params', text:  (o = this.get('params'))    .map(function (e) { return e.text; }), o: o },
+                { type: 'attrs', text:   (o = this.get('attributes')).map(function (e) { return e.text; }), o: o },
+                { type: 'methods', text: (o = this.get('methods'))   .map(function (e) { return e.text; }), o: o }
             ],
             self = this,
             classSigns = this.get('classSigns'),
@@ -167,9 +168,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         var rects = [
             { type: 'name', text: this.getClassName() },
-            { type: 'params', text: this.get('params') },
-            { type: 'attrs', text: this.get('attributes') },
-            { type: 'methods', text: this.get('methods') }
+            { type: 'params', text: this.get('params').map(function (e) { return e.text; }) },
+            { type: 'attrs', text: this.get('attributes').map(function (e) { return e.text; }) },
+            { type: 'methods', text: this.get('methods').map(function (e) { return e.text; }) }
         ];
 
         var offsetY = 0;

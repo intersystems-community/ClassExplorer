@@ -1,0 +1,44 @@
+#methodCodeView {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    height: 0;
+    background: rgba(245, 245, 245, 0.95);
+    z-index: 10;
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
+#methodCodeView > div.head {
+    position: relative;
+    overflow: visible; /* kept for button shadow */
+    margin: 1em;
+}
+
+#methodDescription {
+    box-sizing: border-box;
+    padding: 1em;
+    color: gray;
+    font-style: italic;
+}
+
+#methodViewBounds {
+    overflow: auto;
+}
+
+#methodCode {
+    padding: 1em;
+    box-sizing: border-box;
+    white-space: pre;
+}
+
+#closeMethodCodeView {
+    float: right;
+}
+
+#methodCodeView.active {
+    box-shadow: 0 0 5px black;
+    height: 100%;
+}

@@ -128,7 +128,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         self = this;
 
     var insertString = function (array, string, extraString) {
-        array.push(string + (extraString ? extraString : ""));
+        array.push({ text: string + (extraString ? extraString : "")});
     };
 
     var classInstance = new joint.shapes.uml.Class({
@@ -172,13 +172,54 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
         },
         classSigns: this.getClassSigns(classMetaData),
-        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
+        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH,
+        attrs: {
+            ".uml-class-methods-text": {
+                lineClickHandlers: (function (ps) {
+                    var arr = [], p;
+                    for (p in ps) {
+                        arr.push((function (p) { return function () {
+                            self.showMethodCode(name, p)
+                        }})(p));
+                    }
+                    return arr;
+                })(classMethods)
+            }
+        }
     });
 
     this.objects.push(classInstance);
     this.graph.addCell(classInstance);
 
     return classInstance;
+
+};
+
+ClassView.prototype.showMethodCode = function (className, methodName) {
+
+    var self = this,
+        els = this.cacheUMLExplorer.elements;
+
+    this.cacheUMLExplorer.source.getMethod(className, methodName, function (err, data) {
+        if (err || data.error) {
+            self.cacheUMLExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
+            return;
+        }
+        els.methodLabel.textContent = className + ": " + methodName + "("
+            + (data["arguments"] || "").replace(/,/g, ", ").replace(/:/g, ": ") + ")"
+            + (data["returns"] ? ": " + data["returns"] : "");
+        els.methodDescription.innerHTML = data["description"] || "";
+        els.methodCode.textContent = data["code"] || "";
+        els.methodViewBounds.style.height =
+            els.classView.offsetHeight - els.methodViewBounds.offsetTop + "px";
+        els.methodCodeView.classList.add("active");
+    });
+
+};
+
+ClassView.prototype.hideMethodCode = function () {
+
+    this.cacheUMLExplorer.elements.methodCodeView.classList.remove("active");
 
 };
 
@@ -448,6 +489,9 @@ ClassView.prototype.init = function () {
     this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
         self.zoom(null);
     });
+    this.cacheUMLExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
+        self.hideMethodCode();
+    });
 
     this.SYMBOL_12_WIDTH = (function () {
         var e = document.createElementNS("http://www.w3.org/2000/svg", "text"),
@@ -460,7 +504,7 @@ ClassView.prototype.init = function () {
         e.setAttribute("font-size", "12");
         e.textContent = "aBcDeFgGhH";
         document.body.appendChild(s);
-        w = e.getBBox().width/10;
+        w = e.getBBox().width / 10;
         s.parentNode.removeChild(s);
         return w;
     })();

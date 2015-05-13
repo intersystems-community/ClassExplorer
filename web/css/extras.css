@@ -106,6 +106,30 @@
     left: 5px;
 }
 
+.icon.cross:before {
+    content: "";
+    background-color: #fff;
+    width: 4px;
+    height: 14px;
+    border-radius: 1px;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    transform: rotate(45deg);
+}
+
+.icon.cross:after {
+    content: "";
+    background-color: #fff;
+    width: 14px;
+    height: 4px;
+    border-radius: 1px;
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    transform: rotate(45deg);
+}
+
 .icon.minus:after {
     content: "";
     background-color: #fff;
