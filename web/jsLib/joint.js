@@ -17162,6 +17162,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             this.node.textContent = '';
 
             var textNode = this.node;
+			var image;
+			//console.log(textNode.parentNode);
 
             if (opt.textPath) {
 
@@ -17201,14 +17203,24 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 textNode = textPath.node;
             }
 
+			// trash - elements collected outside tspan element, variable "to save algorithm"
+			if (textNode.TRASH instanceof Array) {
+				_.each(textNode.TRASH, function (e) { e.parentNode.removeChild(e); });
+			}
+			textNode.TRASH = [];
+
             for (; i < lines.length; i++) {
 
-				var jj, setup;
+				var jj, setup, box, iconLeft, xOrigin = this.attr('x') || 0,
+					iconXOrigin = (opt["ref-x"] || 0) + xOrigin;
 
                 // Shift all the <tspan> but first by one line (`1em`)
-                tspan = V('tspan', { dy: (i == 0 ? '0em' : opt.lineHeight || '1em'), x: this.attr('x') || 0 });
+                tspan = V('tspan', {
+					dy: (i == 0 ? '0em' : opt.lineHeight || '1em'),
+					x: xOrigin + (lines[i].icons ? lines[i].icons.length*10 + 2 : 0)
+				});
                 tspan.addClass('line');
-                if (!lines[i]) {
+                if (!lines[i].text) {
                     tspan.addClass('empty-line');
                 }
 				if (lines[i]["styles"]) {
@@ -17218,17 +17230,32 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 				}
 				if (typeof lines[i]["clickHandler"] === "function") {
 					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
-					tspan.node.setAttribute(
-						"class",
-						tspan.node.getAttribute("class") + " line-clickable"
-					);
+					tspan.addClass('line-clickable');
 				}
+
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.
                 tspan.node.textContent = lines[i].text || ' ';
                 
                 V(textNode).append(tspan);
+
+				if (lines[i].icons instanceof Array) {
+					iconLeft = iconXOrigin;
+					box = tspan.bbox();
+					_.each(lines[i].icons, function (ic) {
+						image = V("image");
+						image.attr("xlink:href", ic.src);
+						image.attr("width", 10);
+						image.attr("height", 10);
+						image.attr("y", box.y + box.height - (opt["font-size"] || 14));
+						image.attr("x", iconLeft);
+						iconLeft += 10;
+						V(textNode.parentNode).append(image);
+						textNode.TRASH.push(image.node);
+					});
+				}
+
             }
             return this;
         },

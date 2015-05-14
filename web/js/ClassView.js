@@ -76,7 +76,6 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
 /**
  * Returns array of signs to render or empry array.
  *
- * @private
  * @param classMetaData
  */
 ClassView.prototype.getClassSigns = function (classMetaData) {
@@ -85,11 +84,11 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 
     if (classMetaData["classType"]) signs.push({
         icon: lib.image.greenPill,
-        text: classMetaData["classType"],
+        text: lib.capitalize(classMetaData["classType"]),
         textStyle: "fill:rgb(130,0,255)"
     });
     if (classMetaData["ABSTRACT"]) signs.push({
-        icon: lib.image.iceCube,
+        icon: lib.image.crystalBall,
         text: "Abstract",
         textStyle: "fill:rgb(130,0,255)"
     });
@@ -112,6 +111,29 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
     });
 
     return signs;
+
+};
+
+/**
+ * Returns array of icons according to method metadata.
+ *
+ * @param method
+ */
+ClassView.prototype.getMethodIcons = function (method) {
+
+    var icons = [];
+
+    icons.push({ src: lib.image[method["private"] ? "minus" : "plus"] });
+    if (method["abstract"]) icons.push({ src: lib.image.crystalBall });
+    if (method["clientMethod"]) icons.push({ src: lib.image.user });
+    if (method["final"]) icons.push({ src: lib.image.blueFlag });
+    if (method["notInheritable"]) icons.push({ src: lib.image.redFlag });
+    if (method["sqlProc"]) icons.push({ src: lib.image.table });
+    if (method["webMethod"]) icons.push({ src: lib.image.earth });
+    if (method["zenMethod"]) icons.push({ src: lib.image.zed });
+    if (method["readOnly"]) icons.push({ src: lib.image.eye });
+
+    return icons;
 
 };
 
@@ -150,8 +172,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             var arr = [], n;
             for (n in ps) {
                 arr.push({
-                    text: (ps[n]["private"] ? "- " : "+ ") + n
-                        + (ps[n]["type"] ? ": " + ps[n]["type"] : "")
+                    text: n + (ps[n]["type"] ? ": " + ps[n]["type"] : ""),
+                    icons: self.getMethodIcons(ps[n])
                 });
             }
             return arr;
@@ -160,14 +182,14 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             var arr = [], n;
             for (n in met) {
                 arr.push({
-                    text: (met[n]["private"] ? "- " : "+ ") + n
-                        + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    text: n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
                     styles: (function (t) {
-                        return t ? {} : { textDecoration: "underline" }
+                        return t ? { textDecoration: "underline" } : {}
                     })(met[n]["classMethod"]),
                     clickHandler: (function (n) {
                         return function () { self.showMethodCode(name, n); }
-                    })(n)
+                    })(n),
+                    icons: self.getMethodIcons(met[n])
                 });
             }
             return arr;

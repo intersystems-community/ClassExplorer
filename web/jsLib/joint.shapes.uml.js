@@ -110,7 +110,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         this.defaults.size.width = Math.max(this.defaults.MIN_WIDTH, Math.min(w, 250));
         _.each(rects, function (rect) {
             rect.text.forEach(function (s) {
-                var t = s.text.length*SYMBOL_12_WIDTH + 8;
+                var t = s.text.length*SYMBOL_12_WIDTH + 8 + (s.icons ? s.icons.length*10 + 2 : 0);
                 if (t > self.defaults.size.width) {
                     self.defaults.size.width = t;
                 }
@@ -173,7 +173,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             { type: 'attrs', text: this.get('attributes') },
             { type: 'methods', text: this.get('methods') }
         ];
-        console.log("METHODS: ", this.get('methods'));
+
         var offsetY = 0;
 
         var dp = self.get("directProps") || {},
@@ -184,7 +184,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             var lines = _.isArray(rect.text) ? rect.text : [{ text: rect.text }];
             if (rect.type === "name") {
                 if (self.HEAD_EMPTY_LINES) lines.unshift("");
-                for (var i = 0; i < self.HEAD_EMPTY_LINES; i++) lines.unshift("");
+                for (var i = 0; i < self.HEAD_EMPTY_LINES; i++) lines.unshift({ text: "" });
             }
 
             var rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
