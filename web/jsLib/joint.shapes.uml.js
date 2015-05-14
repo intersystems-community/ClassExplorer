@@ -88,9 +88,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         var o,
             rects = [
                 { type: 'name', text: this.getClassName() },
-                { type: 'params', text:  (o = this.get('params'))    .map(function (e) { return e.text; }), o: o },
-                { type: 'attrs', text:   (o = this.get('attributes')).map(function (e) { return e.text; }), o: o },
-                { type: 'methods', text: (o = this.get('methods'))   .map(function (e) { return e.text; }), o: o }
+                { type: 'params', text:  (o = this.get('params'))    , o: o },
+                { type: 'attrs', text:   (o = this.get('attributes')), o: o },
+                { type: 'methods', text: (o = this.get('methods'))   , o: o }
             ],
             self = this,
             classSigns = this.get('classSigns'),
@@ -109,8 +109,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         this.defaults.size.width = Math.max(this.defaults.MIN_WIDTH, Math.min(w, 250));
         _.each(rects, function (rect) {
-            (rect.text instanceof Array ? rect.text : [rect.text]).forEach(function (s) {
-                var t = s.split("\x1b")[0].length*SYMBOL_12_WIDTH + 8;
+            rect.text.forEach(function (s) {
+                var t = s.text.length*SYMBOL_12_WIDTH + 8 + (s.icons ? s.icons.length*10 + 2 : 0);
                 if (t > self.defaults.size.width) {
                     self.defaults.size.width = t;
                 }
@@ -157,7 +157,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
     },
 
     getClassName: function () {
-        return this.get('name');
+        var n = this.get('name');
+        return n instanceof Array ? n : [{ text: n }];
     },
 
     updateRectangles: function () {
@@ -168,9 +169,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         var rects = [
             { type: 'name', text: this.getClassName() },
-            { type: 'params', text: this.get('params').map(function (e) { return e.text; }) },
-            { type: 'attrs', text: this.get('attributes').map(function (e) { return e.text; }) },
-            { type: 'methods', text: this.get('methods').map(function (e) { return e.text; }) }
+            { type: 'params', text: this.get('params') },
+            { type: 'attrs', text: this.get('attributes') },
+            { type: 'methods', text: this.get('methods') }
         ];
 
         var offsetY = 0;
@@ -180,11 +181,10 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
         _.each(rects, function(rect) {
 
-            var lines = _.isArray(rect.text) ? rect.text : [rect.text];
-
+            var lines = _.isArray(rect.text) ? rect.text : [{ text: rect.text }];
             if (rect.type === "name") {
                 if (self.HEAD_EMPTY_LINES) lines.unshift("");
-                for (var i = 0; i < self.HEAD_EMPTY_LINES; i++) lines.unshift("");
+                for (var i = 0; i < self.HEAD_EMPTY_LINES; i++) lines.unshift({ text: "" });
             }
 
             var rectHeight = lines.length * 12 + (lines.length ? 10 : 0),
@@ -192,7 +192,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
                 rectRect = attrs['.uml-class-' + rect.type + '-rect'],
                 rectLabel = attrs['.uml-class-' + rect.type + '-label'];
 
-            rectText.text = lines.join('\n');
+            rectText.text = lines;
+
             if (nameClickHandler) {
                 if (rect.type === "name") {
                     rectText.clickHandler = nameClickHandler;

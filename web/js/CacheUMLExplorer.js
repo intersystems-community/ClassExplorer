@@ -18,6 +18,7 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         zoomInButton: id("button.zoomIn"),
         zoomOutButton: id("button.zoomOut"),
         zoomNormalButton: id("button.zoomNormal"),
+        helpButton: id("button.showHelp"),
         infoButton: id("button.showInfo"),
         methodCodeView: id("methodCodeView"),
         closeMethodCodeView: id("closeMethodCodeView"),
@@ -53,7 +54,11 @@ CacheUMLExplorer.prototype.init = function () {
             this.classView.loadClass(hash.substr(7));
         } else if (hash.indexOf("package:") === 1) {
             this.classView.loadPackage(hash.substr(9));
+        } else {
+            this.classView.renderInfoGraphic();
         }
+    } else {
+        this.classView.renderInfoGraphic();
     }
 
     this.elements.infoButton.addEventListener("click", function () {

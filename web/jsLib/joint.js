@@ -17138,7 +17138,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         text: function(content, opt) {
 
 	    opt = opt || {};
-            var lines = content.split('\n');
+            var lines = content/*.split('\n')*/;
 	    var i = 0;
             var tspan;
 
@@ -17162,6 +17162,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             this.node.textContent = '';
 
             var textNode = this.node;
+			var image;
+			//console.log(textNode.parentNode);
 
             if (opt.textPath) {
 
@@ -17201,45 +17203,58 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 textNode = textPath.node;
             }
 
-            //if (lines.length === 1) {
-            //    textNode.textContent = content;
-            //    return this;
-            //}
+			// trash - elements collected outside tspan element, variable "to save algorithm"
+			if (textNode.TRASH instanceof Array) {
+				_.each(textNode.TRASH, function (e) { e.parentNode.removeChild(e); });
+			}
+			textNode.TRASH = [];
 
             for (; i < lines.length; i++) {
 
-				var jj, setup;
+				var jj, setup, iconLeft, xOrigin = this.attr('x') || 0,
+					iconXOrigin = (opt["ref-x"] || 0) + xOrigin;
 
                 // Shift all the <tspan> but first by one line (`1em`)
-                tspan = V('tspan', { dy: (i == 0 ? '0em' : opt.lineHeight || '1em'), x: this.attr('x') || 0 });
+                tspan = V('tspan', {
+					dy: (i == 0 ? '0em' : opt.lineHeight || '1em'),
+					x: xOrigin + (lines[i].icons ? lines[i].icons.length*10 + 2 : 0)
+				});
                 tspan.addClass('line');
-                if (!lines[i]) {
+                if (!lines[i].text) {
                     tspan.addClass('empty-line');
                 }
-				if (lines[i].indexOf("\x1b") !== -1) {
-					jj = lines[i].split("\x1b");
-					lines[i] = jj[0];
-					setup = JSON.parse(jj[1]);
-					if (setup["STYLES"]) {
-						for (var j in setup["STYLES"]) {
-							tspan.node.style[j] = setup["STYLES"][j];
-						}
+				if (lines[i]["styles"]) {
+					for (var j in lines[i]["styles"]) {
+						tspan.node.style[j] = lines[i]["styles"][j];
 					}
 				}
-				if (opt.clickHandler) {
-					tspan.node.onclick = opt.clickHandler;
+				if (typeof lines[i]["clickHandler"] === "function") {
+					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
+					tspan.addClass('line-clickable');
 				}
 
-				if (opt.lineClickHandlers && opt.lineClickHandlers[i]) {
-					tspan.node.addEventListener("click", opt.lineClickHandlers[i]);
-					tspan.node.setAttribute("class", tspan.node.getAttribute("class") + " line-clickable");
-				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.
-                tspan.node.textContent = lines[i] || ' ';
+                tspan.node.textContent = lines[i].text || ' ';
                 
                 V(textNode).append(tspan);
+
+				if (lines[i].icons instanceof Array) {
+					iconLeft = iconXOrigin;
+					_.each(lines[i].icons, function (ic) {
+						image = V("image");
+						image.attr("xlink:href", ic.src);
+						image.attr("width", 10);
+						image.attr("height", 10);
+						image.attr("y", textNode.getBoundingClientRect().top + i*(opt["font-size"] || 14) + 2);
+						image.attr("x", iconLeft);
+						iconLeft += 10;
+						V(textNode.parentNode).append(image);
+						textNode.TRASH.push(image.node);
+					});
+				}
+
             }
             return this;
         },
@@ -20952,7 +20967,7 @@ joint.dia.ElementView = joint.dia.CellView.extend({
             // to rewrite them, if needed. (i.e display: 'none')
             if (!_.isUndefined(attrs.text)) {
                 $selected.each(function() {
-                    V(this).text(attrs.text + '', attrs);
+                    V(this).text(attrs.text, attrs);
                 });
                 specialAttributes.push('lineHeight','textPath');
             }

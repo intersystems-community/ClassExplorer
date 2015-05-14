@@ -84,6 +84,18 @@
     box-shadow: 0 0 5px 2px #ffcc1b;
 }
 
+.icon.help:after {
+    content: "?";
+    position: absolute;
+    color: white;
+    display: block;
+    font-size: 21px;
+    font-weight: 900;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
 .icon.plus:before {
     content: "";
     background-color: #fff;

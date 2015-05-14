@@ -74,9 +74,129 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
 };
 
 /**
+ * Render help info
+ */
+ClassView.prototype.renderInfoGraphic = function () {
+
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME =
+        this.cacheUMLExplorer.elements.className.innerHTML =
+            "Welcome to Cach&eacute; UML explorer!";
+
+    location.hash = "help";
+
+    this.showLoader();
+    this.render({
+        basePackageName: "Welcome to Cach? UML explorer!",
+        classes: {
+            "Shared object": {
+                super: "Super object",
+                parameters: {
+                    "Also inherit Super object": {}
+                },
+                methods: {},
+                properties: {}
+            },
+            "Class name": {
+                super: "Super object",
+                ABSTRACT: 1,
+                FINAL: 1,
+                HIDDEN: 1,
+                NAMESPACE: "SAMPLES",
+                PROCEDUREBLOCK: 0,
+                SYSTEM: 4,
+                methods: {
+                    "Abstract public method": {
+                        abstract: 1
+                    },
+                    "Class method": {
+                        classMethod: 1
+                    },
+                    "Client method": {
+                        clientMethod: 1
+                    },
+                    "Final method": {
+                        final: 1
+                    },
+                    "Not inheritable method": {
+                        notInheritable: 1
+                    },
+                    "Private method": {
+                        private: 1
+                    },
+                    "Sql procedure": {
+                        sqlProc: 1
+                    },
+                    "Web method": {
+                        webMethod: 1
+                    },
+                    "ZEN method": {
+                        zenMethod: 1
+                    },
+                    "Method": {
+                        returns: "%Return type"
+                    }
+                },
+                parameters: {
+                    "PARAMETER WITHOUT TYPE": {},
+                    "PARAMETER": {
+                        type: "Type"
+                    }
+                },
+                properties: {
+                    "Public property name": {
+                        private: 0
+                    },
+                    "Private property name": {
+                        private: 1
+                    },
+                    "Public read-only property": {
+                        private: 0,
+                        readOnly: 1
+                    },
+                    "Property": {
+                        type: "Type of property"
+                    },
+                    "Other object": {
+                        private: 0,
+                        type: "Shared object"
+                    },
+                    "Another object": {
+                        private: 1,
+                        type: "Not shared object"
+                    }
+                }
+            },
+            "Super object": {
+                methods: {},
+                properties: {},
+                parameters: {}
+            },
+            "HELP": {
+                parameters: {
+                    "See the basics here!": {}
+                }
+            }
+        },
+        composition: {},
+        aggregation: {
+            "Class name": {
+                "Shared object": "1..1"
+            }
+        },
+        inheritance: {
+            "Class name": { "Super object": 1 },
+            "Shared object": { "Super object": 1 }
+        },
+        restrictPackage: 1
+    });
+
+    this.removeLoader();
+
+};
+
+/**
  * Returns array of signs to render or empry array.
  *
- * @private
  * @param classMetaData
  */
 ClassView.prototype.getClassSigns = function (classMetaData) {
@@ -85,11 +205,11 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 
     if (classMetaData["classType"]) signs.push({
         icon: lib.image.greenPill,
-        text: classMetaData["classType"],
+        text: lib.capitalize(classMetaData["classType"]),
         textStyle: "fill:rgb(130,0,255)"
     });
     if (classMetaData["ABSTRACT"]) signs.push({
-        icon: lib.image.iceCube,
+        icon: lib.image.crystalBall,
         text: "Abstract",
         textStyle: "fill:rgb(130,0,255)"
     });
@@ -116,6 +236,29 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 };
 
 /**
+ * Returns array of icons according to method metadata.
+ *
+ * @param method
+ */
+ClassView.prototype.getMethodIcons = function (method) {
+
+    var icons = [];
+
+    icons.push({ src: lib.image[method["private"] ? "minus" : "plus"] });
+    if (method["abstract"]) icons.push({ src: lib.image.crystalBall });
+    if (method["clientMethod"]) icons.push({ src: lib.image.user });
+    if (method["final"]) icons.push({ src: lib.image.blueFlag });
+    if (method["notInheritable"]) icons.push({ src: lib.image.redFlag });
+    if (method["sqlProc"]) icons.push({ src: lib.image.table });
+    if (method["webMethod"]) icons.push({ src: lib.image.earth });
+    if (method["zenMethod"]) icons.push({ src: lib.image.zed });
+    if (method["readOnly"]) icons.push({ src: lib.image.eye });
+
+    return icons;
+
+};
+
+/**
  * @param {string} name
  * @param classMetaData
  * @returns {joint.shapes.uml.Class}
@@ -127,65 +270,53 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classMethods = classMetaData["methods"],
         self = this;
 
-    var insertString = function (array, string, extraString) {
-        array.push({ text: string + (extraString ? extraString : "")});
-    };
-
     var classInstance = new joint.shapes.uml.Class({
-        name: name,
+        name: [{
+            text: name,
+            clickHandler: function () {
+                self.openClassDoc(name, classMetaData["NAMESPACE"]);
+            },
+            styles: {
+                cursor: "help"
+            }
+        }],
         params: (function (params) {
             var arr = [], n;
             for (n in params) {
-                insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
+                arr.push({
+                    text: n + (params[n]["type"] ? ": " + params[n]["type"] : "")
+                });
             }
             return arr;
         })(classParams),
         attributes: (function (ps) {
             var arr = [], n;
             for (n in ps) {
-                insertString(
-                    arr,
-                    (ps[n]["private"] ? "- " : "+ ") + n
-                        + (ps[n]["type"] ? ": " + ps[n]["type"] : "")
-                );
+                arr.push({
+                    text: n + (ps[n]["type"] ? ": " + ps[n]["type"] : ""),
+                    icons: self.getMethodIcons(ps[n])
+                });
             }
             return arr;
         })(classProps),
         methods: (function (met) {
             var arr = [], n;
             for (n in met) {
-                insertString(
-                    arr,
-                    (met[n]["private"] ? "- " : "+ ") + n
-                        + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
-                    (met[n]["classMethod"] ?
-                        "\x1b" + JSON.stringify({STYLES:{
-                            textDecoration: "underline"
-                        }}) : "")
-                );
+                arr.push({
+                    text: n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    styles: (function (t) {
+                        return t ? { textDecoration: "underline" } : {}
+                    })(met[n]["classMethod"]),
+                    clickHandler: (function (n) {
+                        return function () { self.showMethodCode(name, n); }
+                    })(n),
+                    icons: self.getMethodIcons(met[n])
+                });
             }
             return arr;
         })(classMethods),
-        directProps: {
-            nameClickHandler: function () {
-                self.openClassDoc(name, classMetaData["NAMESPACE"]);
-            }
-        },
         classSigns: this.getClassSigns(classMetaData),
-        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH,
-        attrs: {
-            ".uml-class-methods-text": {
-                lineClickHandlers: (function (ps) {
-                    var arr = [], p;
-                    for (p in ps) {
-                        arr.push((function (p) { return function () {
-                            self.showMethodCode(name, p)
-                        }})(p));
-                    }
-                    return arr;
-                })(classMethods)
-            }
-        }
+        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
     this.objects.push(classInstance);
@@ -358,7 +489,7 @@ ClassView.prototype.loadClass = function (className) {
             self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
             console.error.call(console, err);
         } else {
-            self.cacheUMLExplorer.classView.render(data);
+            self.render(data);
         }
     });
 
@@ -380,7 +511,7 @@ ClassView.prototype.loadPackage = function (packageName) {
             self.showLoader("Unable to get package " + packageName);
             console.error.call(console, err);
         } else {
-            self.cacheUMLExplorer.classView.render(data);
+            self.render(data);
         }
     });
 
@@ -491,6 +622,9 @@ ClassView.prototype.init = function () {
     });
     this.cacheUMLExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
         self.hideMethodCode();
+    });
+    this.cacheUMLExplorer.elements.helpButton.addEventListener("click", function () {
+        self.renderInfoGraphic();
     });
 
     this.SYMBOL_12_WIDTH = (function () {

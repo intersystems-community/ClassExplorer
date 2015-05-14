@@ -3,7 +3,7 @@
 <Class name="UMLExplorer.ClassView">
 <Description>
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63686,4398.893381</TimeChanged>
+<TimeChanged>63686,85630.818189</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -115,8 +115,8 @@ Return structured data about class.</Description>
     for i=1:1:count {
         set oPar = ##class(%ZEN.proxyObject).%New()
         set p = classDefinition.Parameters.GetAt(i)
+        set oPar.type = p.Type
         do oParameters.%DispatchSetProperty(p.Name, oPar)
-        do oPar.%DispatchSetProperty("type", p.Type)
     }
 
     do ..collectInheritance(oData, classDefinition, package)
@@ -302,7 +302,7 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-08 19:38:35.423206">
+<Project name="UMLExplorer" LastModified="2015-05-14 01:35:59.888696">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
