@@ -17211,7 +17211,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
             for (; i < lines.length; i++) {
 
-				var jj, setup, box, iconLeft, xOrigin = this.attr('x') || 0,
+				var jj, setup, iconLeft, xOrigin = this.attr('x') || 0,
 					iconXOrigin = (opt["ref-x"] || 0) + xOrigin;
 
                 // Shift all the <tspan> but first by one line (`1em`)
@@ -17242,13 +17242,12 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 				if (lines[i].icons instanceof Array) {
 					iconLeft = iconXOrigin;
-					box = tspan.bbox();
 					_.each(lines[i].icons, function (ic) {
 						image = V("image");
 						image.attr("xlink:href", ic.src);
 						image.attr("width", 10);
 						image.attr("height", 10);
-						image.attr("y", box.y + box.height - (opt["font-size"] || 14));
+						image.attr("y", textNode.getBoundingClientRect().top + i*(opt["font-size"] || 14) + 2);
 						image.attr("x", iconLeft);
 						iconLeft += 10;
 						V(textNode.parentNode).append(image);

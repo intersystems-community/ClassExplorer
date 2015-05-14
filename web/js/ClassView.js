@@ -74,6 +74,127 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
 };
 
 /**
+ * Render help info
+ */
+ClassView.prototype.renderInfoGraphic = function () {
+
+    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME =
+        this.cacheUMLExplorer.elements.className.innerHTML =
+            "Welcome to Cach&eacute; UML explorer!";
+
+    location.hash = "help";
+
+    this.showLoader();
+    this.render({
+        basePackageName: "Welcome to Cach? UML explorer!",
+        classes: {
+            "Shared object": {
+                super: "Super object",
+                parameters: {
+                    "Also inherit Super object": {}
+                },
+                methods: {},
+                properties: {}
+            },
+            "Class name": {
+                super: "Super object",
+                ABSTRACT: 1,
+                FINAL: 1,
+                HIDDEN: 1,
+                NAMESPACE: "SAMPLES",
+                PROCEDUREBLOCK: 0,
+                SYSTEM: 4,
+                methods: {
+                    "Abstract public method": {
+                        abstract: 1
+                    },
+                    "Class method": {
+                        classMethod: 1
+                    },
+                    "Client method": {
+                        clientMethod: 1
+                    },
+                    "Final method": {
+                        final: 1
+                    },
+                    "Not inheritable method": {
+                        notInheritable: 1
+                    },
+                    "Private method": {
+                        private: 1
+                    },
+                    "Sql procedure": {
+                        sqlProc: 1
+                    },
+                    "Web method": {
+                        webMethod: 1
+                    },
+                    "ZEN method": {
+                        zenMethod: 1
+                    },
+                    "Method": {
+                        returns: "%Return type"
+                    }
+                },
+                parameters: {
+                    "PARAMETER WITHOUT TYPE": {},
+                    "PARAMETER": {
+                        type: "Type"
+                    }
+                },
+                properties: {
+                    "Public property name": {
+                        private: 0
+                    },
+                    "Private property name": {
+                        private: 1
+                    },
+                    "Public read-only property": {
+                        private: 0,
+                        readOnly: 1
+                    },
+                    "Property": {
+                        type: "Type of property"
+                    },
+                    "Other object": {
+                        private: 0,
+                        type: "Shared object"
+                    },
+                    "Another object": {
+                        private: 1,
+                        type: "Not shared object"
+                    }
+                }
+            },
+            "Super object": {
+                methods: {},
+                properties: {},
+                parameters: {}
+            },
+            "HELP": {
+                parameters: {
+                    "See the basics here!": {}
+                }
+            }
+        },
+        composition: {},
+        aggregation: {
+            "Class name": {
+                "Shared object": "1..1"
+            }
+        },
+        inheritance: {
+            "Class name": { "Super object": 1 },
+            "Shared object": { "Super object": 1 }
+        },
+        restrictPackage: 1
+    });
+
+    this.removeLoader();
+
+};
+
+/**
  * Returns array of signs to render or empry array.
  *
  * @param classMetaData
@@ -368,7 +489,7 @@ ClassView.prototype.loadClass = function (className) {
             self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
             console.error.call(console, err);
         } else {
-            self.cacheUMLExplorer.classView.render(data);
+            self.render(data);
         }
     });
 
@@ -390,7 +511,7 @@ ClassView.prototype.loadPackage = function (packageName) {
             self.showLoader("Unable to get package " + packageName);
             console.error.call(console, err);
         } else {
-            self.cacheUMLExplorer.classView.render(data);
+            self.render(data);
         }
     });
 
@@ -501,6 +622,9 @@ ClassView.prototype.init = function () {
     });
     this.cacheUMLExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
         self.hideMethodCode();
+    });
+    this.cacheUMLExplorer.elements.helpButton.addEventListener("click", function () {
+        self.renderInfoGraphic();
     });
 
     this.SYMBOL_12_WIDTH = (function () {
