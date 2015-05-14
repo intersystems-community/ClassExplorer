@@ -17138,7 +17138,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         text: function(content, opt) {
 
 	    opt = opt || {};
-            var lines = content.split('\n');
+            var lines = content/*.split('\n')*/;
 	    var i = 0;
             var tspan;
 
@@ -17201,11 +17201,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 textNode = textPath.node;
             }
 
-            //if (lines.length === 1) {
-            //    textNode.textContent = content;
-            //    return this;
-            //}
-
             for (; i < lines.length; i++) {
 
 				var jj, setup;
@@ -17216,28 +17211,22 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 if (!lines[i]) {
                     tspan.addClass('empty-line');
                 }
-				if (lines[i].indexOf("\x1b") !== -1) {
-					jj = lines[i].split("\x1b");
-					lines[i] = jj[0];
-					setup = JSON.parse(jj[1]);
-					if (setup["STYLES"]) {
-						for (var j in setup["STYLES"]) {
-							tspan.node.style[j] = setup["STYLES"][j];
-						}
+				if (lines[i]["styles"]) {
+					for (var j in lines[i]["styles"]) {
+						tspan.node.style[j] = lines[i]["styles"][j];
 					}
 				}
-				if (opt.clickHandler) {
-					tspan.node.onclick = opt.clickHandler;
-				}
-
-				if (opt.lineClickHandlers && opt.lineClickHandlers[i]) {
-					tspan.node.addEventListener("click", opt.lineClickHandlers[i]);
-					tspan.node.setAttribute("class", tspan.node.getAttribute("class") + " line-clickable");
+				if (typeof lines[i]["clickHandler"] === "function") {
+					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
+					tspan.node.setAttribute(
+						"class",
+						tspan.node.getAttribute("class") + " line-clickable"
+					);
 				}
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.
-                tspan.node.textContent = lines[i] || ' ';
+                tspan.node.textContent = lines[i].text || ' ';
                 
                 V(textNode).append(tspan);
             }
@@ -20952,7 +20941,7 @@ joint.dia.ElementView = joint.dia.CellView.extend({
             // to rewrite them, if needed. (i.e display: 'none')
             if (!_.isUndefined(attrs.text)) {
                 $selected.each(function() {
-                    V(this).text(attrs.text + '', attrs);
+                    V(this).text(attrs.text, attrs);
                 });
                 specialAttributes.push('lineHeight','textPath');
             }

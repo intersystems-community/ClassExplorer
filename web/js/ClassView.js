@@ -127,65 +127,53 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classMethods = classMetaData["methods"],
         self = this;
 
-    var insertString = function (array, string, extraString) {
-        array.push({ text: string + (extraString ? extraString : "")});
-    };
-
     var classInstance = new joint.shapes.uml.Class({
-        name: name,
+        name: [{
+            text: name,
+            clickHandler: function () {
+                self.openClassDoc(name, classMetaData["NAMESPACE"]);
+            },
+            styles: {
+                cursor: "help"
+            }
+        }],
         params: (function (params) {
             var arr = [], n;
             for (n in params) {
-                insertString(arr, n + (params[n]["type"] ? ": " + params[n]["type"] : ""));
+                arr.push({
+                    text: n + (params[n]["type"] ? ": " + params[n]["type"] : "")
+                });
             }
             return arr;
         })(classParams),
         attributes: (function (ps) {
             var arr = [], n;
             for (n in ps) {
-                insertString(
-                    arr,
-                    (ps[n]["private"] ? "- " : "+ ") + n
+                arr.push({
+                    text: (ps[n]["private"] ? "- " : "+ ") + n
                         + (ps[n]["type"] ? ": " + ps[n]["type"] : "")
-                );
+                });
             }
             return arr;
         })(classProps),
         methods: (function (met) {
             var arr = [], n;
             for (n in met) {
-                insertString(
-                    arr,
-                    (met[n]["private"] ? "- " : "+ ") + n
+                arr.push({
+                    text: (met[n]["private"] ? "- " : "+ ") + n
                         + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
-                    (met[n]["classMethod"] ?
-                        "\x1b" + JSON.stringify({STYLES:{
-                            textDecoration: "underline"
-                        }}) : "")
-                );
+                    styles: (function (t) {
+                        return t ? {} : { textDecoration: "underline" }
+                    })(met[n]["classMethod"]),
+                    clickHandler: (function (n) {
+                        return function () { self.showMethodCode(name, n); }
+                    })(n)
+                });
             }
             return arr;
         })(classMethods),
-        directProps: {
-            nameClickHandler: function () {
-                self.openClassDoc(name, classMetaData["NAMESPACE"]);
-            }
-        },
         classSigns: this.getClassSigns(classMetaData),
-        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH,
-        attrs: {
-            ".uml-class-methods-text": {
-                lineClickHandlers: (function (ps) {
-                    var arr = [], p;
-                    for (p in ps) {
-                        arr.push((function (p) { return function () {
-                            self.showMethodCode(name, p)
-                        }})(p));
-                    }
-                    return arr;
-                })(classMethods)
-            }
-        }
+        SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
     this.objects.push(classInstance);
