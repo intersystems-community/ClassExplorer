@@ -24,7 +24,7 @@ Source.prototype.getClassTree = function (callback) {
 Source.prototype.getMethod = function (className, methodName, callback) {
 
     lib.load(
-        this.URL + "/GetMethod/" + encodeURIComponent(className) + "/"
+        this.URL + "/GetMethod?className=" + encodeURIComponent(className) + "&methodName="
             + encodeURIComponent(methodName),
         null,
         callback);
@@ -38,7 +38,7 @@ Source.prototype.getMethod = function (className, methodName, callback) {
  */
 Source.prototype.getClassView = function (className, callback) {
 
-    lib.load(this.URL + "/GetClassView/" + encodeURIComponent(className), null, callback);
+    lib.load(this.URL + "/GetClassView?name=" + encodeURIComponent(className), null, callback);
 
 };
 
@@ -49,7 +49,7 @@ Source.prototype.getClassView = function (className, callback) {
  */
 Source.prototype.getPackageView = function (packageName, callback) {
 
-    lib.load(this.URL + "/GetPackageView/" + encodeURIComponent(packageName), null, callback);
+    lib.load(this.URL + "/GetPackageView?name=" + encodeURIComponent(packageName), null, callback);
 
 };
 

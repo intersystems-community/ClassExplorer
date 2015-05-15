@@ -302,7 +302,7 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-14 01:35:59.888696">
+<Project name="UMLExplorer" LastModified="2015-05-15 00:57:01.855062">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
@@ -315,7 +315,7 @@ Returns structured package data</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63685,85586.177035</TimeChanged>
+<TimeChanged>63687,39024.811955</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -327,9 +327,9 @@ REST interface for UMLExplorer</Description>
    <Route Url="/js/CacheUMLExplorer.js" Method="GET" Call="GetJs"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
-   <Route Url="/GetClassView/:ClassName" Method="GET" Call="GetClassView"/>
-   <Route Url="/GetPackageView/:PackageName" Method="GET" Call="GetPackageView"/>
-   <Route Url="/GetMethod/:ClassName/:MethodName" Method="GET" Call="GetMethod"/>
+   <Route Url="/GetClassView" Method="GET" Call="GetClassView"/>
+   <Route Url="/GetPackageView" Method="GET" Call="GetPackageView"/>
+   <Route Url="/GetMethod" Method="GET" Call="GetMethod"/>
 </Routes>
 ]]></Data>
 </XData>
@@ -349,9 +349,9 @@ Method returns whole class tree visible in the current namespace.</Description>
 <Description>
 Returns classTree by given class name</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>className:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+    set className = %request.Get("name")
     set classData = ##class(UMLExplorer.ClassView).getClassView(className)
     do classData.%ToJSON(, "ou")
     return $$$OK
@@ -362,9 +362,9 @@ Returns classTree by given class name</Description>
 <Description>
 Returns all package class trees by given package name</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>packageName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+    set packageName = %request.Get("name")
     set classData = ##class(UMLExplorer.ClassView).getPackageView(packageName)
     do classData.%ToJSON(, "ou")
     return $$$OK
@@ -375,9 +375,10 @@ Returns all package class trees by given package name</Description>
 <Description>
 Returns method description and code</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>className:%String,methodName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+    set className = %request.Get("className")
+    set methodName = %request.Get("methodName")
     set methodData = ##class(ClassView).getMethod(className, methodName)
     do methodData.%ToJSON(, "ou")
     return $$$OK
