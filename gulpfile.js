@@ -28,6 +28,13 @@ var banner = [
     ""
 ].join("\n");
 
+var specialReplace = function () {
+    return replace(/[^\s]+\/\*build\.replace:(.*)\*\//g, function (part, match) {
+        var s = match.toString();
+        return s.replace(/pkg\.([a-zA-Z]+)/g, function (p,a) { return pkg[a]; });
+    });
+};
+
 gulp.task("clean", function () {
     return gulp.src("build", {read: false})
         .pipe(clean());
@@ -60,10 +67,7 @@ gulp.task("gatherLibs", ["clean"], function () {
 gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
     return gulp.src("web/js/*.js")
         .pipe(concat("CacheUMLExplorer.js"))
-        .pipe(replace(/[^\s]+\/\*build\.replace:(.*)\*\//g, function (part, match) {
-            var s = match.toString();
-            return s.replace(/pkg\.([a-zA-Z]+)/g, function (p,a) { return pkg[a]; });
-        }))
+        .pipe(specialReplace())
         .pipe(wrap("CacheUMLExplorer = (function(){<%= contents %> return CacheUMLExplorer;}());"))
         .pipe(uglify({
             output: {
@@ -111,7 +115,7 @@ gulp.task("exportCacheXML", [
     "clean", "gatherCSS", "gatherScripts", "addHTMLFile", "copyLICENSE", "copyREADME"
 ], function () {
     return gulp.src("cache/projectTemplate.xml")
-        .pipe(replace(/\{\{replace:HTML}}/, fs.readFileSync("build/web/index.html", "utf-8")))
+        .pipe(specialReplace())
         .pipe(replace(
             /\{\{replace:css}}/,
             function () { return fs.readFileSync("build/web/css/CacheUMLExplorer.css", "utf-8"); }

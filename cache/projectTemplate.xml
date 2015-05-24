@@ -2,8 +2,9 @@
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-28 19:50:48">
 <Class name="UMLExplorer.ClassView">
 <Description>
+Cache UML Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63686,85630.818189</TimeChanged>
+<TimeChanged>63690,48954.853237</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getClassTree">
@@ -302,11 +303,74 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-15 00:57:01.855062">
+<Class name="UMLExplorer.WebAppInstaller">
+<Super>%Projection.AbstractProjection</Super>
+<TimeChanged>63696,65168.289869</TimeChanged>
+<TimeCreated>63696,64041.85537</TimeCreated>
+
+<Projection name="Reference">
+<Type>WebAppInstaller</Type>
+</Projection>
+
+<Method name="CreateProjection">
+<Description>
+This method is invoked when a class is compiled.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[cls:%String,&params]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set ns = $NAMESPACE
+    zn:ns'="%SYS" "%SYS"
+    do ##class(Security.System).GetInstallationSecuritySetting(.security)
+    if (security="None") {
+        set cspProperties("AutheEnabled") = 64 // Unauthenticated
+    } else {
+        set cspProperties("AutheEnabled") = 32 // Password
+    }
+    set cspProperties("NameSpace") = ns
+    set cspProperties("Description") = "A WEB application for Cache UML Explorer."
+    set cspProperties("IsNameSpaceDefault") = 1
+    set cspProperties("DispatchClass") = "UMLExplorer.Router"
+    if ('##class(Security.Applications).Exists("/UMLExplorer")) {
+        w !, "Creating WEB application ""/UMLExplorer""..."
+        set tSC = ##class(Security.Applications).Create("/UMLExplorer", .cspProperties)
+        if $$$ISERR(tSC) throw ##class(%Installer.Exception).CreateFromStatus(tSC)
+        w !, "WEB application ""/UMLExplorer"" created."
+    } else {
+        w !, "WEB application ""/UMLExplorer"" already exists, so it is ready to use."
+    }
+    zn:ns'="%SYS" ns
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RemoveProjection">
+<Description>
+This method is invoked when a class is 'uncompiled'.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[cls:%String,&params,recompile:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set ns = $NAMESPACE
+    zn:ns'="%SYS" "%SYS"
+    if (##class(Security.Applications).Exists("/UMLExplorer")) {
+        w !, "Deleting WEB application ""/UMLExplorer""..."
+        do ##class(Security.Applications).Delete("/UMLExplorer")
+        w !, "WEB application ""/UMLExplorer"" was successfully removed."
+    }
+    zn:ns'="%SYS" ns
+    QUIT $$$OK
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Project name="UMLExplorer" LastModified="2015-05-24 18:07:22.008232">
   <Items>
     <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
     <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
+    <ProjectItem name="UMLExplorer.WebAppInstaller" type="CLS"></ProjectItem>
   </Items>
 </Project>
 
