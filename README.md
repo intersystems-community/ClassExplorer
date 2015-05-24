@@ -15,19 +15,23 @@ An UML Class explorer for InterSystems Caché.
 
 ## Installation
 
-To install Caché UML Explorer, you need to import UMLExplorer package to Caché and then set up a WEB-application.
+To install latests Caché UML Explorer, you just need to import UMLExplorer package. Download the
+archive from [latest releases](https://github.com/ZitRos/CacheUMLExplorer/releases), and then import
+<code>Cache/CacheUMLExplorer-vX.X.X.xml</code> file.
 
-###### Import classes to Caché
-To install Caché UML class explorer, download the [latest release](https://github.com/intersystems-ru/UMLExplorer/releases) or build project by yourself. Then import XML file inside <code>Cache</code> directory of archive or directory.
-
-###### Set up WEB application
-When you have imported and compiled <b>UMLExplorer package</b> in Caché, make sure the namespace is the same you have imported classes to. Then go to <code>system management portal -> administering -> security -> applications -> web applications</code> and create there a new web application. Fill the <code>name</code> field of it with <code>/UMLExplorer</code> (slash is required) and set the value of <code>dispatch class</code> to <code>UMLExplorer.Router</code>. Click save. Now your WEB application is ready.
-
-###### Use it
-Visit <code>[server domain and port]/UMLExplorer/</code> (with slash at end) to enter application.
+Note that importing UMLExplorer.WebAppInstaller class will also create a /UMLExplorer application.
+If you want to create WEB application manually, please, do not import this class. Anyway, <b>
+importing this class requires %SYS permission.</b>
+## Usage
+Visit <code>[server domain and port]/UMLExplorer/</code> (slash at end required) to enter
+application.
 
 ## Build
 
-To build project, you need [NodeJS](https://nodejs.org) platform to be installed. Then, clone source code and run <code>npm install</code> from the root of the project. This will install all necessary modules from NPM. Also run <code>npm install -g gulp</code> if you have no gulp builder in your modules.
+To build project, you need [NodeJS](https://nodejs.org) platform to be installed. Then, clone source
+code and run <code>npm install</code> from the root of the project. This will install all necessary
+modules from NPM. Also run <code>npm install -g gulp</code> if you have no gulp builder in your
+modules.
 
-After that and each next time just run <code>gulp</code> command from the project root. This will generate <code>build</code> directory, where you will found all what you need.
+After that and each next time just run <code>gulp</code> command from the project root. This will
+generate <code>build</code> directory, where you will found all what you need.
