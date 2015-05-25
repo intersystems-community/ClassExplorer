@@ -71,7 +71,7 @@ var enableSVGDownload = function (classView) {
             emptySvgDeclarationComputed = getComputedStyle(emptySvg),
             source = getSources(document, emptySvgDeclarationComputed)[0];
 
-        var filename = (classView || {}).SELECTED_CLASS_NAME || "classDiagram";
+        var filename = (classView || {}).SELECTED_NAME || "classDiagram";
 
         var img = new Image();
         var url = window.URL.createObjectURL(new Blob(source.source, { "type" : 'image/svg+xml;charset=utf-8'/*"text\/xml"*/ }));

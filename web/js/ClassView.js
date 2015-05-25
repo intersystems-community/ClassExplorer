@@ -78,15 +78,15 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.renderInfoGraphic = function () {
 
-    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME =
-        this.cacheUMLExplorer.elements.className.innerHTML =
-            "Welcome to Cach&eacute; UML explorer!";
+    this.cacheUMLExplorer.classTree.SELECTED_NAME =
+        this.cacheUMLExplorer.elements.className.textContent =
+            "Welcome to Caché UML explorer!";
 
-    location.hash = "help";
+    location.hash = "{\"type\":\"help\"}";
 
     this.showLoader();
     this.render({
-        basePackageName: "Welcome to Cach? UML explorer!",
+        basePackageName: "Welcome to Caché UML explorer!",
         classes: {
             "Shared object": {
                 super: "Super object",
@@ -480,13 +480,14 @@ ClassView.prototype.loadClass = function (className) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = className;
+    this.cacheUMLExplorer.classTree.SELECTED_NAME = className;
+    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "class";
     this.showLoader();
     this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
-            self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME);
+            self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_NAME);
             console.error.call(console, err);
         } else {
             self.render(data);
@@ -494,7 +495,7 @@ ClassView.prototype.loadClass = function (className) {
     });
 
     this.cacheUMLExplorer.elements.className.textContent = className;
-    location.hash = "class:" + className;
+    this.cacheUMLExplorer.updateURL();
 
 };
 
@@ -502,7 +503,8 @@ ClassView.prototype.loadPackage = function (packageName) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_CLASS_NAME = packageName;
+    this.cacheUMLExplorer.classTree.SELECTED_NAME = packageName;
+    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "package";
     this.showLoader();
     this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
         //console.log(data);
@@ -516,7 +518,7 @@ ClassView.prototype.loadPackage = function (packageName) {
     });
 
     this.cacheUMLExplorer.elements.className.textContent = packageName;
-    location.hash = "package:" + packageName;
+    this.cacheUMLExplorer.updateURL();
 
 };
 
