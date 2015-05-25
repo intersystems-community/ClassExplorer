@@ -11,11 +11,11 @@ An UML Class explorer for InterSystems Caché.
 
 ## Screenshots
 
-![Demo](https://cloud.githubusercontent.com/assets/4989256/7642972/f2c3e33c-fa9d-11e4-90b4-d35c809c9e60.png)
+![Demo](https://cloud.githubusercontent.com/assets/4989256/7799624/f0255216-0310-11e5-8783-06300fc6d957.png)
 
 ## Installation
 
-To install latests Caché UML Explorer, you just need to import UMLExplorer package. Download the
+To install latest Caché UML Explorer, you just need to import UMLExplorer package. Download the
 archive from [latest releases](https://github.com/ZitRos/CacheUMLExplorer/releases), and then import
 <code>Cache/CacheUMLExplorer-vX.X.X.xml</code> file.
 

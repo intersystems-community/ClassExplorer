@@ -84,6 +84,14 @@
     box-shadow: 0 0 5px 2px #ffcc1b;
 }
 
+.icon.select {
+    width: auto;
+    color: white;
+    border: 0;
+    vertical-align: top;
+    padding-left: 3px;
+}
+
 .icon.help:after {
     content: "?";
     position: absolute;

@@ -1,7 +1,9 @@
-var Source = function () {
+var Source = function (cacheUMLExplorer) {
 
     this.URL = window.location.protocol + "//" + window.location.hostname + ":" +
         57773/*build.replace:window.location.port*/ + "/UMLExplorer";
+
+    this.cue = cacheUMLExplorer;
 
 };
 
@@ -11,7 +13,22 @@ var Source = function () {
  */
 Source.prototype.getClassTree = function (callback) {
 
-    lib.load(this.URL + "/GetClassTree", null, callback);
+    lib.load(
+        this.URL + "/GetClassTree"
+            + (this.cue.NAMESPACE ? "?namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
+        null,
+        callback
+    );
+
+};
+
+/**
+ * Return namespaces & current namespace.
+ * @param {Source~dataCallback} callback
+ */
+Source.prototype.getNamespacesInfo = function (callback) {
+
+    lib.load(this.URL + "/GetAllNamespacesList", null, callback);
 
 };
 
@@ -25,7 +42,8 @@ Source.prototype.getMethod = function (className, methodName, callback) {
 
     lib.load(
         this.URL + "/GetMethod?className=" + encodeURIComponent(className) + "&methodName="
-            + encodeURIComponent(methodName),
+            + encodeURIComponent(methodName)
+            + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
         null,
         callback);
 
@@ -38,7 +56,11 @@ Source.prototype.getMethod = function (className, methodName, callback) {
  */
 Source.prototype.getClassView = function (className, callback) {
 
-    lib.load(this.URL + "/GetClassView?name=" + encodeURIComponent(className), null, callback);
+    lib.load(
+        this.URL + "/GetClassView?name=" + encodeURIComponent(className)
+            + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
+        null,
+        callback);
 
 };
 
@@ -49,7 +71,12 @@ Source.prototype.getClassView = function (className, callback) {
  */
 Source.prototype.getPackageView = function (packageName, callback) {
 
-    lib.load(this.URL + "/GetPackageView?name=" + encodeURIComponent(packageName), null, callback);
+    lib.load(
+        this.URL + "/GetPackageView?name=" + encodeURIComponent(packageName)
+            + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
+        null,
+        callback
+    );
 
 };
 

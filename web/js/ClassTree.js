@@ -9,7 +9,8 @@ var ClassTree = function (parent, treeViewContainer) {
     this.cacheUMLExplorer = parent;
     this.container = treeViewContainer;
     this.loader = null;
-    this.SELECTED_CLASS_NAME = null;
+    this.SELECTED_NAME = null;
+    this.SELECTED_TYPE = null; // "class" || "package"
     this.SELECTED_ELEMENT = null;
 
 };
@@ -33,8 +34,6 @@ ClassTree.prototype.removeLoader = function () {
 };
 
 ClassTree.prototype.classSelected = function (element, className) {
-
-    this.SELECTED_CLASS_NAME = className;
 
     if (element !== this.SELECTED_ELEMENT) {
         if (this.SELECTED_ELEMENT) this.SELECTED_ELEMENT.classList.remove("selected");
@@ -66,8 +65,11 @@ ClassTree.prototype.updateTree = function (treeObject) {
 
     var self = this,
         div = function () { return document.createElement("div");},
-        selectedClassElement = this.SELECTED_CLASS_NAME ? this.SELECTED_CLASS_NAME.split(".") : [],
+        selectedClassElement = this.SELECTED_NAME ? this.SELECTED_NAME.split(".") : [],
         sce = 0; // selectedClassElement level index
+
+    this.removeLoader();
+    this.container.textContent = "";
 
     var packageClick = function (e) {
 
@@ -156,7 +158,5 @@ ClassTree.prototype.updateTree = function (treeObject) {
     };
 
     build(this.container, treeObject, [], 0);
-
-    this.removeLoader();
 
 };
