@@ -350,7 +350,7 @@ Returns structured package data</Description>
 <Description>
 REST interface for UMLExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63697,59148.775813</TimeChanged>
+<TimeChanged>63697,73073.878177</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -376,7 +376,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "ou")
+    do ##class(UMLExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -389,7 +389,7 @@ Returns classTree by given class name</Description>
 <Implementation><![CDATA[
     set className = %request.Get("name")
     set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"))
-    do classData.%ToJSON(, "ou")
+    do classData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -402,7 +402,7 @@ Returns all package class trees by given package name</Description>
 <Implementation><![CDATA[
     set packageName = %request.Get("name")
     set classData = ##class(ClassView).getPackageView(packageName, %request.Get("namespace"))
-    do classData.%ToJSON(, "ou")
+    do classData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -413,7 +413,7 @@ Return the list of all namespaces</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getAllNamespacesList().%ToJSON(, "ou")
+    do ##class(UMLExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -427,7 +427,7 @@ Returns method description and code</Description>
     set className = %request.Get("className")
     set methodName = %request.Get("methodName")
     set methodData = ##class(ClassView).getMethod(className, methodName, %request.Get("namespace"))
-    do methodData.%ToJSON(, "ou")
+    do methodData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
