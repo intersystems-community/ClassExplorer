@@ -6,7 +6,7 @@ An UML Class explorer for InterSystems Caché.
 + Build diagrams for any package or subpackage;
 + Edit diagrams after build;
 + Export diagrams as an image;
-+ View class methods code;
++ View class methods code with syntax highlighting;
 + Zoom in and out, explore big packages and more.
 
 ## Screenshots
