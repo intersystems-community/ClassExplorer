@@ -340,7 +340,7 @@ ClassView.prototype.showMethodCode = function (className, methodName) {
             + (data["arguments"] || "").replace(/,/g, ", ").replace(/:/g, ": ") + ")"
             + (data["returns"] ? ": " + data["returns"] : "");
         els.methodDescription.innerHTML = data["description"] || "";
-        els.methodCode.textContent = data["code"] || "";
+        els.methodCode.innerHTML = lib.highlightCOS(data["code"] || "");
         els.methodViewBounds.style.height =
             els.classView.offsetHeight - els.methodViewBounds.offsetTop + "px";
         els.methodCodeView.classList.add("active");

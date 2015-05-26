@@ -49,6 +49,103 @@ Lib.prototype.capitalize = function (string) {
     return string[0].toUpperCase() + string.substr(1);
 };
 
+Lib.prototype.keyWords = {
+    "break": 0,
+    "catch": 0,
+    "close": 0,
+    "continue": 0,
+    "do": 0,
+    "d": 0,
+    "else": 0,
+    "elseif": 0,
+    "for": 0,
+    "goto": 0,
+    "halt": 0,
+    "hang": 0,
+    "h": 0,
+    "if": 0,
+    "job": 0,
+    "j": 0,
+    "kill": 0,
+    "k": 0,
+    "lock": 0,
+    "l": 0,
+    "merge": 0,
+    "new": 0,
+    "open": 0,
+    "quit": 0,
+    "q": 0,
+    "read": 0,
+    "r": 0,
+    "return": 0,
+    "set": 0,
+    "s": 0,
+    "tcommit": 0,
+    "throw": 0,
+    "trollback": 0,
+    "try": 0,
+    "tstart": 0,
+    "use": 0,
+    "view": 0,
+    "while": 0,
+    "write": 0,
+    "w": 0,
+    "xecute": 0,
+    "x": 0,
+    "zkill": 0,
+    "znspace": 0,
+    "zn": 0,
+    "ztrap": 0,
+    "zwrite": 0,
+    "zw": 0,
+    "zzdump": 0,
+    "zzwrite": 0,
+    "print": 0,
+    "zbreak": 0,
+    "zinsert": 0,
+    "zload": 0,
+    "zprint": 0,
+    "zremove": 0,
+    "zsave": 0,
+    "zzprint": 0,
+    "mv": 0,
+    "mvcall": 0,
+    "mvcrt": 0,
+    "mvdim": 0,
+    "mvprint": 0,
+    "zquit": 0,
+    "zsync": 0,
+    "ascii": 0
+};
+
+/**
+ * Highlight Caché Object Script code.
+ * @param {string} code
+ */
+Lib.prototype.highlightCOS = function (code) {
+    var self = this;
+    return code.replace(/[<>&]/g, function (r) {
+            return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
+        }).replace(/(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
+            var i = -1, c;
+            [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
+                i++;
+                return e === undefined;
+            });
+            switch (i) {
+                case 0: c = "comment"; break;
+                case 1: c = "string"; break;
+                case 2: c = "vars"; break;
+                case 3: c = "names"; break;
+                case 4: c = "functions"; break;
+                case 5: c = self.keyWords.hasOwnProperty(part.toLowerCase()) ? "keyword" : "word"; break;
+                case 6: c = "comment"; break;
+                default: c = "other"
+            }
+            return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });
+        });
+};
+
 /**
  * Contains graphic base64s for the application.
  */

@@ -1,0 +1,27 @@
+.syntax-comment {
+    color: green;
+}
+
+.syntax-string {
+    color: #394;
+}
+
+.syntax-vars, .syntax-keyword {
+    color: #00b;
+}
+
+.syntax-names {
+    color: #299;
+}
+
+.syntax-functions {
+    color: #986;
+}
+
+.syntax-global {
+    color: #800;
+}
+
+.syntax-other {
+    color: red;
+}
