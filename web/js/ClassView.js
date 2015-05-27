@@ -359,7 +359,9 @@ ClassView.prototype.render = function (data) {
     var self = this,
         number = lib.countProperties(data["classes"]);
 
-    if (number < 30) return this.confirmRender(data);
+    if (number < 30) {
+        return self.confirmRender(data);
+    }
 
     var c = document.createElement("div"),
         c1 = document.createElement("h3"),
@@ -414,6 +416,11 @@ ClassView.prototype.confirmRender = function (data) {
     var self = this, p, pp, className,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
+
+    // Reset view and zoom again because it may cause visual damage to icons.
+    // Don't ask me why. Just believe we need this peace of code.
+    this.zoom(null);
+    this.resetView();
 
     if (!data["classes"]) {
         console.error("Wrong data: no 'classes' property.", data);
