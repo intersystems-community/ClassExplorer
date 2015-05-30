@@ -20,6 +20,24 @@ var ClassTree = function (parent, treeViewContainer) {
         self.searchChanged.call(self, (e.target || e.srcElement).value);
     });
 
+    window.addEventListener("resize", function () {
+        self.updateSizes();
+    });
+
+    this.updateSizes();
+
+};
+
+ClassTree.prototype.updateSizes = function () {
+
+    var dh = this.cacheUMLExplorer.elements.searchBlock.clientHeight,
+        h = window.innerHeight - dh,
+        b = this.cacheUMLExplorer.elements.treeViewContainer;
+
+    b.style.paddingTop = 0;
+    b.style.marginTop = dh + "px";
+    b.style.height = h + "px";
+
 };
 
 ClassTree.prototype.showLoader = function () {

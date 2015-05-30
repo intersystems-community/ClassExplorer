@@ -3,7 +3,6 @@
     display: block;
     font-size: 16px;
     height: 100%;
-    border-right: 1px solid lightgray;
     overflow: auto;
     box-sizing: border-box;
     padding-top: 24px;
