@@ -15,13 +15,13 @@ html, body {
 .ui-sideBlock {
     position: relative;
     float: left;
-    width: 250px;
+    width: 200px;
     height: 100%;
 }
 
 .ui-mainBlock {
     position: relative;
-    margin-left: 250px;
+    margin-left: 200px;
     height: 100%;
 }
 
