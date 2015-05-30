@@ -5,6 +5,26 @@
     height: 100%;
     border-right: 1px solid lightgray;
     overflow: auto;
+    box-sizing: border-box;
+    padding-top: 24px;
+}
+
+.ui-sideSearchBlock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.ui-sideSearchBlock > input {
+    display: block;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    border-radius: 5px;
+    width: 196px;
+    margin: 1px 1px 1px 2px;
+    height: 22px;
 }
 
 .tv-package-name.minimized + .tv-package-content {

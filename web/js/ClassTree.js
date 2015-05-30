@@ -6,12 +6,19 @@
  */
 var ClassTree = function (parent, treeViewContainer) {
 
+    var self = this;
+
     this.cacheUMLExplorer = parent;
     this.container = treeViewContainer;
     this.loader = null;
     this.SELECTED_NAME = null;
     this.SELECTED_TYPE = null; // "class" || "package"
     this.SELECTED_ELEMENT = null;
+    this.treeObject = null;
+
+    this.cacheUMLExplorer.elements.classTreeSearch.addEventListener("input", function (e) {
+        self.searchChanged.call(self, (e.target || e.srcElement).value);
+    });
 
 };
 
@@ -19,6 +26,8 @@ ClassTree.prototype.showLoader = function () {
 
     if (this.loader) return;
 
+    this.cacheUMLExplorer.elements.classTreeSearch.value = "";
+    this.treeObject = null;
     this.loader = document.createElement("div");
     this.loader.className = "spinner";
     this.container.appendChild(this.loader);
@@ -28,6 +37,8 @@ ClassTree.prototype.showLoader = function () {
 ClassTree.prototype.removeLoader = function () {
 
     if (!this.loader) return;
+
+    this.cacheUMLExplorer.elements.classTreeSearch.value = "";
     this.loader.parentNode.removeChild(this.loader);
     this.loader = null;
 
@@ -61,7 +72,36 @@ ClassTree.prototype.packageSelected = function (element, packageName) {
 
 };
 
-ClassTree.prototype.updateTree = function (treeObject) {
+ClassTree.prototype.searchChanged = function (query) {
+
+    var o = this.treeObject;
+
+    if (!o) return;
+    query = query.toLowerCase();
+
+    var searchClone = function (o, copyFlag) {
+        var i, matches = 0, lm, t, clone = {}, cpf;
+        for (i in o) {
+            lm = 0; cpf = false;
+            if (i.toLowerCase().indexOf(query) !== -1) { lm += 1; matches++; cpf = true; }
+            if (typeof o[i] === "object") {
+                lm += (t = searchClone(o[i], cpf)).matches;
+                matches += t.matches;
+            } else t = { obj: o[i] };
+            if (copyFlag || lm !== 0) clone[i] = t.obj;
+        }
+        return { matches: matches, obj: clone };
+    };
+
+    this.updateTree(searchClone(o).obj || {}, true);
+
+};
+
+/**
+ * @param treeObject
+ * @param {boolean} [doNotChangeRoot] - Determines to restrict assign of this.treeObject.
+ */
+ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
 
     var self = this,
         div = function () { return document.createElement("div");},
@@ -158,5 +198,7 @@ ClassTree.prototype.updateTree = function (treeObject) {
     };
 
     build(this.container, treeObject, [], 0);
+
+    if (!doNotChangeRoot) this.treeObject = treeObject;
 
 };

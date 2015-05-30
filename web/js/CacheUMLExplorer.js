@@ -28,7 +28,8 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         svgContainer: id("svgContainer"),
         methodDescription: id("methodDescription"),
         methodViewBounds: id("methodViewBounds"),
-        namespaces: id("namespaces")
+        namespaces: id("namespaces"),
+        classTreeSearch: id("classTreeSearch")
     };
 
     this.UI = new UI(this);
