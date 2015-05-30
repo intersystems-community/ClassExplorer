@@ -17,6 +17,7 @@ html, body {
     float: left;
     width: 200px;
     height: 100%;
+    box-shadow: 0 0 0 1px lightgray;
 }
 
 .ui-mainBlock {
