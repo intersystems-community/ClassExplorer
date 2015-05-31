@@ -21,7 +21,26 @@ var ClassView = function (parent, container) {
     this.CLASS_DOC_PATH = "/csp/documatic/%25CSP.Documatic.cls";
     this.SYMBOL_12_WIDTH = 6.6;
 
+    this.HIGHLIGHTED_VIEW = null;
+    this.SEARCH_INDEX = 0;
+
     this.init();
+
+};
+
+ClassView.prototype.highlightElement = function (jointElement) {
+
+    if (this.HIGHLIGHTED_VIEW || (!jointElement && this.HIGHLIGHTED_VIEW)) {
+        this.HIGHLIGHTED_VIEW.unhighlight();
+        this.HIGHLIGHTED_VIEW = null;
+    }
+
+    if (!jointElement) return;
+    var view = this.paper.findViewByModel(jointElement);
+    if (!view) return;
+
+    view.highlight();
+    this.HIGHLIGHTED_VIEW = view;
 
 };
 
@@ -60,6 +79,9 @@ ClassView.prototype.resetView = function () {
     this.objects = [];
     this.paper.setOrigin(0, 0);
     this.graph.clear();
+    this.HIGHLIGHTED_VIEW = null;
+    this.SEARCH_INDEX = 0;
+    this.cacheUMLExplorer.elements.diagramSearch.value = "";
 
 };
 
@@ -268,6 +290,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
     var classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
+        keyWordsArray = [name],
         self = this;
 
     var classInstance = new joint.shapes.uml.Class({
@@ -283,6 +306,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         params: (function (params) {
             var arr = [], n;
             for (n in params) {
+                keyWordsArray.push(n);
                 arr.push({
                     text: n + (params[n]["type"] ? ": " + params[n]["type"] : "")
                 });
@@ -292,6 +316,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         attributes: (function (ps) {
             var arr = [], n;
             for (n in ps) {
+                keyWordsArray.push(n);
                 arr.push({
                     text: n + (ps[n]["type"] ? ": " + ps[n]["type"] : ""),
                     icons: self.getMethodIcons(ps[n])
@@ -302,6 +327,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         methods: (function (met) {
             var arr = [], n;
             for (n in met) {
+                keyWordsArray.push(n);
                 arr.push({
                     text: n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
                     styles: (function (t) {
@@ -319,6 +345,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
+    classInstance.SEARCH_KEYWORDS = keyWordsArray.join(",").toLowerCase();
     this.objects.push(classInstance);
     this.graph.addCell(classInstance);
 
@@ -562,6 +589,69 @@ ClassView.prototype.zoom = function (delta) {
 
 };
 
+/**
+ * Focus on joint instance.
+ * @param jointInstance
+ */
+ClassView.prototype.focusOnInstance = function (jointInstance) {
+
+    var bb = jointInstance.getBBox();
+
+    this.focusOnXY(bb.x + bb.width/2, bb.y + bb.height/2);
+
+};
+
+/**
+ * Focus on x and y coordinates considering scale.
+ * @param {number} x
+ * @param {number} y
+ */
+ClassView.prototype.focusOnXY = function (x, y) {
+
+    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+        scale = this.PAPER_SCALE;
+
+    this.paper.setOrigin(
+        -(x * scale) + sw/2,
+        -(y * scale) + sh/2
+    );
+
+};
+
+/**
+ * Find text on diagram and focus on element.
+ *
+ * @param {string} text
+ */
+ClassView.prototype.searchOnDiagram = function (text) {
+
+    var p, found = [], o;
+
+    if (!text) {
+        this.highlightElement(null);
+        return;
+    }
+
+    text = text.toLowerCase();
+
+    for (p in this.objects) {
+        if (this.objects[p].SEARCH_KEYWORDS.indexOf(text) !== -1) {
+            found.push(this.objects[p]);
+        }
+    }
+
+    if (found.length) {
+        o = found[this.SEARCH_INDEX % found.length];
+        this.focusOnInstance(o);
+        this.highlightElement(o);
+        return;
+    }
+
+    this.highlightElement(null);
+
+};
+
 ClassView.prototype.init = function () {
 
     var p, self = this,
@@ -634,6 +724,19 @@ ClassView.prototype.init = function () {
     });
     this.cacheUMLExplorer.elements.helpButton.addEventListener("click", function () {
         self.renderInfoGraphic();
+    });
+    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("input", function (e) {
+        self.searchOnDiagram((e.target || e.srcElement).value);
+    });
+    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("keydown", function (e) {
+        if (e.keyCode === 13) {
+            self.SEARCH_INDEX++;
+            self.searchOnDiagram((e.target || e.srcElement).value);
+        }
+    });
+    this.cacheUMLExplorer.elements.diagramSearchButton.addEventListener("click", function () {
+        self.SEARCH_INDEX++;
+        self.searchOnDiagram(self.cacheUMLExplorer.elements.diagramSearch.value);
     });
 
     this.SYMBOL_12_WIDTH = (function () {

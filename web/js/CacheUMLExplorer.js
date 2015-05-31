@@ -11,6 +11,7 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
     var id = function (e) { return document.getElementById(e); };
 
     this.elements = {
+        favicon: id("favicon"),
         uiBody: id("ui-body"),
         className: id("className"),
         treeViewContainer: treeViewContainer,
@@ -30,7 +31,9 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         methodViewBounds: id("methodViewBounds"),
         namespaces: id("namespaces"),
         classTreeSearch: id("classTreeSearch"),
-        searchBlock: id("searchBlock")
+        searchBlock: id("searchBlock"),
+        diagramSearch: id("diagramSearch"),
+        diagramSearchButton: id("button.diagramSearch")
     };
 
     this.UI = new UI(this);
@@ -118,6 +121,8 @@ CacheUMLExplorer.prototype.init = function () {
 
     var self = this,
         restored;
+
+    this.elements.favicon.href = lib.image.binoculars;
 
     restored = this.restoreFromURL();
     this.classTree.showLoader();

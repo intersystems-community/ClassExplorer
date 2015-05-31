@@ -84,6 +84,35 @@
     box-shadow: 0 0 5px 2px #ffcc1b;
 }
 
+.icon.search:after {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 6px;
+    height: 6px;
+    left: 4px;
+    top: 4px;
+    border: 3px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+}
+
+.icon.search:before {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 14px;
+    top: 12px;
+    width: 3px;
+    height: 7px;
+    background: #fff;
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
 .icon.select {
     width: auto;
     color: white;
