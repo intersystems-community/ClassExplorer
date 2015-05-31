@@ -30,7 +30,9 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         methodViewBounds: id("methodViewBounds"),
         namespaces: id("namespaces"),
         classTreeSearch: id("classTreeSearch"),
-        searchBlock: id("searchBlock")
+        searchBlock: id("searchBlock"),
+        diagramSearch: id("diagramSearch"),
+        diagramSearchButton: id("button.diagramSearch")
     };
 
     this.UI = new UI(this);

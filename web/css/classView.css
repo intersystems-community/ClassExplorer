@@ -83,3 +83,22 @@ text {
 .line-clickable:hover {
     fill: red;
 }
+
+.inlineSearchBlock {
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+#diagramSearch {
+    display: block;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    border-radius: 5px;
+    width: 200px;
+    margin: 4px 0 4px 4px;
+    height: 22px;
+}
+
+.element.highlighted {
+    outline: 4px solid rgba(255, 0, 0, 0.6);
+}
