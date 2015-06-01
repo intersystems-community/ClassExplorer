@@ -133,11 +133,9 @@ gulp.task("exportCacheXML", [
 });
 
 gulp.task("zipRelease", ["exportCacheXML"], function () {
-    return gulp.src("build/**/*")
+    return gulp.src(["build/**/*", "!build/web/**/*"])
         .pipe(zip("CacheUMLExplorer-v" + pkg["version"] + ".zip", {
-            comment: "Cach? UML explorer v" + pkg["version"] + " by Nikita Savchenko\n\n" +
-            "+ WEBModule folder holds packed JS/CSS files to integrate CacheUMLExplorer to any WEB " +
-            "application;\n" +
+            comment: "Cache UML explorer v" + pkg["version"] + " by Nikita Savchenko\n\n" +
             "+ Cache folder holds XML file to import to InterSystems Cache.\n\n" +
             "For further information about installation and information, check README.md file."
         }))
