@@ -16,7 +16,7 @@ var enableSVGDownload = function (classView) {
     function getSources(doc, emptySvgDeclarationComputed) {
 
         var svgInfo = [],
-            svgs = doc.querySelectorAll("svg");
+            svgs = doc.querySelectorAll("#svgContainer > svg");
 
         [].forEach.call(svgs, function (svg) {
 
@@ -67,17 +67,15 @@ var enableSVGDownload = function (classView) {
 
     document.getElementById("button.downloadSVG").addEventListener("click", function () {
 
-        var emptySvg = window.document.createElementNS(prefix.svg, 'svg'),
-            emptySvgDeclarationComputed = getComputedStyle(emptySvg),
-            source = getSources(document, emptySvgDeclarationComputed)[0];
-
+        var emptySvg = document.createElementNS(prefix.svg, 'svg');
+        document.body.appendChild(emptySvg);
+        var emptySvgDeclarationComputed = getComputedStyle(emptySvg);
+        var source = getSources(document, emptySvgDeclarationComputed)[0];
         var filename = (classView || {}).SELECTED_NAME || "classDiagram";
-
         var img = new Image();
-        var url = window.URL.createObjectURL(new Blob(source.source, { "type" : 'image/svg+xml;charset=utf-8'/*"text\/xml"*/ }));
-
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
+        var url = window.URL.createObjectURL(new Blob(source.source, { "type" : 'image/svg+xml;charset=utf-8' }));
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
         canvas.setAttribute("width", source.width);
         canvas.setAttribute("height", source.height);
         document.body.appendChild(canvas);
@@ -92,6 +90,7 @@ var enableSVGDownload = function (classView) {
             a.click();
             setTimeout(function () {
                 a.parentNode.removeChild(a);
+                document.body.removeChild(emptySvg);
                 canvas.parentNode.removeChild(canvas);
                 window.URL.revokeObjectURL(url);
             }, 10);
@@ -110,6 +109,10 @@ var enableSVGDownload = function (classView) {
             for (i=0, len=cSSStyleDeclarationComputed.length; i<len; i++) {
                 key=cSSStyleDeclarationComputed[i];
                 value=cSSStyleDeclarationComputed.getPropertyValue(key);
+
+                // weird fix for weird bug in chrome: css rewrites w/h tag attributes!
+                if (value === "auto" && (key === "width" || key === "height")) continue;
+
                 if (value!==emptySvgDeclarationComputed.getPropertyValue(key)) {
                     computedStyleStr+=key+":"+value+";";
                 }
