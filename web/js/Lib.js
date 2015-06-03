@@ -42,6 +42,16 @@ Lib.prototype.countProperties = function (object) {
 };
 
 /**
+ * Convert array to associative array.
+ * @param {Array} array
+ */
+Lib.prototype.obj = function (array) {
+    var o = {}, p;
+    for (p in array) { o[array[p]] = true; }
+    return o;
+};
+
+/**
  * Make first letter of string uppercase.
  * @param {string} string
  */
@@ -126,20 +136,21 @@ Lib.prototype.highlightCOS = function (code) {
     var self = this;
     return code.replace(/[<>&]/g, function (r) {
             return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
-        }).replace(/(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
+        }).replace(/(&[lgtamp]{2,3};)|(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
             var i = -1, c;
             [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
                 i++;
                 return e === undefined;
             });
             switch (i) {
-                case 0: c = "comment"; break;
-                case 1: c = "string"; break;
-                case 2: c = "vars"; break;
-                case 3: c = "names"; break;
-                case 4: c = "functions"; break;
-                case 5: c = self.keyWords.hasOwnProperty(part.toLowerCase()) ? "keyword" : "word"; break;
-                case 6: c = "comment"; break;
+                case 0: return part; break; // skip some html entities
+                case 1: c = "comment"; break;
+                case 2: c = "string"; break;
+                case 3: c = "vars"; break;
+                case 4: c = "names"; break;
+                case 5: c = "functions"; break;
+                case 6: c = self.keyWords.hasOwnProperty(part.toLowerCase()) ? "keyword" : "word"; break;
+                case 7: c = "comment"; break;
                 default: c = "other"
             }
             return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });

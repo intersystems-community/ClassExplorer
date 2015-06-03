@@ -112,6 +112,7 @@ ClassView.prototype.renderInfoGraphic = function () {
         classes: {
             "Shared object": {
                 super: "Super object",
+                classType: "Serial",
                 parameters: {
                     "Also inherit Super object": {}
                 },
@@ -189,11 +190,15 @@ ClassView.prototype.renderInfoGraphic = function () {
                 }
             },
             "Super object": {
+                classType: "Persistent",
                 methods: {},
                 properties: {},
-                parameters: {}
+                parameters: {
+                    "(This class is %Persistent)": {}
+                }
             },
             "HELP": {
+                classType: "Registered",
                 parameters: {
                     "See the basics here!": {}
                 }
@@ -217,19 +222,72 @@ ClassView.prototype.renderInfoGraphic = function () {
 };
 
 /**
+ * Filter some inherits.
+ *
+ * @param data
+ */
+ClassView.prototype.filterInherits = function (data) {
+
+    if (!data || !data.inheritance) return;
+
+    var p1, p2, filter = {
+        "%Library.Persistent": true,
+        "%Persistent": true,
+        "%Library.SerialObject": true,
+        "%SerialObject": true,
+        "%Library.RegisteredObject": true,
+        "%RegisteredObject": true,
+        "%Library.DataType": true,
+        "%DataType": true
+    };
+
+    for (p1 in data.inheritance) { // classes
+        for (p2 in data.inheritance[p1]) { // inherits
+            if (filter.hasOwnProperty(p2)) delete data.inheritance[p1][p2];
+        }
+    }
+
+    for (p1 in data.classes) {
+        if (filter.hasOwnProperty(p1)) delete data.classes[p1];
+    }
+
+};
+
+/**
  * Returns array of signs to render or empry array.
  *
  * @param classMetaData
  */
-ClassView.prototype.getClassSigns = function (classMetaData) {
+ClassView.prototype.getClassSignsAndType = function (classMetaData) {
 
-    var signs = [];
+    var signs = [], sup = lib.obj((classMetaData["super"] || "").split(",")), ct, CT = "NORMAL";
 
-    if (classMetaData["classType"]) signs.push({
-        icon: lib.image.greenPill,
-        text: lib.capitalize(classMetaData["classType"]),
-        textStyle: "fill:rgb(130,0,255)"
-    });
+    if (classMetaData["classType"] || sup) {
+        ct = classMetaData["classType"];
+        if (sup.hasOwnProperty("%Library.Persistent") || sup.hasOwnProperty("%Persistent")) {
+            ct = "Persistent";
+        }
+        if (sup.hasOwnProperty("%Library.SerialObject") || sup.hasOwnProperty("%SerialObject")) {
+            ct = "Serial";
+        }
+        if (
+                sup.hasOwnProperty("%Library.RegisteredObject")
+                || sup.hasOwnProperty("%RegisteredObject")
+            ) {
+            ct = "Registered";
+        }
+        if (sup.hasOwnProperty("%Library.DataType") || sup.hasOwnProperty("%DataType")) {
+            ct = "Datatype";
+        }
+        if (ct) {
+            CT = ct;
+            signs.push({
+                icon: lib.image.greenPill,
+                text: lib.capitalize(ct),
+                textStyle: "fill:rgb(130,0,255)"
+            });
+        }
+    }
     if (classMetaData["ABSTRACT"]) signs.push({
         icon: lib.image.crystalBall,
         text: "Abstract",
@@ -253,7 +311,7 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
         text: "Hidden"
     });
 
-    return signs;
+    return { signs: signs, classType: CT };
 
 };
 
@@ -291,6 +349,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
         keyWordsArray = [name],
+        signsAndType,
         self = this;
 
     var classInstance = new joint.shapes.uml.Class({
@@ -341,7 +400,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classMethods),
-        classSigns: this.getClassSigns(classMetaData),
+        classSigns: (signsAndType = this.getClassSignsAndType(classMetaData)).signs,
+        classType: signsAndType.classType,
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
@@ -443,6 +503,8 @@ ClassView.prototype.confirmRender = function (data) {
     var self = this, p, pp, className,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
+
+    this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
     // Don't ask me why. Just believe we need this peace of code.
