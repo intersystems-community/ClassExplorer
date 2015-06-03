@@ -21,7 +21,7 @@ To install latest Caché UML Explorer, you just need to import UMLExplorer packa
 archive from [latest releases](https://github.com/ZitRos/CacheUMLExplorer/releases), and then import
 <code>Cache/CacheUMLExplorer-vX.X.X.xml</code> file.
 
-###### Web applicationgulp
+###### Web application
 Note that importing UMLExplorer.WebAppInstaller class will also create a /UMLExplorer application.
 If you want to create WEB application manually, please, do not import this class. Anyway, <b>
 importing this class requires %SYS permission.</b>
