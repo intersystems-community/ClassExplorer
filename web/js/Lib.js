@@ -42,6 +42,16 @@ Lib.prototype.countProperties = function (object) {
 };
 
 /**
+ * Convert array to associative array.
+ * @param {Array} array
+ */
+Lib.prototype.obj = function (array) {
+    var o = {}, p;
+    for (p in array) { o[array[p]] = true; }
+    return o;
+};
+
+/**
  * Make first letter of string uppercase.
  * @param {string} string
  */

@@ -42,7 +42,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         attrs: {
             rect: { 'width': 0 },
 
-            '.uml-class-name-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#3498db' },
+            '.uml-class-name-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': 'rgb(177, 205, 255)' },
             '.uml-class-params-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': 'white' },
             '.uml-class-attrs-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
             '.uml-class-methods-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
@@ -94,8 +94,22 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             ],
             self = this,
             classSigns = this.get('classSigns'),
+            CLASS_TYPE = this.get('classType'),
             SYMBOL_12_WIDTH = this.get('SYMBOL_12_WIDTH') || 6.6,
             i, j, blockWidth, left = 3, top = 3, w, positions = [], sign;
+
+        // set color head according to class type
+        var headColor;
+        switch (CLASS_TYPE) {
+            case "Persistent": headColor = "rgb(255,219,170)"; break; // light orange
+            case "Serial": headColor = "rgb(252,255,149)"; break; // light yellow
+            case "Registered": headColor = "rgb(192,255,170)"; break; // light green
+            case "Datatype": headColor = "rgb(193,250,255)"; break; // light blue
+            case "Stream": headColor = "rgb(246,188,255)"; break; // light magenta
+            case "View": headColor = "rgb(255,188,188)"; break; // light red
+            case "Index": headColor = "rgb(228,228,228)"; break; // light gray
+        }
+        if (headColor) this.attributes.attrs[".uml-class-name-rect"].fill = headColor;
 
         var subLabelWidth = function (sign) { // object
             return sign.text.length * SYMBOL_12_WIDTH + (sign.icon ? 13 : 0)

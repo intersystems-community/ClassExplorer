@@ -16,7 +16,7 @@ svg {
 }
 
 .uml-class-name-rect {
-    fill: lightgray;
+    /*fill: lightgray;*/
 }
 
 .uml-class-attrs-rect, .uml-class-methods-rect {
@@ -57,7 +57,7 @@ text {
 .uml-class-attrs-label {
     font-family: monospace;
     font-weight: 900;
-    fill: orange;
+    fill: rgb(255, 97, 0);
 }
 
 .uml-class-methods-label {
