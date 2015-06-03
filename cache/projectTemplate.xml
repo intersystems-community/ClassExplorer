@@ -4,7 +4,7 @@
 <Description>
 Cache UML Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63697,66596.619226</TimeChanged>
+<TimeChanged>63706,86042.410811</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -102,6 +102,7 @@ Return structured data about class.</Description>
     set oClass.HIDDEN = classDefinition.Hidden
     set oClass.classType = classDefinition.ClassType
     set oClass.serverOnly = classDefinition.ServerOnly // -
+    set oClass.isDataType = classDefinition.ClientDataTypeIsDefined()
 
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
 

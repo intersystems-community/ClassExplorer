@@ -19,6 +19,7 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         zoomInButton: id("button.zoomIn"),
         zoomOutButton: id("button.zoomOut"),
         zoomNormalButton: id("button.zoomNormal"),
+        showSettingsButton: id("button.showSettings"),
         helpButton: id("button.showHelp"),
         infoButton: id("button.showInfo"),
         methodCodeView: id("methodCodeView"),
@@ -33,7 +34,18 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         classTreeSearch: id("classTreeSearch"),
         searchBlock: id("searchBlock"),
         diagramSearch: id("diagramSearch"),
-        diagramSearchButton: id("button.diagramSearch")
+        diagramSearchButton: id("button.diagramSearch"),
+        settingsView: id("settingsView"),
+        closeSettings: id("closeSettings"),
+        settings: {
+            showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram")
+        }
+    };
+
+    this.settings = {
+        showDataTypesOnDiagram:
+            localStorage.getItem("showDataTypesOnDiagram") === null ? false :
+                localStorage.getItem("showDataTypesOnDiagram") === "true"
     };
 
     this.UI = new UI(this);
@@ -42,7 +54,22 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
     this.classView = new ClassView(this, classViewContainer);
     this.NAMESPACE = null;
 
+    this.initSettings();
     this.init();
+
+};
+
+CacheUMLExplorer.prototype.initSettings = function () {
+
+    var self = this;
+
+    this.elements.settings.showDataTypesOnDiagram.checked = this.settings.showDataTypesOnDiagram;
+    this.elements.settings.showDataTypesOnDiagram.addEventListener("change", function (e) {
+        localStorage.setItem(
+            "showDataTypesOnDiagram",
+            self.settings.showDataTypesOnDiagram = (e.target || e.srcElement).checked
+        );
+    });
 
 };
 
@@ -152,6 +179,12 @@ CacheUMLExplorer.prototype.init = function () {
         if (ns !== self.NAMESPACE) {
             self.setNamespace(ns);
         }
+    });
+    this.elements.showSettingsButton.addEventListener("click", function () {
+        self.elements.settingsView.classList.add("active");
+    });
+    this.elements.closeSettings.addEventListener("click", function () {
+        self.elements.settingsView.classList.remove("active");
     });
 
     enableSVGDownload(this.classTree);
