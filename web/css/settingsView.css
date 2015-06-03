@@ -1,0 +1,28 @@
+#settingsView {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    height: 0;
+    background: rgba(245, 245, 245, 0.95);
+    z-index: 10;
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
+#settingsView.active {
+    box-shadow: 0 0 5px black;
+    height: 100%;
+}
+
+#settingsView > div.head {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    padding: 1em;
+    z-index: 2;
+    text-align: right;
+}

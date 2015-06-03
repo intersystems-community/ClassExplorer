@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/classView.css"/>
     <link rel="stylesheet" href="css/joint.min.css"/>
     <link rel="stylesheet" href="css/methodCodeView.css"/>
+    <link rel="stylesheet" href="css/settingsView.css"/>
     <!-- endbuild -->
     <!-- build:js -->
     <script type="text/javascript" src="jsLib/joint.js"></script>
@@ -43,6 +44,7 @@
             <div class="ui-topRightToolBar">
                 <div id="button.showInfo" class="icon info"></div>
                 <div id="button.showHelp" class="icon help"></div>
+                <div id="button.showSettings" class="icon gear"></div>
                 <select id="namespaces" class="icon select">
                     <option value="Loading..." selected>Loading...</option>
                 </select>
@@ -76,6 +78,24 @@
                 </div>
                 <div id="svgContainer">
 
+                </div>
+            </div>
+        </div>
+        <div id="settingsView">
+            <div class="head">
+                <div id="closeSettings" class="icon cross"></div>
+            </div>
+            <div class="central">
+                <div>
+                    <div>
+                        <h1>
+                            Settings
+                        </h1>
+                        <label>
+                            <input id="setting.showDataTypesOnDiagram" type="checkbox"/>
+                            Show data types on diagram
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>

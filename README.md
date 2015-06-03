@@ -13,7 +13,7 @@ An UML Class explorer for InterSystems Caché.
 
 ## Screenshots
 
-![Demo](https://cloud.githubusercontent.com/assets/4989256/7968221/00d348b0-0a38-11e5-81af-89c547655c12.png)
+![Demo](https://cloud.githubusercontent.com/assets/4989256/7972419/ec9ef408-0a54-11e5-96a1-8ef70e24a168.png)
 
 ## Installation
 
@@ -21,7 +21,7 @@ To install latest Caché UML Explorer, you just need to import UMLExplorer packa
 archive from [latest releases](https://github.com/ZitRos/CacheUMLExplorer/releases), and then import
 <code>Cache/CacheUMLExplorer-vX.X.X.xml</code> file.
 
-###### Web application
+###### Web applicationgulp
 Note that importing UMLExplorer.WebAppInstaller class will also create a /UMLExplorer application.
 If you want to create WEB application manually, please, do not import this class. Anyway, <b>
 importing this class requires %SYS permission.</b>

@@ -230,7 +230,7 @@ ClassView.prototype.filterInherits = function (data) {
 
     if (!data || !data.inheritance) return;
 
-    var p1, p2, filter = {
+    var p1, p2, toFilter = ["inheritance", "composition", "aggregation"], filter = {
         "%Library.Persistent": true,
         "%Persistent": true,
         "%Library.SerialObject": true,
@@ -241,14 +241,24 @@ ClassView.prototype.filterInherits = function (data) {
         "%DataType": true
     };
 
-    for (p1 in data.inheritance) { // classes
-        for (p2 in data.inheritance[p1]) { // inherits
-            if (filter.hasOwnProperty(p2)) delete data.inheritance[p1][p2];
+    var f = function (p) {
+        return filter.hasOwnProperty(p) || (data.classes[p] || {})["isDataType"] ||
+            lib.obj(((data.classes[p] || {}).super || "").split(",")).hasOwnProperty("%DataType");
+    };
+
+    if (this.cacheUMLExplorer.settings.showDataTypesOnDiagram)
+        return;
+
+    toFilter.forEach(function (p) {
+        for (p1 in data[p]) { // classes
+            for (p2 in data[p][p1]) { // inherits
+                if (f(p2)) delete data[p][p1][p2];
+            }
         }
-    }
+    });
 
     for (p1 in data.classes) {
-        if (filter.hasOwnProperty(p1)) delete data.classes[p1];
+        if (f(p1)) delete data.classes[p1];
     }
 
 };
