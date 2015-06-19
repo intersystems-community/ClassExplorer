@@ -493,6 +493,17 @@ Method returns user application HTML.</Description>
     return $$$OK
 ]]></Implementation>
 </Method>
+
+<Method name="Http304">
+<Description>
+Issue an "304 Not Modified" status</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set %response.Status="304 Not Modified"
+    Quit $$$OK
+]]></Implementation>
+</Method>
 </Class>
 
 
