@@ -439,9 +439,17 @@ Method returns user application CSS.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	#define CompileTime ##Expression("""" _ $zd($h, 11) _ ", "_ $zdt($NOW(0), 2,1) _ " GMT""")
     set %response.CharSet = "utf-8"
     set %response.ContentType = "text/css"
-    do ##class(StaticContent).Write("CSS")
+    do %response.SetHeader("Last-Modified", $$$CompileTime)
+   
+    if %request.GetCgiEnv("HTTP_IF_MODIFIED_SINCE")=$$$CompileTime {
+	    do ..Http304()
+    } else {
+	    do ##class(StaticContent).Write("CSS")
+    }
+    
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -452,9 +460,17 @@ Method returns user application JavaScript.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	#define CompileTime ##Expression("""" _ $zd($h, 11) _ ", "_ $zdt($NOW(0), 2,1) _ " GMT""")
     set %response.CharSet = "utf-8"
     set %response.ContentType = "text/javascript"
-    do ##class(StaticContent).Write("JS")
+    do %response.SetHeader("Last-Modified", $$$CompileTime)
+    
+    if %request.GetCgiEnv("HTTP_IF_MODIFIED_SINCE")=$$$CompileTime {
+	    do ..Http304()
+    } else {
+	    do ##class(StaticContent).Write("JS")
+    }
+    
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -465,7 +481,15 @@ Method returns user application HTML.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(StaticContent).Write("HTML")
+	#define CompileTime ##Expression("""" _ $zd($h, 11) _ ", "_ $zdt($NOW(0), 2,1) _ " GMT""")
+	do %response.SetHeader("Last-Modified", $$$CompileTime)
+        
+    if %request.GetCgiEnv("HTTP_IF_MODIFIED_SINCE")=$$$CompileTime {
+	    do ..Http304()
+    } else {
+	    do ##class(StaticContent).Write("HTML")
+    }
+    
     return $$$OK
 ]]></Implementation>
 </Method>
