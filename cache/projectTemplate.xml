@@ -473,6 +473,9 @@ Method returns user application HTML.</Description>
 
 
 <Class name="UMLExplorer.StaticContent">
+<Description>
+Cache UML Explorer vX.X.X/*build.replace:pkg.version*/ static content generator.
+Class contains methods that return JS/CSS/HTML data for single page application.</Description>
 <TimeChanged>63670,71368.846177</TimeChanged>
 <TimeCreated>63663,71456.865723</TimeCreated>
 
