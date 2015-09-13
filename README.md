@@ -1,4 +1,4 @@
-# CacheUMLExplorer
+# Cache UML Explorer
 An UML Class explorer for InterSystems Caché.
 
 ##### Key features

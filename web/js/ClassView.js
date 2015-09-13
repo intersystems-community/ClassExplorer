@@ -10,6 +10,7 @@ var ClassView = function (parent, container) {
     this.graph = null;
     this.paper = null;
     this.loader = null;
+    this.logic = new Logic(parent);
 
     this.links = [];
     this.objects = [];
@@ -156,7 +157,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                         zenMethod: 1
                     },
                     "Method": {
-                        returns: "%Return type"
+                        returns: "%ReturnType"
                     }
                 },
                 parameters: {
@@ -181,7 +182,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                     },
                     "Other object": {
                         private: 0,
-                        type: "Shared object"
+                        type: "Any other object"
                     },
                     "Another object": {
                         private: 1,
@@ -198,18 +199,55 @@ ClassView.prototype.renderInfoGraphic = function () {
                 }
             },
             "HELP": {
-                classType: "Registered",
                 parameters: {
                     "See the basics here!": {}
+                }
+            },
+            "Registered class": {
+                $classType: "Registered"
+            },
+            "Persistent class (one)": {
+                $classType: "Persistent"
+            },
+            "Serial class": {
+                $classType: "Serial"
+            },
+            "DataType class (many)": {
+                $classType: "DataType"
+            },
+            "Associated object": {
+                properties: {
+                    "Association": {
+                        type: "Class name"
+                    }
+                }
+            }
+        },
+        association: {
+            "Registered class": {
+                "Serial class": {}
+            },
+            "Serial class": {
+                "Persistent class (one)": {}
+            },
+            "DataType class (many)": {
+                "Registered class": {}
+            }
+        },
+        aggregation: {
+            "Persistent class (one)": {
+                "DataType class (many)": {
+                    left: "*",
+                    right: 1
                 }
             }
         },
         composition: {},
-        aggregation: {
-            "Class name": {
-                "Shared object": "1..1"
-            }
-        },
+        //aggregation: {
+        //    "Class name": {
+        //        "Shared object": "1..1"
+        //    }
+        //},
         inheritance: {
             "Class name": { "Super object": 1 },
             "Shared object": { "Super object": 1 }
@@ -241,6 +279,37 @@ ClassView.prototype.filterInherits = function (data) {
         "%DataType": true
     };
 
+    // inheritance: { "ClassName": { "IHCN": 1, ... }, ... }
+    // inherit isDataType & classType if not set for inherited classes
+    //var rec = function (className) {
+    //    if (!(cls = data.classes[className])) return { isDataType: null, classType: null };
+    //    var c, res = { isDataType: cls.isDataType || null, classType: cls.classType || null}, resi, cls;
+    //    if (className === "%DeepSee.ListingTable") console.log("-------", res);
+    //    if (data.inheritance[className]) {
+    //        for (c in data.inheritance[className]) {
+    //            resi = undefined;
+    //            if (data.classes[c]) {
+    //                if (data.classes[c].isDataType) resi = {
+    //                    isDataType: data.classes[c].isDataType,
+    //                    classType: data.classes[c].classType || null
+    //                }; else if (data.classes[c].classType) {
+    //                    res.classType = data.classes[c].classType;
+    //                }
+    //            }
+    //            if (!resi) resi = rec(c);
+    //            if (className === "Aviation.Cubes.Aircraft.Listing") console.log(c, resi);
+    //            if (res.isDataType === null) { res.isDataType = resi.isDataType; }
+    //            if (res.classType === null) { res.classType = resi.classType; }
+    //        }
+    //    }
+    //    if (res.isDataType !== null && !cls.isDataType) { cls.isDataType = res.isDataType; }
+    //    if (res.classType !== null && !cls.classType) { cls.classType = res.classType; }
+    //    return res;
+    //};
+    //for (p1 in data.classes) {
+    //    rec(p1);
+    //}
+
     var f = function (p) {
         return filter.hasOwnProperty(p) || (data.classes[p] || {})["isDataType"] ||
             lib.obj(((data.classes[p] || {}).super || "").split(",")).hasOwnProperty("%DataType");
@@ -268,32 +337,42 @@ ClassView.prototype.filterInherits = function (data) {
  *
  * @param classMetaData
  */
-ClassView.prototype.getClassSignsAndType = function (classMetaData) {
+ClassView.prototype.getClassSigns = function (classMetaData) {
 
-    var signs = [], sup = lib.obj((classMetaData["super"] || "").split(",")), ct, CT = "NORMAL";
+    var signs = [], ct;
 
-    if (classMetaData["classType"] || sup) {
-        ct = classMetaData["classType"];
-        if (sup.hasOwnProperty("%Library.Persistent") || sup.hasOwnProperty("%Persistent")) {
-            ct = "Persistent";
-        }
-        if (sup.hasOwnProperty("%Library.SerialObject") || sup.hasOwnProperty("%SerialObject")) {
-            ct = "Serial";
-        }
-        if (
-                sup.hasOwnProperty("%Library.RegisteredObject")
-                || sup.hasOwnProperty("%RegisteredObject")
-            ) {
-            ct = "Registered";
-        }
-        if (sup.hasOwnProperty("%Library.DataType") || sup.hasOwnProperty("%DataType")) {
-            ct = "Datatype";
-        }
-        if (ct) {
-            CT = ct;
+    // todo: preprocess class type before diagram load
+    //if (classMetaData["classType"] || sup) {
+    //    ct = classMetaData["classType"];
+    //    if (sup.hasOwnProperty("%Library.Persistent") || sup.hasOwnProperty("%Persistent")) {
+    //        ct = "Persistent";
+    //    }
+    //    if (sup.hasOwnProperty("%Library.SerialObject") || sup.hasOwnProperty("%SerialObject")) {
+    //        ct = "Serial";
+    //    }
+    //    if (
+    //            sup.hasOwnProperty("%Library.RegisteredObject")
+    //            || sup.hasOwnProperty("%RegisteredObject")
+    //        ) {
+    //        ct = "Registered";
+    //    }
+    //    if (sup.hasOwnProperty("%Library.DataType") || sup.hasOwnProperty("%DataType")) {
+    //        ct = "Datatype";
+    //    }
+    //    if (ct) {
+    //        CT = ct;
+    //        signs.push({
+    //            icon: lib.image.greenPill,
+    //            text: lib.capitalize(ct),
+    //            textStyle: "fill:rgb(130,0,255)"
+    //        });
+    //    }
+    //}
+    if (ct = classMetaData["$classType"]) {
+        if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
             signs.push({
                 icon: lib.image.greenPill,
-                text: lib.capitalize(ct),
+                text: ct,
                 textStyle: "fill:rgb(130,0,255)"
             });
         }
@@ -321,7 +400,7 @@ ClassView.prototype.getClassSignsAndType = function (classMetaData) {
         text: "Hidden"
     });
 
-    return { signs: signs, classType: CT };
+    return signs;
 
 };
 
@@ -359,7 +438,6 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
         keyWordsArray = [name],
-        signsAndType,
         self = this;
 
     var classInstance = new joint.shapes.uml.Class({
@@ -410,8 +488,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classMethods),
-        classSigns: (signsAndType = this.getClassSignsAndType(classMetaData)).signs,
-        classType: signsAndType.classType,
+        classSigns: this.getClassSigns(classMetaData),
+        classType: classMetaData.$classType,
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
@@ -455,6 +533,8 @@ ClassView.prototype.render = function (data) {
 
     var self = this,
         number = lib.countProperties(data["classes"]);
+
+    this.logic.process(data);
 
     if (number < 30) {
         return self.confirmRender(data);
@@ -534,7 +614,8 @@ ClassView.prototype.confirmRender = function (data) {
 
     var link = function (type) {
         var name = type === "inheritance" ? "Generalization" :
-                type === "aggregation" ? "Aggregation" : "Composition";
+                type === "aggregation" ? "Aggregation" : type === "composition" ? "Composition"
+                : "Association";
         for (p in data[type]) {
             relFrom = (classes[p] || {}).instance;
             for (pp in data[type][p]) {
@@ -549,7 +630,28 @@ ClassView.prototype.confirmRender = function (data) {
                         source: { id: type === "inheritance" ? relFrom.id : relTo.id },
                         target: { id: type === "inheritance" ? relTo.id : relFrom.id },
                         router: { name: "manhattan" },
-                        connector: { name: "rounded" }
+                        connector: { name: "rounded" },
+                        labels: (function (link) {
+                            var arr = [],
+                                getLabel = function (label, pos) {
+                                    return {
+                                        position: pos,
+                                        attrs: {
+                                            text: {
+                                                text: label,
+                                                    fill: 'black',
+                                                    "font-size": "10pt"
+                                            },
+                                            rect: {
+                                                fill: "whitesmoke"
+                                            }
+                                        }
+                                    }
+                                };
+                            if (link.left) arr.push(getLabel(link.left, 10));
+                            if (link.right) arr.push(getLabel(link.right, -10));
+                            return arr;
+                        })(data[type][p][pp] || {})
                     }));
                     self.links.push(connector);
                 }
@@ -560,6 +662,7 @@ ClassView.prototype.confirmRender = function (data) {
     link("inheritance");
     link("composition");
     link("aggregation");
+    link("association");
 
     joint.layout.DirectedGraph.layout(this.graph, {
         setLinkVertices: false,

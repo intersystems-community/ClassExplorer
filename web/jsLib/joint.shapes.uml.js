@@ -104,7 +104,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             case "Persistent": headColor = "rgb(255,219,170)"; break; // light orange
             case "Serial": headColor = "rgb(252,255,149)"; break; // light yellow
             case "Registered": headColor = "rgb(192,255,170)"; break; // light green
-            case "Datatype": headColor = "rgb(193,250,255)"; break; // light blue
+            case "DataType": headColor = "rgb(193,250,255)"; break; // light blue
             case "Stream": headColor = "rgb(246,188,255)"; break; // light magenta
             case "View": headColor = "rgb(255,188,188)"; break; // light red
             case "Index": headColor = "rgb(228,228,228)"; break; // light gray
@@ -317,7 +317,17 @@ joint.shapes.uml.Composition = joint.dia.Link.extend({
 });
 
 joint.shapes.uml.Association = joint.dia.Link.extend({
-    defaults: { type: 'uml.Association' }
+    defaults: {
+        type: 'uml.Association',
+        attrs: {
+            '.marker-target': {
+                d: 'M 15 0 L 0 8 L 15 15',
+                fill: 'none',
+                'stroke-dasharray': '3,3'
+            },
+            '.connection': { 'stroke-dasharray': '3,3' }
+        }
+    }
 });
 
 // Statechart

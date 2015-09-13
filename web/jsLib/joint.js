@@ -17137,26 +17137,26 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
         text: function(content, opt) {
 
-	    opt = opt || {};
-            var lines = content/*.split('\n')*/;
-	    var i = 0;
+	    	opt = opt || {};
+            var lines = typeof content === "string" ? content.split('\n').map(function (t) { return { text: t }; }) : content;
+	    	var i = 0;
             var tspan;
 
             // `alignment-baseline` does not work in Firefox.
-	    // Setting `dominant-baseline` on the `<text>` element doesn't work in IE9.
+	    	// Setting `dominant-baseline` on the `<text>` element doesn't work in IE9.
             // In order to have the 0,0 coordinate of the `<text>` element (or the first `<tspan>`)
-	    // in the top left corner we translate the `<text>` element by `0.8em`.
-	    // See `http://www.w3.org/Graphics/SVG/WG/wiki/How_to_determine_dominant_baseline`.
-	    // See also `http://apike.ca/prog_svg_text_style.html`.
-	    this.attr('y', opt.paddingTop || '0.8em');
+			// in the top left corner we translate the `<text>` element by `0.8em`.
+			// See `http://www.w3.org/Graphics/SVG/WG/wiki/How_to_determine_dominant_baseline`.
+			// See also `http://apike.ca/prog_svg_text_style.html`.
+			this.attr('y', opt.paddingTop || '0.8em');
 
             // An empty text gets rendered into the DOM in webkit-based browsers.
             // In order to unify this behaviour across all browsers
             // we rather hide the text element when it's empty.
             this.attr('display', content ? null : 'none');
 
-	    // Preserve spaces. In other words, we do not want consecutive spaces to get collapsed to one.
-	    this.node.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
+			// Preserve spaces. In other words, we do not want consecutive spaces to get collapsed to one.
+			this.node.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
 
             // Easy way to erase all `<tspan>` children;
             this.node.textContent = '';
