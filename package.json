@@ -1,6 +1,10 @@
 {
   "name": "CacheUMLExplorer",
+<<<<<<< HEAD
   "version": "1.0.0",
+=======
+  "version": "0.15.1",
+>>>>>>> 59d55bd711e05c45ac628bff99372683be3b7378
   "description": "An UML Class explorer for InterSystems Caché",
   "directories": {
     "test": "test"
