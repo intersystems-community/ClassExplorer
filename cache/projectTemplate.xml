@@ -94,7 +94,6 @@ Return structured data about class.</Description>
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
     set oProperties = ##class(%ZEN.proxyObject).%New()
 
-    set oClass.super = ..correctInheritance(oData, classDefinition, package)
     set oClass.NAMESPACE = $NAMESPACE
     set oClass.SYSTEM = classDefinition.System
     set oClass.PROCEDUREBLOCK = classDefinition.ProcedureBlock
@@ -106,6 +105,7 @@ Return structured data about class.</Description>
     set oClass.isDataType = classDefinition.ClientDataTypeIsDefined()
 
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
+    set oClass.super = ..correctInheritance(oData, classDefinition, package)
 
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()

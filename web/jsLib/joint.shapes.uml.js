@@ -103,7 +103,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         switch (CLASS_TYPE) {
             case "Persistent": headColor = "rgb(255,219,170)"; break; // light orange
             case "Serial": headColor = "rgb(252,255,149)"; break; // light yellow
-            case "Registered": headColor = "rgb(192,255,170)"; break; // light green
+            //case "Registered": headColor = "rgb(192,255,170)"; break; // light green
             case "DataType": headColor = "rgb(193,250,255)"; break; // light blue
             case "Stream": headColor = "rgb(246,188,255)"; break; // light magenta
             case "View": headColor = "rgb(255,188,188)"; break; // light red
