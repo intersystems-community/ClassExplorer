@@ -13,7 +13,7 @@ An UML Class explorer for InterSystems Caché.
 
 ## Screenshots
 
-![Demo](https://cloud.githubusercontent.com/assets/4989256/7972419/ec9ef408-0a54-11e5-96a1-8ef70e24a168.png)
+![Demo](https://cloud.githubusercontent.com/assets/4989256/9852547/890543f8-5b07-11e5-9dc3-a539e33b2058.png)
 
 ## Installation
 
