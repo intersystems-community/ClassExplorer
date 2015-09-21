@@ -26,3 +26,7 @@
     z-index: 2;
     text-align: right;
 }
+
+#settingsView table td {
+    text-align: left;
+}

@@ -321,11 +321,10 @@ joint.shapes.uml.Association = joint.dia.Link.extend({
         type: 'uml.Association',
         attrs: {
             '.marker-target': {
-                d: 'M 15 0 L 0 8 L 15 15',
-                fill: 'none',
-                'stroke-dasharray': '3,3'
+                d: 'M 15 0 L 0 7.5 L 15 15 M 0 7.5 L 15 7.5',
+                fill: 'none'
             },
-            '.connection': { 'stroke-dasharray': '3,3' }
+            '.connection': { stroke: "gray" }
         }
     }
 });
