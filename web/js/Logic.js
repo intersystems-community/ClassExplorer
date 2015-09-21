@@ -1,6 +1,6 @@
 var Logic = function (parent) {
 
-    this.cacheUMLExplorer = parent;
+    this.umlExplorer = parent;
 
 };
 
@@ -13,8 +13,6 @@ Logic.prototype.process = function (data) {
 
     var self = this,
         cls, clsName;
-
-    console.log("before", JSON.parse(JSON.stringify(data)));
 
     this.data = data;
 
@@ -34,12 +32,17 @@ Logic.prototype.process = function (data) {
     if (!this.data.inheritance) this.data.inheritance = {};
     for (clsName in data.classes) {
         cls = data.classes[clsName];
-        if (cls.super) cls.super.split(",").forEach(function (name) { self.inherits(clsName, name); });
+        if (cls.super) cls.super.split(",").forEach(function (name) {
+            self.inherits(clsName, name);
+        });
+        if (cls.parameters && !this.umlExplorer.settings.showParameters) delete cls.parameters;
+        if (cls.properties && !this.umlExplorer.settings.showProperties) delete cls.properties;
+        if (cls.methods && !this.umlExplorer.settings.showMethods) delete cls.methods;
     }
 
     this.alignClassTypes(); // call after inheritance scheme done
 
-    if (!this.cacheUMLExplorer.settings.showDataTypesOnDiagram) {
+    if (!this.umlExplorer.settings.showDataTypesOnDiagram) {
         for (clsName in data.classes) {
             if (/%Library\..*/.test(clsName)) delete data.classes[clsName];
         }
@@ -55,8 +58,6 @@ Logic.prototype.process = function (data) {
     delete data.classes["%RegisteredObject"];
     delete data.classes["%Library.DataType"];
     delete data.classes["%DataType"];
-
-    console.log("after", JSON.parse(JSON.stringify(data)));
 
 };
 

@@ -38,14 +38,24 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         settingsView: id("settingsView"),
         closeSettings: id("closeSettings"),
         settings: {
-            showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram")
+            showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
+            showParameters: id("setting.showParameters"),
+            showProperties: id("setting.showProperties"),
+            showMethods: id("setting.showMethods")
         }
     };
 
+    var settingsValue = function (name, defaultVal) {
+        return localStorage.getItem(name) === null ? (defaultVal || false)
+            : localStorage.getItem(name) === "true"
+    };
+
+    // note: this.elements is required to be modified with the same name as settings keys
     this.settings = {
-        showDataTypesOnDiagram:
-            localStorage.getItem("showDataTypesOnDiagram") === null ? false :
-                localStorage.getItem("showDataTypesOnDiagram") === "true"
+        showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
+        showParameters: settingsValue("showParameters", true),
+        showProperties: settingsValue("showProperties", true),
+        showMethods: settingsValue("showMethods", true)
     };
 
     this.UI = new UI(this);
@@ -63,13 +73,17 @@ CacheUMLExplorer.prototype.initSettings = function () {
 
     var self = this;
 
-    this.elements.settings.showDataTypesOnDiagram.checked = this.settings.showDataTypesOnDiagram;
-    this.elements.settings.showDataTypesOnDiagram.addEventListener("change", function (e) {
-        localStorage.setItem(
-            "showDataTypesOnDiagram",
-            self.settings.showDataTypesOnDiagram = (e.target || e.srcElement).checked
-        );
-    });
+    for (var st in this.elements.settings) {
+        this.elements.settings[st].checked = this.settings[st];
+        this.elements.settings[st].addEventListener("change", (function (st) {
+            return function (e) {
+                localStorage.setItem(
+                    st,
+                    self.settings[st] = (e.target || e.srcElement).checked
+                );
+            };
+        })(st));
+    }
 
 };
 
