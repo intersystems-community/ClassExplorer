@@ -4,7 +4,7 @@
 <Description>
 Cache UML Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63808,84964.699928</TimeChanged>
+<TimeChanged>63830,81286.756889</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -93,6 +93,7 @@ Return structured data about class.</Description>
     do oData.classes.%DispatchSetProperty(classDefinition.Name, oClass) // prevent from recursive setup
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
     set oProperties = ##class(%ZEN.proxyObject).%New()
+    set oQueries = ##class(%ZEN.proxyObject).%New()
 
     set oClass.NAMESPACE = $NAMESPACE
     set oClass.SYSTEM = classDefinition.System
@@ -109,55 +110,65 @@ Return structured data about class.</Description>
 
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.PropertyDefinition")
     for i=1:1:count {
         set oProp = ##class(%ZEN.proxyObject).%New()
         set p = classDefinition.Properties.GetAt(i)
         do oProperties.%DispatchSetProperty(p.Name, oProp)
-        set oProp.private = p.Private
-        set oProp.readOnly = p.ReadOnly
-        set oProp.cardinality = p.Cardinality
-        set oProp.inverse = p.Inverse
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(p, pname)
+        }
         if (..classExists(package _ "." _ p.Type)) {
-            set oProp.type = package _ "." _ p.Type
+            set oProp.Type = package _ "." _ p.Type
             do ..fillClassData(oData, package _ "." _ p.Type)
         } elseif (..classExists(..extendClassFromType(p.Type))) {
-            set oProp.type = ..extendClassFromType(p.Type)
+            set oProp.Type = ..extendClassFromType(p.Type)
             do ..fillClassData(oData, ..extendClassFromType(p.Type))
         }  else {
-            set oProp.type = p.Type
+            set oProp.Type = ..extendClassFromType(p.Type)
         }
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
     set oClass.methods = oMethods
     set count = classDefinition.Methods.Count()
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.MethodDefinition")
     for i=1:1:count {
         set oMeth = ##class(%ZEN.proxyObject).%New()
         set met = classDefinition.Methods.GetAt(i)
         do oMethods.%DispatchSetProperty(met.Name, oMeth)
-        set oMeth.private = met.Private
-        set oMeth.returns = met.ReturnType
-        set oMeth.classMethod = met.ClassMethod
-        set oMeth.clientMethod = met.ClientMethod
-        set oMeth.final = met.Final
-        set oMeth.abstract = met.Abstract
-        set oMeth.language = met.Language
-        set oMeth.notInheritable = met.NotInheritable
-        set oMeth.serverOnly = met.ServerOnly
-        set oMeth.sqlProc = met.SqlProc
-        set oMeth.sqlName = met.SqlName
-        set oMeth.webMethod = met.WebMethod
-        set oMeth.zenMethod = met.ZenMethod
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:((pname '= "parent") && (pname '= "Implementation")) $PROPERTY(oMeth, pname) = $PROPERTY(met, pname)
+        }
     }
 
     set oParameters = ##class(%ZEN.proxyObject).%New()
     set oClass.parameters = oParameters
     set count = classDefinition.Parameters.Count()
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.ParameterDefinition")
     for i=1:1:count {
         set oPar = ##class(%ZEN.proxyObject).%New()
         set p = classDefinition.Parameters.GetAt(i)
-        set oPar.type = p.Type
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:(pname '= "parent") $PROPERTY(oPar, pname) = $PROPERTY(p, pname)
+        }
         do oParameters.%DispatchSetProperty(p.Name, oPar)
+    }
+
+    #dim q as %Dictionary.QueryDefinition
+    set oClass.queries = oQueries
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.QueryDefinition")
+    for i=1:1:classDefinition.Queries.Count() {
+        set oProp = ##class(%ZEN.proxyObject).%New()
+        set q = classDefinition.Queries.GetAt(i)
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(q, pname)
+        }
+        do oQueries.%DispatchSetProperty(q.Name, oProp)
     }
 
     do ..collectInheritance(oData, oClass.super)

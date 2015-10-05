@@ -19,7 +19,7 @@ svg {
     /*fill: lightgray;*/
 }
 
-.uml-class-attrs-rect, .uml-class-methods-rect {
+.uml-class-attrs-rect, .uml-class-methods-rect, .uml-class-queries-rect {
     fill: white;
 }
 
@@ -64,6 +64,12 @@ text {
     font-family: monospace;
     font-weight: 900;
     fill: blue;
+}
+
+.uml-class-queries-label {
+    font-family: monospace;
+    font-weight: 900;
+    fill: #0d0;
 }
 
 .uml-class-params-label {

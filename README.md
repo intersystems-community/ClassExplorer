@@ -1,4 +1,4 @@
-# Cache UML Explorer
+# Cache Class Explorer
 An UML Class explorer for InterSystems Caché.
 
 ##### Key features
@@ -6,6 +6,7 @@ An UML Class explorer for InterSystems Caché.
 + Build diagrams for any package or subpackage;
 + Edit diagrams after build;
 + Export diagrams as an image;
++ See Class methods, properties, parameters, SQL queries and more;
 + View class methods code with syntax highlighting;
 + Zoom in and out;
 + Search on diagram or in class tree;
