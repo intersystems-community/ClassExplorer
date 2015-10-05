@@ -237,8 +237,8 @@ ClassView.prototype.renderInfoGraphic = function () {
         aggregation: {
             "Persistent class (one)": {
                 "DataType class (many)": {
-                    left: "*",
-                    right: 1
+                    left: "many",
+                    right: "one"
                 }
             }
         },
@@ -409,19 +409,21 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
  *
  * @param method
  */
-ClassView.prototype.getMethodIcons = function (method) {
+ClassView.prototype.getPropertyIcons = function (method) {
 
     var icons = [];
 
-    icons.push({ src: lib.image[method["private"] ? "minus" : "plus"] });
-    if (method["abstract"]) icons.push({ src: lib.image.crystalBall });
-    if (method["clientMethod"]) icons.push({ src: lib.image.user });
-    if (method["final"]) icons.push({ src: lib.image.blueFlag });
-    if (method["notInheritable"]) icons.push({ src: lib.image.redFlag });
-    if (method["sqlProc"]) icons.push({ src: lib.image.table });
-    if (method["webMethod"]) icons.push({ src: lib.image.earth });
-    if (method["zenMethod"]) icons.push({ src: lib.image.zed });
-    if (method["readOnly"]) icons.push({ src: lib.image.eye });
+    if (typeof method["Private"] !== "undefined") {
+        icons.push({ src: lib.image[method["Private"] ? "minus" : "plus"] });
+    }
+    if (method["Abstract"]) icons.push({ src: lib.image.crystalBall });
+    if (method["ClientMethod"]) icons.push({ src: lib.image.user });
+    if (method["Final"]) icons.push({ src: lib.image.blueFlag });
+    if (method["NotInheritable"]) icons.push({ src: lib.image.redFlag });
+    if (method["SqlProc"]) icons.push({ src: lib.image.table });
+    if (method["WebMethod"]) icons.push({ src: lib.image.earth });
+    if (method["ZenMethod"]) icons.push({ src: lib.image.zed });
+    if (method["ReadOnly"]) icons.push({ src: lib.image.eye });
 
     return icons;
 
@@ -437,6 +439,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
     var classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
+        classQueries = classMetaData["queries"],
         keyWordsArray = [name],
         self = this;
 
@@ -455,7 +458,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in params) {
                 keyWordsArray.push(n);
                 arr.push({
-                    text: n + (params[n]["type"] ? ": " + params[n]["type"] : "")
+                    text: n + (params[n]["Type"] ? ": " + params[n]["Type"] : ""),
+                    icons: self.getPropertyIcons(params[n])
                 });
             }
             return arr;
@@ -465,8 +469,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in ps) {
                 keyWordsArray.push(n);
                 arr.push({
-                    text: n + (ps[n]["type"] ? ": " + ps[n]["type"] : ""),
-                    icons: self.getMethodIcons(ps[n])
+                    text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
+                    icons: self.getPropertyIcons(ps[n])
                 });
             }
             return arr;
@@ -476,18 +480,29 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in met) {
                 keyWordsArray.push(n);
                 arr.push({
-                    text: n + (met[n]["returns"] ? ": " + met[n]["returns"] : ""),
+                    text: n + (met[n]["ReturnType"] ? ": " + met[n]["ReturnType"] : ""),
                     styles: (function (t) {
                         return t ? { textDecoration: "underline" } : {}
                     })(met[n]["classMethod"]),
                     clickHandler: (function (n) {
                         return function () { self.showMethodCode(name, n); }
                     })(n),
-                    icons: self.getMethodIcons(met[n])
+                    icons: self.getPropertyIcons(met[n])
                 });
             }
             return arr;
         })(classMethods),
+        queries: (function (qrs) {
+            var arr = [], n;
+            for (n in qrs) {
+                keyWordsArray.push(n);
+                arr.push({
+                    text: n,
+                    icons: self.getPropertyIcons(qrs[n])
+                });
+            }
+            return arr;
+        })(classQueries),
         classSigns: this.getClassSigns(classMetaData),
         classType: classMetaData.$classType,
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
@@ -591,9 +606,11 @@ ClassView.prototype.render = function (data) {
 ClassView.prototype.confirmRender = function (data) {
 
     var self = this, p, pp, className,
+        LINK_TEXT_MARGIN = 22,
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
+    console.log(data);
     this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
@@ -648,8 +665,8 @@ ClassView.prototype.confirmRender = function (data) {
                                         }
                                     }
                                 };
-                            if (link.left) arr.push(getLabel(link.left, 10));
-                            if (link.right) arr.push(getLabel(link.right, -10));
+                            if (link.left) arr.push(getLabel(link.left, LINK_TEXT_MARGIN));
+                            if (link.right) arr.push(getLabel(link.right, -LINK_TEXT_MARGIN));
                             return arr;
                         })(data[type][p][pp] || {})
                     }));

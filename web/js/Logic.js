@@ -75,21 +75,21 @@ Logic.prototype.fillAssociations = function () {
         if (!properties) continue;
         for (propertyName in properties) {
             po = properties[propertyName];
-            if (po["cardinality"] === "one") {
-                if (!aggr[po.type]) aggr[po.type] = {};
-                aggr[po.type][className] = {
-                    left: "*",
-                    right: "1"
+            if (po["Cardinality"] === "one") {
+                if (!aggr[po["Type"]]) aggr[po["Type"]] = {};
+                aggr[po["Type"]][className] = {
+                    left: "many",
+                    right: "one"
                 };
-            } else if (po["cardinality"] === "parent") {
-                if (!compos[po.type]) compos[po.type] = {};
-                compos[po.type][className] = {
-                    left: "*",
-                    right: "1"
+            } else if (po["Cardinality"] === "parent") {
+                if (!compos[po["Type"]]) compos[po["Type"]] = {};
+                compos[po["Type"]][className] = {
+                    left: "child",
+                    right: "parent"
                 };
-            } else if (self.data.classes[po.type] && !po["cardinality"]) {
-                if (!assoc[po.type]) assoc[po.type] = {};
-                assoc[po.type][className] = {};
+            } else if (self.data.classes[po["Type"]] && !po["Cardinality"]) {
+                if (!assoc[po["Type"]]) assoc[po["Type"]] = {};
+                assoc[po["Type"]][className] = {};
             }
         }
     }

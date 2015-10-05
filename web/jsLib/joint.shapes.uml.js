@@ -22,11 +22,14 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             '<text class="uml-class-attrs-label">Properties</text>',
             '<rect class="uml-class-methods-rect"/>',
             '<text class="uml-class-methods-label">Methods</text>',
+            '<rect class="uml-class-queries-rect"/>',
+            '<text class="uml-class-queries-label">Queries</text>',
           '</g>',
           '<text class="uml-class-name-text"/>',
           '<text class="uml-class-params-text"/>',
           '<text class="uml-class-attrs-text"/>',
           '<text class="uml-class-methods-text"/>',
+          '<text class="uml-class-queries-text"/>',
         '</g>'
     ].join(''),
 
@@ -46,6 +49,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             '.uml-class-params-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': 'white' },
             '.uml-class-attrs-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
             '.uml-class-methods-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
+            '.uml-class-queries-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
 
             '.uml-class-name-text': {
                 'ref': '.uml-class-name-rect', 'ref-y': .5, 'ref-x': .5, 'text-anchor': 'middle', 'y-alignment': 'middle', 'font-weight': 'bold',
@@ -63,12 +67,19 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
                 'ref': '.uml-class-methods-rect', 'ref-y': 5, 'ref-x': 5,
                 'fill': 'black', 'font-size': 12
             },
+            '.uml-class-queries-text': {
+                'ref': '.uml-class-queries-rect', 'ref-y': 5, 'ref-x': 5,
+                'fill': 'black', 'font-size': 12
+            },
             '.uml-class-attrs-label': {
                 ref: '.uml-class-attrs-label', fill: "black", 'font-size': 10,
                 xPos: -56
             },
             '.uml-class-methods-label': {
                 ref: '.uml-class-methods-label', fill: "black", 'font-size': 10
+            },
+            '.uml-class-queries-label': {
+                ref: '.uml-class-queries-label', fill: "black", 'font-size': 10
             },
             '.uml-class-params-label': {
                 ref: '.uml-class-methods-label', fill: "black", 'font-size': 10
@@ -79,6 +90,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         params: [],
         attributes: [],
         methods: [],
+        queries: [],
         classSigns: []
 
     }, joint.shapes.basic.Generic.prototype.defaults),
@@ -90,7 +102,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
                 { type: 'name', text: this.getClassName() },
                 { type: 'params', text:  (o = this.get('params'))    , o: o },
                 { type: 'attrs', text:   (o = this.get('attributes')), o: o },
-                { type: 'methods', text: (o = this.get('methods'))   , o: o }
+                { type: 'methods', text: (o = this.get('methods'))   , o: o },
+                { type: 'queries', text: (o = this.get('queries'))   , o: o }
             ],
             self = this,
             classSigns = this.get('classSigns'),
@@ -185,7 +198,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             { type: 'name', text: this.getClassName() },
             { type: 'params', text: this.get('params') },
             { type: 'attrs', text: this.get('attributes') },
-            { type: 'methods', text: this.get('methods') }
+            { type: 'methods', text: this.get('methods') },
+            { type: 'queries', text: this.get('queries') }
         ];
 
         var offsetY = 0;
