@@ -1,0 +1,20 @@
+.hoverMessage {
+
+    box-sizing: border-box;
+    white-space: pre-line;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    border: 1px solid dimgray;
+    padding: .3em;
+
+}
+
+.hoverContainer {
+
+    position: fixed;
+    box-sizing: border-box;
+    left: 0;
+    top: 0;
+    padding: 20px;
+
+}

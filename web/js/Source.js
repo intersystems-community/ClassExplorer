@@ -1,7 +1,7 @@
 var Source = function (cacheUMLExplorer) {
 
     this.URL = window.location.protocol + "//" + window.location.hostname + ":" +
-        57773/*build.replace:window.location.port*/ + "/UMLExplorer";
+        57776/*build.replace:window.location.port*/ + "/UMLExplorer";
 
     this.cue = cacheUMLExplorer;
 
