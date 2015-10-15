@@ -17232,6 +17232,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
 					tspan.addClass('line-clickable');
 				}
+				if (typeof lines[i]["hover"] === "string") {
+					tspan.addClass('line-hoverable');
+					tspan.node.setAttribute("hovertext", lines[i]["hover"]);
+				}
 
 		// Make sure the textContent is never empty. If it is, add an additional 
 		// space (an invisible character) so that following lines are correctly

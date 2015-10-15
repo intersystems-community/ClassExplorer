@@ -498,7 +498,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n,
-                    icons: self.getPropertyIcons(qrs[n])
+                    icons: self.getPropertyIcons(qrs[n]),
+                    hover: qrs[n]["SqlQuery"]
                 });
             }
             return arr;
@@ -610,7 +611,7 @@ ClassView.prototype.confirmRender = function (data) {
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
-    console.log(data);
+    console.log(data); // todo
     this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
@@ -699,6 +700,8 @@ ClassView.prototype.confirmRender = function (data) {
         q.options.width/2 - bb.width/2,
         q.options.height/2 - Math.min(q.options.height/2 - 100, bb.height/2)
     );
+
+    this.onRendered();
 
 };
 
@@ -946,5 +949,19 @@ ClassView.prototype.init = function () {
         s.parentNode.removeChild(s);
         return w;
     })();
+
+};
+
+ClassView.prototype.onRendered = function () {
+
+    [].slice.call(document.querySelectorAll(".line-hoverable")).forEach(function (el) {
+        var hm = new HoverMessage(el.getAttribute("hovertext"));
+        el.addEventListener("mouseover", function (e) {
+            hm.attach(e.pageX || e.clientX, e.pageY || e.clientY);
+        });
+        //el.addEventListener("mouseout", function () {
+        //    hm.detach();
+        //});
+    });
 
 };
