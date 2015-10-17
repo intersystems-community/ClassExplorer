@@ -17230,9 +17230,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 				}
 				if (typeof lines[i]["clickHandler"] === "function") {
 					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
+					tspan.node["clickHandler"] = lines[i]["clickHandler"];
 					tspan.addClass('line-clickable');
 				}
-				if (typeof lines[i]["hover"] === "string") {
+				if (lines[i]["hover"] && typeof lines[i]["hover"] === "string") {
 					tspan.addClass('line-hoverable');
 					tspan.node.setAttribute("hovertext", lines[i]["hover"]);
 				}

@@ -279,37 +279,6 @@ ClassView.prototype.filterInherits = function (data) {
         "%DataType": true
     };
 
-    // inheritance: { "ClassName": { "IHCN": 1, ... }, ... }
-    // inherit isDataType & classType if not set for inherited classes
-    //var rec = function (className) {
-    //    if (!(cls = data.classes[className])) return { isDataType: null, classType: null };
-    //    var c, res = { isDataType: cls.isDataType || null, classType: cls.classType || null}, resi, cls;
-    //    if (className === "%DeepSee.ListingTable") console.log("-------", res);
-    //    if (data.inheritance[className]) {
-    //        for (c in data.inheritance[className]) {
-    //            resi = undefined;
-    //            if (data.classes[c]) {
-    //                if (data.classes[c].isDataType) resi = {
-    //                    isDataType: data.classes[c].isDataType,
-    //                    classType: data.classes[c].classType || null
-    //                }; else if (data.classes[c].classType) {
-    //                    res.classType = data.classes[c].classType;
-    //                }
-    //            }
-    //            if (!resi) resi = rec(c);
-    //            if (className === "Aviation.Cubes.Aircraft.Listing") console.log(c, resi);
-    //            if (res.isDataType === null) { res.isDataType = resi.isDataType; }
-    //            if (res.classType === null) { res.classType = resi.classType; }
-    //        }
-    //    }
-    //    if (res.isDataType !== null && !cls.isDataType) { cls.isDataType = res.isDataType; }
-    //    if (res.classType !== null && !cls.classType) { cls.classType = res.classType; }
-    //    return res;
-    //};
-    //for (p1 in data.classes) {
-    //    rec(p1);
-    //}
-
     var f = function (p) {
         return filter.hasOwnProperty(p) || (data.classes[p] || {})["isDataType"] ||
             lib.obj(((data.classes[p] || {}).super || "").split(",")).hasOwnProperty("%DataType");
@@ -341,33 +310,6 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 
     var signs = [], ct;
 
-    // todo: preprocess class type before diagram load
-    //if (classMetaData["classType"] || sup) {
-    //    ct = classMetaData["classType"];
-    //    if (sup.hasOwnProperty("%Library.Persistent") || sup.hasOwnProperty("%Persistent")) {
-    //        ct = "Persistent";
-    //    }
-    //    if (sup.hasOwnProperty("%Library.SerialObject") || sup.hasOwnProperty("%SerialObject")) {
-    //        ct = "Serial";
-    //    }
-    //    if (
-    //            sup.hasOwnProperty("%Library.RegisteredObject")
-    //            || sup.hasOwnProperty("%RegisteredObject")
-    //        ) {
-    //        ct = "Registered";
-    //    }
-    //    if (sup.hasOwnProperty("%Library.DataType") || sup.hasOwnProperty("%DataType")) {
-    //        ct = "Datatype";
-    //    }
-    //    if (ct) {
-    //        CT = ct;
-    //        signs.push({
-    //            icon: lib.image.greenPill,
-    //            text: lib.capitalize(ct),
-    //            textStyle: "fill:rgb(130,0,255)"
-    //        });
-    //    }
-    //}
     if (ct = classMetaData["$classType"]) {
         if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
             signs.push({
@@ -459,6 +401,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (params[n]["Type"] ? ": " + params[n]["Type"] : ""),
+                    hover: params[n]["Description"] || "",
                     icons: self.getPropertyIcons(params[n])
                 });
             }
@@ -470,6 +413,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
+                    hover: ps[n]["Description"] || "",
                     icons: self.getPropertyIcons(ps[n])
                 });
             }
@@ -487,6 +431,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                     clickHandler: (function (n) {
                         return function () { self.showMethodCode(name, n); }
                     })(n),
+                    hover: met[n]["Description"] || "",
                     icons: self.getPropertyIcons(met[n])
                 });
             }
@@ -499,7 +444,10 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 arr.push({
                     text: n,
                     icons: self.getPropertyIcons(qrs[n]),
-                    hover: qrs[n]["SqlQuery"]
+                    hover: qrs[n]["SqlQuery"],
+                    clickHandler: (function (q, className) {
+                        return function () { self.showQuery(className, q); }
+                    })(qrs[n], name)
                 });
             }
             return arr;
@@ -519,23 +467,55 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
 
 ClassView.prototype.showMethodCode = function (className, methodName) {
 
-    var self = this,
-        els = this.cacheUMLExplorer.elements;
+    var self = this;
 
     this.cacheUMLExplorer.source.getMethod(className, methodName, function (err, data) {
         if (err || data.error) {
             self.cacheUMLExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
             return;
         }
-        els.methodLabel.textContent = className + ": " + methodName + "("
+        self.showPanel({
+            header: className + ": " + methodName + "("
             + (data["arguments"] || "").replace(/,/g, ", ").replace(/:/g, ": ") + ")"
-            + (data["returns"] ? ": " + data["returns"] : "");
-        els.methodDescription.innerHTML = data["description"] || "";
-        els.methodCode.innerHTML = lib.highlightCOS(data["code"] || "");
-        els.methodViewBounds.style.height =
-            els.classView.offsetHeight - els.methodViewBounds.offsetTop + "px";
-        els.methodCodeView.classList.add("active");
+            + (data["returns"] ? ": " + data["returns"] : ""),
+            comment: data["description"],
+            body: lib.highlightCOS(data["code"] || "")
+        });
     });
+
+};
+
+ClassView.prototype.showQuery = function (className, queryData) {
+
+    queryData = queryData || {};
+
+    this.showPanel({
+        header: "##class(" + className + ")." + queryData["Name"] + "("
+            + (queryData["FormalSpec"] || "").replace(/,/g, ", ").replace(/:/g, ": ") + ")",
+        comment: queryData["Description"],
+        body: lib.highlightSQL(queryData["SqlQuery"] || "")
+    });
+
+};
+
+/**
+ * Show panel filled with given HTML contents.
+ * @param {string} data.header
+ * @param {string} [data.comment]
+ * @param {string} data.body
+ */
+ClassView.prototype.showPanel = function (data) {
+
+    var els = this.cacheUMLExplorer.elements;
+
+    data = data || {};
+
+    els.methodLabel.textContent = data.header || "";
+    els.methodDescription.innerHTML = data.comment || "";
+    els.methodCode.innerHTML = data.body || "";
+    els.methodViewBounds.style.height =
+        els.classView.offsetHeight - els.methodViewBounds.offsetTop + "px";
+    els.methodCodeView.classList.add("active");
 
 };
 
@@ -870,7 +850,8 @@ ClassView.prototype.init = function () {
     this.graph.on("change:position", function (object) {
         if (_.contains(self.objects, object))
             for (p in self.links) {
-                self.paper.findViewByModel(self.links[p]).update();
+                var link = self.paper.findViewByModel(self.links[p]);
+                if (link) link.update(); // removed links, should be in todo
             }
     });
 
@@ -955,13 +936,18 @@ ClassView.prototype.init = function () {
 ClassView.prototype.onRendered = function () {
 
     [].slice.call(document.querySelectorAll(".line-hoverable")).forEach(function (el) {
-        var hm = new HoverMessage(el.getAttribute("hovertext"));
+        var hm = new HoverMessage(el.getAttribute("hovertext"), el["clickHandler"] || null),
+            APPEAR_TIMEOUT = 500, tm = 0;
         el.addEventListener("mouseover", function (e) {
-            hm.attach(e.pageX || e.clientX, e.pageY || e.clientY);
+            if (tm) clearTimeout(tm);
+            tm = setTimeout(function () {
+                clearTimeout(tm);
+                hm.attach(e.pageX || e.clientX, e.pageY || e.clientY);
+            }, APPEAR_TIMEOUT);
         });
-        //el.addEventListener("mouseout", function () {
-        //    hm.detach();
-        //});
+        el.addEventListener("mouseout", function () {
+            clearTimeout(tm);
+        });
     });
 
 };

@@ -1,12 +1,26 @@
 .hoverMessage {
 
-    box-sizing: border-box;
     white-space: pre-line;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     border: 1px solid dimgray;
     padding: .3em;
+    overflow: hidden;
+    line-height: 1em;
+    max-height: 10em;
 
+}
+
+.line-hoverable {
+    cursor: pointer;
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
+.line-hoverable:hover {
+    fill: red;
 }
 
 .hoverContainer {
@@ -16,5 +30,6 @@
     left: 0;
     top: 0;
     padding: 20px;
+    cursor: pointer;
 
 }

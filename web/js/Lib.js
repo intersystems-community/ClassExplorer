@@ -128,6 +128,19 @@ Lib.prototype.keyWords = {
     "ascii": 0
 };
 
+Lib.prototype.sqlKeyWords = {
+    "SELECT": 0,
+    "FROM": 0,
+    "WHERE": 0,
+    "JOIN": 0,
+    "INNER": 0,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "ORDER": 0,
+    "BY": 0,
+    "SORT": 0
+};
+
 /**
  * Highlight Caché Object Script code.
  * @param {string} code
@@ -155,6 +168,29 @@ Lib.prototype.highlightCOS = function (code) {
             }
             return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });
         });
+};
+
+/**
+ * Highlight SQL code.
+ * @param {string} code
+ */
+Lib.prototype.highlightSQL = function (code) {
+    var self = this;
+    return code.replace(/[<>&]/g, function (r) {
+        return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
+    }).replace(/(&[lgtamp]{2,3};)|([a-zA-Z]+)/gi, function (part, a, kw) {
+        var i = -1, c;
+        [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
+            i++;
+            return e === undefined;
+        });
+        switch (i) {
+            case 0: return part; break;
+            case 1: c = self.sqlKeyWords.hasOwnProperty(kw.toUpperCase()) ? "keyword" : "word"; break;
+            default: c = "word"
+        }
+        return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });
+    });
 };
 
 /**
