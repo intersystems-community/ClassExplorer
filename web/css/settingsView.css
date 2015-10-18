@@ -30,3 +30,8 @@
 #settingsView table td {
     text-align: left;
 }
+
+#settingsView table td:nth-child(3) {
+    color: #888;
+    padding-left: 1em;
+}

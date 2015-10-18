@@ -310,6 +310,8 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 
     var signs = [], ct;
 
+    if (!this.cacheUMLExplorer.settings.showClassIcons) return signs;
+
     if (ct = classMetaData["$classType"]) {
         if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
             signs.push({

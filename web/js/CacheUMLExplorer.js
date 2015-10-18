@@ -37,8 +37,10 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         diagramSearchButton: id("button.diagramSearch"),
         settingsView: id("settingsView"),
         closeSettings: id("closeSettings"),
+        settingsExtraText: id("settingsExtraText"),
         settings: {
             showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
+            showClassIcons: id("setting.showClassIcons"),
             showParameters: id("setting.showParameters"),
             showProperties: id("setting.showProperties"),
             showMethods: id("setting.showMethods"),
@@ -54,6 +56,7 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
     // note: this.elements is required to be modified with the same name as settings keys
     this.settings = {
         showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
+        showClassIcons: settingsValue("showClassIcons", true),
         showParameters: settingsValue("showParameters", true),
         showProperties: settingsValue("showProperties", true),
         showMethods: settingsValue("showMethods", true),
@@ -73,12 +76,14 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
 
 CacheUMLExplorer.prototype.initSettings = function () {
 
-    var self = this;
+    var self = this,
+        textChanged = "Please, re-render diagram to make changes apply.";
 
     for (var st in this.elements.settings) {
         this.elements.settings[st].checked = this.settings[st];
         this.elements.settings[st].addEventListener("change", (function (st) {
             return function (e) {
+                self.elements.settingsExtraText.innerHTML = textChanged;
                 localStorage.setItem(
                     st,
                     self.settings[st] = (e.target || e.srcElement).checked
@@ -200,6 +205,7 @@ CacheUMLExplorer.prototype.init = function () {
         self.elements.settingsView.classList.add("active");
     });
     this.elements.closeSettings.addEventListener("click", function () {
+        self.elements.settingsExtraText.textContent = "";
         self.elements.settingsView.classList.remove("active");
     });
 

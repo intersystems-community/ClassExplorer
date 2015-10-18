@@ -17229,7 +17229,18 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 					}
 				}
 				if (typeof lines[i]["clickHandler"] === "function") {
-					tspan.node.addEventListener("click", lines[i]["clickHandler"]);
+					tspan.node.addEventListener("click", (function (el, handler) {
+						var clickable = true;
+						el.addEventListener("mousemove", function () {
+							clickable = false;
+						});
+						el.addEventListener("mousedown", function () {
+							clickable = true;
+						});
+						return function (e) {
+							if (clickable) handler(e);
+						};
+					})(tspan.node, lines[i]["clickHandler"]));
 					tspan.node["clickHandler"] = lines[i]["clickHandler"];
 					tspan.addClass('line-clickable');
 				}
