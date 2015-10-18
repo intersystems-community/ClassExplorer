@@ -5,8 +5,10 @@ An UML Class explorer for InterSystems Caché.
 + Build class diagrams;
 + Build diagrams for any package or subpackage;
 + Edit diagrams after build;
++ Switch between strict UML notation and designed view;
 + Export diagrams as an image;
 + See Class methods, properties, parameters, SQL queries and more;
++ See any keywords and related information by hovering over everything with pointer;
 + View class methods code with syntax highlighting;
 + Zoom in and out;
 + Search on diagram or in class tree;
@@ -18,17 +20,17 @@ An UML Class explorer for InterSystems Caché.
 
 ## Installation
 
-To install latest Caché UML Explorer, you just need to import UMLExplorer package. Download the
+To install latest Caché Class Explorer, you just need to import ClassExplorer package. Download the
 archive from [latest releases](https://github.com/intersystems-ru/UMLExplorer/releases), and then import
 <code>Cache/CacheUMLExplorer-vX.X.X.xml</code> file.
 
 ###### Web application
-Note that importing UMLExplorer.WebAppInstaller class will also create a /UMLExplorer application.
+Note that importing ClassExplorer.WebAppInstaller class will also create a /ClassExplorer application.
 If you want to create WEB application manually, please, do not import this class. Anyway, <b>
 importing this class requires %SYS permission.</b>
 
 ## Usage
-Visit <code>[server domain and port]/UMLExplorer/</code> (slash at end required) to enter
+Visit <code>[server domain and port]/ClassExplorer/</code> (slash at end required) to enter
 application.
 
 ## Build
