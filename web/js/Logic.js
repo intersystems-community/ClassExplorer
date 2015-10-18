@@ -32,12 +32,13 @@ Logic.prototype.process = function (data) {
     if (!this.data.inheritance) this.data.inheritance = {};
     for (clsName in data.classes) {
         cls = data.classes[clsName];
-        if (cls.super) cls.super.split(",").forEach(function (name) {
+        if (cls.Super) cls.Super.split(",").forEach(function (name) {
             self.inherits(clsName, name);
         });
         if (cls.parameters && !this.umlExplorer.settings.showParameters) delete cls.parameters;
         if (cls.properties && !this.umlExplorer.settings.showProperties) delete cls.properties;
         if (cls.methods && !this.umlExplorer.settings.showMethods) delete cls.methods;
+        if (cls.queries && !this.umlExplorer.settings.showQueries) delete cls.queries;
     }
 
     this.alignClassTypes(); // call after inheritance scheme done
@@ -49,6 +50,7 @@ Logic.prototype.process = function (data) {
     }
 
     this.fillAssociations();
+    this.fillIndices();
 
     delete data.classes["%Persistent"];
     delete data.classes["%Library.Persistent"];
@@ -58,6 +60,30 @@ Logic.prototype.process = function (data) {
     delete data.classes["%RegisteredObject"];
     delete data.classes["%Library.DataType"];
     delete data.classes["%DataType"];
+
+};
+
+Logic.prototype.fillIndices = function () {
+
+    var className, cls, indexName, j, index, props, propName;
+
+    for (className in this.data.classes) {
+        cls = this.data.classes[className];
+        for (indexName in cls.indices) {
+            index = cls.indices[indexName];
+            props = index["Properties"].split(",");
+            for (j in props) {
+                if (cls.properties[propName = props[j].match(/[^\(]+/)[0]]) {
+                    cls.properties[propName].index = index;
+                } else {
+                    console.warn(
+                        "No property", propName, "defined in", className,"to assign index",
+                        indexName, "to."
+                    );
+                }
+            }
+        }
+    }
 
 };
 
@@ -175,8 +201,8 @@ Logic.prototype.alignClassTypes = function () {
                 // try to get class type from parent
                 if (classObj.$classType) derivedObj.$classType = classObj.$classType;
                 // reassign class type from classType property
-                if (derivedObj.classType)
-                    derivedObj.$classType = self.getNormalClassType(derivedObj.classType);
+                if (derivedObj.ClassType)
+                    derivedObj.$classType = self.getNormalClassType(derivedObj.ClassType);
             }
             extendDerivedClasses(derivedClassName, derivedObj);
         });

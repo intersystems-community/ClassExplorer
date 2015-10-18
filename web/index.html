@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Cache UML explorer</title>
+    <title>Cache Class Explorer</title>
     <!-- build:css -->
     <link rel="stylesheet" href="css/interface.css"/>
     <link rel="stylesheet" href="css/treeView.css"/>
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="jsLib/ImageExporter.js"></script>
     <script type="text/javascript" src="js/ClassView.js"></script>
     <script type="text/javascript" src="js/Lib.js"></script>
-    <script type="text/javascript" src="js/CacheUMLExplorer.js"></script>
+    <script type="text/javascript" src="js/CacheClassExplorer.js"></script>
     <script type="text/javascript" src="js/ClassTree.js"></script>
     <script type="text/javascript" src="js/Source.js"></script>
     <script type="text/javascript" src="js/UI.js"></script>
@@ -30,7 +30,7 @@
     <!-- endbuild -->
     <link id="favicon" rel="shortcut icon" href="#"/>
 </head>
-<body onload="cue = new CacheUMLExplorer(document.getElementById('treeView'), document.getElementById('svgContainer'))">
+<body onload="cue = new CacheClassExplorer(document.getElementById('treeView'), document.getElementById('svgContainer'))">
     <div class="ui-body" id="ui-body">
         <div class="ui-sideBlock">
             <div class="ui-sideSearchBlock" id="searchBlock">
@@ -98,22 +98,42 @@
                             <tbody>
                             <tr>
                                 <td><input id="setting.showDataTypesOnDiagram" type="checkbox"/></td>
-                                <td><label for="setting.showDataTypesOnDiagram">Show Data Types</label></td>
+                                <td><label for="setting.showDataTypesOnDiagram">Render Data Types</label></td>
+                                <td>Show data type classes on diagram</td>
+                            </tr>
+                            <tr>
+                                <td><input id="setting.showClassIcons" type="checkbox"/></td>
+                                <td><label for="setting.showClassIcons">Show Icons Over Class Name</label></td>
+                                <td>Visualize class keywords (turn off for standard UML notation)</td>
+                            </tr>
+                            <tr>
+                                <td><input id="setting.showPropertyIcons" type="checkbox"/></td>
+                                <td><label for="setting.showPropertyIcons">Show Class Properties Icons</label></td>
+                                <td>Visualize property keywords (turn off for standard UML notation)</td>
                             </tr>
                             <tr>
                                 <td><input id="setting.showParameters" type="checkbox"/></td>
                                 <td><label for="setting.showParameters">Show Parameters</label></td>
+                                <td>Display block with class parameters</td>
                             </tr>
                             <tr>
                                 <td><input id="setting.showProperties" type="checkbox"/></td>
                                 <td><label for="setting.showProperties">Show Properties</label></td>
+                                <td>Display block with class properties</td>
                             </tr>
                             <tr>
                                 <td><input id="setting.showMethods" type="checkbox"/></td>
                                 <td><label for="setting.showMethods">Show Methods</label></td>
+                                <td>Display block with class methods</td>
+                            </tr>
+                            <tr>
+                                <td><input id="setting.showQueries" type="checkbox"/></td>
+                                <td><label for="setting.showQueries">Show Queries</label></td>
+                                <td>Display block with class queries</td>
                             </tr>
                             </tbody>
                         </table>
+                        <p id="settingsExtraText"></p>
                     </div>
                 </div>
             </div>

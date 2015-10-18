@@ -312,3 +312,15 @@
     left: 4px;
     box-shadow: inset 0 0 0 32px #ffcc1b, 0 -7px 0 0 #ffcc1b, 0 7px 0 0 #ffcc1b;
 }
+
+.underlined {
+    text-decoration: underline;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.nowrap {
+    white-space: nowrap;
+}

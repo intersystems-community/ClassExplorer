@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-28 19:50:48">
-<Class name="UMLExplorer.ClassView">
+<Class name="ClassExplorer.ClassView">
 <Description>
-Cache UML Explorer vX.X.X/*build.replace:pkg.version*/
+Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63830,81286.756889</TimeChanged>
+<TimeChanged>63844,1327.122337</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -45,33 +45,34 @@ Returns structured class tree with all classes available in current namespace</D
     set level = 1
     do objects.SetAt(resp, level)
 
-
     do classes.Execute()
     while (classes.Next()) {
         set name = classes.Data("Name")
         if ($EXTRACT(name, 1, 1) = "%") && ($NAMESPACE '= "%SYS") { continue }
         set parts = $LISTFROMSTRING(name, ".")
-        set i = 0
-        while (i < $LISTLENGTH(parts)) && ($LISTGET(lastParts, i + 1) = $LISTGET(parts, i + 1)) {
-            set i = i + 1
+        set level = 1
+        while ((level < $LISTLENGTH(parts)) && ($LISTGET(lastParts, level) = ("/"_$LISTGET(parts, level)))) {
+            set level = level + 1
         }
-        set level = i + 1
         set resp = objects.GetAt(level)
         if (resp="") {
             set resp = ##class(%ZEN.proxyObject).%New()
-            do objects.GetAt(level - 1).%DispatchSetProperty($LISTGET(parts, level - 1), resp)
+            do objects.GetAt(level - 1).%DispatchSetProperty("/" _ $LISTGET(parts, level - 1), resp)
             do objects.SetAt(resp, level)
         }
         while ($LISTLENGTH(parts) > level) {
             set level = level + 1
             set resp = ##class(%ZEN.proxyObject).%New()
-            do objects.GetAt(level - 1).%DispatchSetProperty($LISTGET(parts, level - 1), resp)
+            do objects.GetAt(level - 1).%DispatchSetProperty("/" _ $LISTGET(parts, level - 1), resp)
             do objects.SetAt(resp, level)
         }
         if ($LISTLENGTH(parts) = level) {
             do resp.%DispatchSetProperty($LISTGET(parts, level), classes.Data("Hidden"))
         }
         set lastParts = parts
+        for i=1:1:$LISTLENGTH(lastParts)-1 {
+            set $LIST(lastParts, i) = "/"_$LISTGET(lastParts, i)
+        }
     }
 
     quit objects.GetAt(1)
@@ -87,6 +88,7 @@ Return structured data about class.</Description>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set classDefinition = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+    set compiledClassDefinition = ##class(%Dictionary.CompiledClass).%OpenId(className)
     if (classDefinition = "") || (oData.classes.%DispatchGetProperty(classDefinition.Name) '= "") quit ""
 
     set oClass = ##class(%ZEN.proxyObject).%New()
@@ -94,19 +96,30 @@ Return structured data about class.</Description>
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(classDefinition.Name, "."), 1, *-1),".")
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oQueries = ##class(%ZEN.proxyObject).%New()
+    set oIndices = ##class(%ZEN.proxyObject).%New()
 
-    set oClass.NAMESPACE = $NAMESPACE
-    set oClass.SYSTEM = classDefinition.System
-    set oClass.PROCEDUREBLOCK = classDefinition.ProcedureBlock
-    set oClass.ABSTRACT = classDefinition.Abstract
-    set oClass.FINAL = classDefinition.Final
-    set oClass.HIDDEN = classDefinition.Hidden
-    set oClass.classType = classDefinition.ClassType
-    set oClass.serverOnly = classDefinition.ServerOnly // -
     set oClass.isDataType = classDefinition.ClientDataTypeIsDefined()
+    set oClass.isOdbcType = classDefinition.OdbcTypeIsDefined()
+    set oClass.isSoapBindingStyle = classDefinition.SoapBindingStyleIsDefined()
+    set oClass.isSoapBodyUse = classDefinition.SoapBodyUseIsDefined()
+    set oClass.isSqlCategory = classDefinition.SqlCategoryIsDefined()
 
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.ClassDefinition")
+    for j=1:1:props.Properties.Count() {
+        set pname = props.Properties.GetAt(j).Name
+        set:((pname '= "parent")
+             && ('props.Properties.GetAt(j).Private)
+             && ('$IsObject($PROPERTY(classDefinition, pname)))) $PROPERTY(oClass, pname) = $PROPERTY(classDefinition, pname)
+    }
+    if (oClass.TimeChanged) { set oClass.TimeChanged = $zdatetime(oClass.TimeChanged) }
+    if (oClass.TimeCreated) { set oClass.TimeCreated = $zdatetime(oClass.TimeCreated) }
+    if ((compiledClassDefinition '= "") && (compiledClassDefinition.ClassType '= "")) {
+        set oClass.ClassType = compiledClassDefinition.ClassType // set class type from all inherited classes
+    }
+
+    set oClass.Super = "" // do not quit with super at this moment
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
-    set oClass.super = ..correctInheritance(oData, classDefinition, package)
+    set oClass.Super = ..correctInheritance(oData, classDefinition, package) // now expand super names
 
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
@@ -171,7 +184,20 @@ Return structured data about class.</Description>
         do oQueries.%DispatchSetProperty(q.Name, oProp)
     }
 
-    do ..collectInheritance(oData, oClass.super)
+    #dim ind as %Dictionary.IndexDefinition
+    set oClass.indices = oIndices
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.IndexDefinition")
+    for i=1:1:classDefinition.Indices.Count() {
+        set oProp = ##class(%ZEN.proxyObject).%New()
+        set ind = classDefinition.Indices.GetAt(i)
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(ind, pname)
+        }
+        do oIndices.%DispatchSetProperty(ind.Name, oProp)
+    }
+
+    do ..collectInheritance(oData, oClass.Super)
 
     quit oClass
 ]]></Implementation>
@@ -343,19 +369,19 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-24 18:14:48.579613">
+<Project name="ClassExplorer" LastModified="2015-05-24 18:14:48.579613">
   <Items>
-    <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.WebAppInstaller" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.ClassView" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.Router" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.StaticContent" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.WebAppInstaller" type="CLS"></ProjectItem>
   </Items>
 </Project>
 
 
-<Class name="UMLExplorer.Router">
+<Class name="ClassExplorer.Router">
 <Description>
-REST interface for UMLExplorer</Description>
+REST interface for ClassExplorer</Description>
 <Super>%CSP.REST</Super>
 <TimeChanged>63697,73073.878177</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
@@ -365,8 +391,8 @@ REST interface for UMLExplorer</Description>
 <Routes>
    <Route Url="/" Method="GET" Call="Index"/>
    <Route Url="/index" Method="GET" Call="Index"/>
-   <Route Url="/css/CacheUMLExplorer.css" Method="GET" Call="GetCss"/>
-   <Route Url="/js/CacheUMLExplorer.js" Method="GET" Call="GetJs"/>
+   <Route Url="/css/CacheClassExplorer.css" Method="GET" Call="GetCss"/>
+   <Route Url="/js/CacheClassExplorer.js" Method="GET" Call="GetJs"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView" Method="GET" Call="GetClassView"/>
@@ -383,7 +409,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -420,7 +446,7 @@ Return the list of all namespaces</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -513,7 +539,7 @@ Issue an "304 Not Modified" status</Description>
 </Class>
 
 
-<Class name="UMLExplorer.StaticContent">
+<Class name="ClassExplorer.StaticContent">
 <Description>
 Cache UML Explorer vX.X.X/*build.replace:pkg.version*/ static content generator.
 Class contains methods that return JS/CSS/HTML data for single page application.</Description>
@@ -527,7 +553,7 @@ Write the contents of xData tag</Description>
 <FormalSpec>Const:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||"_Const).Data
+    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("ClassExplorer.StaticContent||"_Const).Data
     set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
     while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
     return $$$OK
@@ -560,7 +586,7 @@ Write the contents of xData tag</Description>
 </Class>
 
 
-<Class name="UMLExplorer.WebAppInstaller">
+<Class name="ClassExplorer.WebAppInstaller">
 <Super>%Projection.AbstractProjection</Super>
 <TimeChanged>63696,65168.289869</TimeChanged>
 <TimeCreated>63696,64041.85537</TimeCreated>
@@ -587,14 +613,14 @@ This method is invoked when a class is compiled.</Description>
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for Cache UML Explorer."
     set cspProperties("IsNameSpaceDefault") = 1
-    set cspProperties("DispatchClass") = "UMLExplorer.Router"
-    if ('##class(Security.Applications).Exists("/UMLExplorer")) {
-        w !, "Creating WEB application ""/UMLExplorer""..."
-        set tSC = ##class(Security.Applications).Create("/UMLExplorer", .cspProperties)
+    set cspProperties("DispatchClass") = "ClassExplorer.Router"
+    if ('##class(Security.Applications).Exists("/ClassExplorer")) {
+        w !, "Creating WEB application ""/ClassExplorer""..."
+        set tSC = ##class(Security.Applications).Create("/ClassExplorer", .cspProperties)
         if $$$ISERR(tSC) throw ##class(%Installer.Exception).CreateFromStatus(tSC)
-        w !, "WEB application ""/UMLExplorer"" created."
+        w !, "WEB application ""/ClassExplorer"" created."
     } else {
-        w !, "WEB application ""/UMLExplorer"" already exists, so it is ready to use."
+        w !, "WEB application ""/ClassExplorer"" already exists, so it is ready to use."
     }
     zn:ns'="%SYS" ns
     quit $$$OK
@@ -610,10 +636,10 @@ This method is invoked when a class is 'uncompiled'.</Description>
 <Implementation><![CDATA[
     set ns = $NAMESPACE
     zn:ns'="%SYS" "%SYS"
-    if (##class(Security.Applications).Exists("/UMLExplorer")) {
-        w !, "Deleting WEB application ""/UMLExplorer""..."
-        do ##class(Security.Applications).Delete("/UMLExplorer")
-        w !, "WEB application ""/UMLExplorer"" was successfully removed."
+    if (##class(Security.Applications).Exists("/ClassExplorer")) {
+        w !, "Deleting WEB application ""/ClassExplorer""..."
+        do ##class(Security.Applications).Delete("/ClassExplorer")
+        w !, "WEB application ""/ClassExplorer"" was successfully removed."
     }
     zn:ns'="%SYS" ns
     QUIT $$$OK

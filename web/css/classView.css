@@ -108,3 +108,11 @@ text {
 .element.highlighted {
     outline: 4px solid rgba(255, 0, 0, 0.6);
 }
+
+.marker-source, .marker-target {
+    vector-effect: none !important;
+}
+
+.connection {
+    stroke: black;
+}

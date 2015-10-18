@@ -5,7 +5,7 @@
 var ClassView = function (parent, container) {
 
     this.container = container;
-    this.cacheUMLExplorer = parent;
+    this.cacheClassExplorer = parent;
 
     this.graph = null;
     this.paper = null;
@@ -82,7 +82,7 @@ ClassView.prototype.resetView = function () {
     this.graph.clear();
     this.HIGHLIGHTED_VIEW = null;
     this.SEARCH_INDEX = 0;
-    this.cacheUMLExplorer.elements.diagramSearch.value = "";
+    this.cacheClassExplorer.elements.diagramSearch.value = "";
 
 };
 
@@ -101,18 +101,18 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.renderInfoGraphic = function () {
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME =
-        this.cacheUMLExplorer.elements.className.textContent =
-            "Welcome to Caché UML explorer!";
+    this.cacheClassExplorer.classTree.SELECTED_NAME =
+        this.cacheClassExplorer.elements.className.textContent =
+            "Welcome to Caché Class explorer!";
 
     location.hash = "{\"type\":\"help\"}";
 
     this.showLoader();
     this.render({
-        basePackageName: "Welcome to Caché UML explorer!",
+        basePackageName: "Welcome to Caché Class explorer!",
         classes: {
             "Shared object": {
-                super: "Super object",
+                Super: "Super object",
                 classType: "Serial",
                 parameters: {
                     "Also inherit Super object": {}
@@ -121,7 +121,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                 properties: {}
             },
             "Class name": {
-                super: "Super object",
+                Super: "Super object",
                 ABSTRACT: 1,
                 FINAL: 1,
                 HIDDEN: 1,
@@ -133,7 +133,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                         abstract: 1
                     },
                     "Class method": {
-                        classMethod: 1
+                        ClassMethod: 1
                     },
                     "Client method": {
                         clientMethod: 1
@@ -281,10 +281,10 @@ ClassView.prototype.filterInherits = function (data) {
 
     var f = function (p) {
         return filter.hasOwnProperty(p) || (data.classes[p] || {})["isDataType"] ||
-            lib.obj(((data.classes[p] || {}).super || "").split(",")).hasOwnProperty("%DataType");
+            lib.obj(((data.classes[p] || {}).Super || "").split(",")).hasOwnProperty("%DataType");
     };
 
-    if (this.cacheUMLExplorer.settings.showDataTypesOnDiagram)
+    if (this.cacheClassExplorer.settings.showDataTypesOnDiagram)
         return;
 
     toFilter.forEach(function (p) {
@@ -302,13 +302,15 @@ ClassView.prototype.filterInherits = function (data) {
 };
 
 /**
- * Returns array of signs to render or empry array.
+ * Returns array of signs to render or empty array.
  *
  * @param classMetaData
  */
 ClassView.prototype.getClassSigns = function (classMetaData) {
 
     var signs = [], ct;
+
+    if (!this.cacheClassExplorer.settings.showClassIcons) return signs;
 
     if (ct = classMetaData["$classType"]) {
         if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
@@ -319,25 +321,25 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
             });
         }
     }
-    if (classMetaData["ABSTRACT"]) signs.push({
+    if (classMetaData["Abstract"]) signs.push({
         icon: lib.image.crystalBall,
         text: "Abstract",
         textStyle: "fill:rgb(130,0,255)"
     });
-    if (classMetaData["FINAL"]) signs.push({
+    if (classMetaData["Final"]) signs.push({
         icon: lib.image.blueFlag,
         text: "Final",
         textStyle: "fill:rgb(130,0,255)"
     });
-    if (classMetaData["SYSTEM"]) signs.push({
+    if (classMetaData["System"]) signs.push({
         icon: lib.image.chip,
-        text: "System/" + classMetaData["SYSTEM"]
+        text: "System/" + classMetaData["System"]
     });
-    if (classMetaData["PROCEDUREBLOCK"] === 0) signs.push({
+    if (classMetaData["ProcedureBlock"] === 0) signs.push({
         icon: lib.image.moleculeCubeCross,
         text: "NotProcBlock"
     });
-    if (classMetaData["HIDDEN"]) signs.push({
+    if (classMetaData["Hidden"]) signs.push({
         icon: lib.image.ghost,
         text: "Hidden"
     });
@@ -349,25 +351,201 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 /**
  * Returns array of icons according to method metadata.
  *
- * @param method
+ * @param property
  */
-ClassView.prototype.getPropertyIcons = function (method) {
+ClassView.prototype.getPropertyIcons = function (property) {
 
     var icons = [];
 
-    if (typeof method["Private"] !== "undefined") {
-        icons.push({ src: lib.image[method["Private"] ? "minus" : "plus"] });
+    if (!this.cacheClassExplorer.settings.showPropertyIcons)
+        return [{ src: lib.image[(property["Private"] ? "minus" : "plus") + "Simple"] }];
+
+    if (typeof property["Private"] !== "undefined") {
+        icons.push({ src: lib.image[property["Private"] ? "minus" : "plus"] });
     }
-    if (method["Abstract"]) icons.push({ src: lib.image.crystalBall });
-    if (method["ClientMethod"]) icons.push({ src: lib.image.user });
-    if (method["Final"]) icons.push({ src: lib.image.blueFlag });
-    if (method["NotInheritable"]) icons.push({ src: lib.image.redFlag });
-    if (method["SqlProc"]) icons.push({ src: lib.image.table });
-    if (method["WebMethod"]) icons.push({ src: lib.image.earth });
-    if (method["ZenMethod"]) icons.push({ src: lib.image.zed });
-    if (method["ReadOnly"]) icons.push({ src: lib.image.eye });
+    if (property["Abstract"]) icons.push({ src: lib.image.crystalBall });
+    if (property["ClientMethod"]) icons.push({ src: lib.image.user });
+    if (property["Final"]) icons.push({ src: lib.image.blueFlag });
+    if (property["NotInheritable"]) icons.push({ src: lib.image.redFlag });
+    if (property["SqlProc"]) icons.push({ src: lib.image.table });
+    if (property["WebMethod"]) icons.push({ src: lib.image.earth });
+    if (property["ZenMethod"]) icons.push({ src: lib.image.zed });
+    if (property["ReadOnly"]) icons.push({ src: lib.image.eye });
+    if (property["index"]) {
+        icons.push(
+            property["index"]["Unique"] ? { src: lib.image.keyRed }
+            : (property["index"]["PrimaryKey"] || property["index"]["IDKey"])
+            ? { src: lib.image.keyGreen } : { src: lib.image.keyYellow }
+        );
+    }
 
     return icons;
+
+};
+
+/**
+ * @param prop
+ * @param {string} type = ["parameter", "property", "method", "query"]
+ * @returns {string}
+ */
+ClassView.prototype.getPropertyHoverText = function (prop, type) {
+
+    var ind, i, desc = "",
+        indexText = {
+            "IdKey": function () { return "IdKey"; },
+            "Type": function (type) { return "Type="+type; },
+            "Internal": function () { return "Internal"; },
+            "Extent": function () { return "Extent"; },
+            "PrimaryKey": function () { return "PrimaryKey"; },
+            "Unique": function () { return "Unique"; }
+        },
+        propText = {
+            "Calculated": 1,
+            "Final": 1,
+            "Identity": 1,
+            "InitialExpression": function (data) {
+                return (data === "\"\"")
+                    ? ""
+                    : "<span class=\"syntax-keyword\">InitialExpression</span>="
+                        + lib.highlightCOS(data + "")
+            },
+            "Internal": 1,
+            "MultiDimensional": 1,
+            "NoModBit": 1,
+            "NotInheritable": 1,
+            "Private": 1,
+            "ReadOnly": 1,
+            "Relationship": function (data, p) {
+                return "<span class=\"syntax-keyword\">Relationship</span> [ Cardinality="
+                    + p["Cardinality"] + ", Inverse=" + p["Inverse"] + " ]";
+            },
+            "Required": 1,
+            "SqlComputed": function (data, p) {
+                return p["SqlComputeCode"]
+                    ? "<span class=\"syntax-keyword\">SqlComputed</span> [ SqlComputeCode={"
+                        + lib.highlightCOS(p["SqlComputeCode"]) + "} ]"
+                    : "";
+            },
+            "Transient": 1,
+            // -- methods
+            "Abstract": 1,
+            // "ClassMethod": 1, - they're underlined
+            "ClientMethod": 1,
+            "CodeMode": function (data) {
+                return data === "code" ? "" : "<span class=\"syntax-keyword\">CodeMode</span>="
+                    + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "ForceGenerate": 1,
+            "NoContext": 1,
+            "NotForProperty": 1,
+            "ReturnResultsets": 1,
+            "SoapAction": function (data) {
+                return data === "[default]" ? ""
+                    : "<span class=\"syntax-keyword\">SoapAction</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlProc": 1,
+            "WebMethod": 1,
+            "ZenMethod": 1,
+            // -- parameters
+            "Encoded": 1,
+            // -- queries
+            "SqlView": 1,
+            // -- class
+            "ClientDataType": function (data, p) {
+                return !p["isDataType"] ? ""
+                    : "<span class=\"syntax-keyword\">ClientDataType</span>="
+                    + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "DdlAllowed": 1,
+            "Deployed": 1,
+            "Dynamic": 1,
+            "Inheritance": function (data) {
+                return data === "left" ? ""
+                    : "<span class=\"syntax-keyword\">Inheritance</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "Language": function (data) {
+                return data === "cache" ? ""
+                    : "<span class=\"syntax-keyword\">Language</span>="
+                + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "LegacyInstanceContext": 1,
+            // ModificationLevel ?
+            "NoExtent": 1,
+            "OdbcType": function (data, p) {
+                return !p["isOdbcType"] ? ""
+                    : "<span class=\"syntax-keyword\">OdbcType</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "ProcedureBlock": function (data) {
+                return data ? "" : "<span class=\"syntax-keyword\">Not ProcedureBlock</span>";
+            },
+            "SoapBindingStyle": function (data, p) {
+                return !p["isSoapBindingStyle"] ? ""
+                    : "<span class=\"syntax-keyword\">SoapBindingStyle</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SoapBodyUse": function (data, p) {
+                return !p["isSoapBodyUse"] ? ""
+                    : "<span class=\"syntax-keyword\">SoapBodyUse</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlCategory": function (data, p) {
+                return !p["isSqlCategory"] ? ""
+                    : "<span class=\"syntax-keyword\">SqlCategory</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlRowIdPrivate": 1,
+            "System": function (data) {
+                return !data ? ""
+                    : "<span class=\"syntax-keyword\">System</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>"
+            }
+        };
+
+    if (type === "class" && prop["TimeChanged"] && prop["TimeCreated"]) {
+        desc += "<span class=\"syntax-keyword\">Changed</span>: "
+            + "<span class=\"syntax-string nowrap\">" + prop["TimeChanged"] + "</span>, "
+            + "<span class=\"syntax-keyword\">Created</span>: "
+            + "<span class=\"syntax-string nowrap\">" + prop["TimeCreated"] + "</span><br/>";
+    }
+
+    if (ind = prop["index"]) {
+        desc += "<span class=\"syntax-keyword\">INDEX</span> <span class=\"syntax-string\">"
+            + ind["Name"] + "</span> " + (function () {
+                var txt = [];
+                for (i in ind) {
+                    if (indexText[i] && ind[i]) txt.push(indexText[i](ind[i]));
+                }
+                return txt.join(", ");
+            })()
+            + "\n";
+    }
+
+    var txt = [], val;
+    for (i in prop) {
+        if (propText[i] && (prop[i] || i === "InitialExpression" || i === "ProcedureBlock")) {
+            val = propText[i] === 1
+                ? "<span class=\"syntax-keyword\">" + i + "</span>"
+                : propText[i](prop[i], prop);
+            if (val !== "") txt.push(val);
+        }
+    }
+    if (txt.length) desc += txt.join(", ");
+
+    // Display FormalSpec in methods?
+
+    if (desc && prop["Description"]) desc += "<hr/>";
+    desc += prop["Description"] || "";
+
+    if (desc && type) {
+        desc = "<span class=\"underlined\"><span class=\"syntax-keyword\">" + lib.capitalize(type)
+            + "</span> <span class=\"syntax-other\">" + (prop["Name"] || "") + "</span></span>"
+            + ("<br/>") + desc;
+    }
+
+    return desc;
 
 };
 
@@ -389,8 +567,9 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         name: [{
             text: name,
             clickHandler: function () {
-                self.openClassDoc(name, classMetaData["NAMESPACE"]);
+                self.openClassDoc(name, self.cacheClassExplorer.NAMESPACE);
             },
+            hover: self.getPropertyHoverText(classMetaData, "class"),
             styles: {
                 cursor: "help"
             }
@@ -401,7 +580,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (params[n]["Type"] ? ": " + params[n]["Type"] : ""),
-                    hover: params[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(params[n], "parameter"),
                     icons: self.getPropertyIcons(params[n])
                 });
             }
@@ -413,7 +592,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
-                    hover: ps[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(ps[n], "property"),
                     icons: self.getPropertyIcons(ps[n])
                 });
             }
@@ -427,11 +606,11 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                     text: n + (met[n]["ReturnType"] ? ": " + met[n]["ReturnType"] : ""),
                     styles: (function (t) {
                         return t ? { textDecoration: "underline" } : {}
-                    })(met[n]["classMethod"]),
+                    })(met[n]["ClassMethod"]),
                     clickHandler: (function (n) {
                         return function () { self.showMethodCode(name, n); }
                     })(n),
-                    hover: met[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(met[n], "method"),
                     icons: self.getPropertyIcons(met[n])
                 });
             }
@@ -444,7 +623,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 arr.push({
                     text: n,
                     icons: self.getPropertyIcons(qrs[n]),
-                    hover: qrs[n]["SqlQuery"],
+                    hover: self.getPropertyHoverText(qrs[n], "query"),
                     clickHandler: (function (q, className) {
                         return function () { self.showQuery(className, q); }
                     })(qrs[n], name)
@@ -469,9 +648,9 @@ ClassView.prototype.showMethodCode = function (className, methodName) {
 
     var self = this;
 
-    this.cacheUMLExplorer.source.getMethod(className, methodName, function (err, data) {
+    this.cacheClassExplorer.source.getMethod(className, methodName, function (err, data) {
         if (err || data.error) {
-            self.cacheUMLExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
+            self.cacheClassExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
             return;
         }
         self.showPanel({
@@ -506,7 +685,7 @@ ClassView.prototype.showQuery = function (className, queryData) {
  */
 ClassView.prototype.showPanel = function (data) {
 
-    var els = this.cacheUMLExplorer.elements;
+    var els = this.cacheClassExplorer.elements;
 
     data = data || {};
 
@@ -521,7 +700,7 @@ ClassView.prototype.showPanel = function (data) {
 
 ClassView.prototype.hideMethodCode = function () {
 
-    this.cacheUMLExplorer.elements.methodCodeView.classList.remove("active");
+    this.cacheClassExplorer.elements.methodCodeView.classList.remove("active");
 
 };
 
@@ -566,11 +745,11 @@ ClassView.prototype.render = function (data) {
         cS.parentNode.removeChild(cS);
         c2.parentNode.removeChild(c2);
         setTimeout(function () {
-            self.confirmRender(data); self.cacheUMLExplorer.UI.removeMessage();
+            self.confirmRender(data); self.cacheClassExplorer.UI.removeMessage();
         }, 25);
     });
     bOff.addEventListener("click", function () {
-        self.cacheUMLExplorer.UI.removeMessage();
+        self.cacheClassExplorer.UI.removeMessage();
     });
 
     c.appendChild(c1);
@@ -580,7 +759,7 @@ ClassView.prototype.render = function (data) {
     c2.appendChild(bOff);
     load.appendChild(lt);
     load.appendChild(spinner);
-    this.cacheUMLExplorer.UI.displayMessage(c, false);
+    this.cacheClassExplorer.UI.displayMessage(c, false);
 
 };
 
@@ -591,7 +770,6 @@ ClassView.prototype.confirmRender = function (data) {
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
-    console.log(data); // todo
     this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
@@ -689,22 +867,22 @@ ClassView.prototype.loadClass = function (className) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME = className;
-    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "class";
+    this.cacheClassExplorer.classTree.SELECTED_NAME = className;
+    this.cacheClassExplorer.classTree.SELECTED_TYPE = "class";
     this.showLoader();
-    this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
+    this.cacheClassExplorer.source.getClassView(className, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
-            self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_NAME);
+            self.showLoader("Unable to get " + self.cacheClassExplorer.classTree.SELECTED_NAME);
             console.error.call(console, err);
         } else {
             self.render(data);
         }
     });
 
-    this.cacheUMLExplorer.elements.className.textContent = className;
-    this.cacheUMLExplorer.updateURL();
+    this.cacheClassExplorer.elements.className.textContent = className;
+    this.cacheClassExplorer.updateURL();
 
 };
 
@@ -712,10 +890,10 @@ ClassView.prototype.loadPackage = function (packageName) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME = packageName;
-    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "package";
+    this.cacheClassExplorer.classTree.SELECTED_NAME = packageName;
+    this.cacheClassExplorer.classTree.SELECTED_TYPE = "package";
     this.showLoader();
-    this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
+    this.cacheClassExplorer.source.getPackageView(packageName, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
@@ -726,8 +904,8 @@ ClassView.prototype.loadPackage = function (packageName) {
         }
     });
 
-    this.cacheUMLExplorer.elements.className.textContent = packageName;
-    this.cacheUMLExplorer.updateURL();
+    this.cacheClassExplorer.elements.className.textContent = packageName;
+    this.cacheClassExplorer.updateURL();
 
 };
 
@@ -743,8 +921,8 @@ ClassView.prototype.updateSizes = function () {
 ClassView.prototype.zoom = function (delta) {
 
     var scaleOld = this.PAPER_SCALE, scaleDelta;
-    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
-        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+    var sw = this.cacheClassExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheClassExplorer.elements.classViewContainer.offsetHeight,
         side = delta > 0 ? 1 : -1,
         ox = this.paper.options.origin.x,
         oy = this.paper.options.origin.y;
@@ -783,8 +961,8 @@ ClassView.prototype.focusOnInstance = function (jointInstance) {
  */
 ClassView.prototype.focusOnXY = function (x, y) {
 
-    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
-        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+    var sw = this.cacheClassExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheClassExplorer.elements.classViewContainer.offsetHeight,
         scale = this.PAPER_SCALE;
 
     this.paper.setOrigin(
@@ -881,38 +1059,38 @@ ClassView.prototype.init = function () {
         relP.x = e.pageX; relP.y = e.pageY;
     };
 
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
         self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
     });
-    this.cacheUMLExplorer.elements.zoomInButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomInButton.addEventListener("click", function () {
         self.zoom(1);
     });
-    this.cacheUMLExplorer.elements.zoomOutButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomOutButton.addEventListener("click", function () {
         self.zoom(-1);
     });
-    this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomNormalButton.addEventListener("click", function () {
         self.zoom(null);
     });
-    this.cacheUMLExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
         self.hideMethodCode();
     });
-    this.cacheUMLExplorer.elements.helpButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.helpButton.addEventListener("click", function () {
         self.renderInfoGraphic();
     });
-    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("input", function (e) {
+    this.cacheClassExplorer.elements.diagramSearch.addEventListener("input", function (e) {
         self.searchOnDiagram((e.target || e.srcElement).value);
     });
-    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("keydown", function (e) {
+    this.cacheClassExplorer.elements.diagramSearch.addEventListener("keydown", function (e) {
         if (e.keyCode === 13) {
             self.SEARCH_INDEX++;
             self.searchOnDiagram((e.target || e.srcElement).value);
         }
     });
-    this.cacheUMLExplorer.elements.diagramSearchButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.diagramSearchButton.addEventListener("click", function () {
         self.SEARCH_INDEX++;
-        self.searchOnDiagram(self.cacheUMLExplorer.elements.diagramSearch.value);
+        self.searchOnDiagram(self.cacheClassExplorer.elements.diagramSearch.value);
     });
 
     this.SYMBOL_12_WIDTH = (function () {

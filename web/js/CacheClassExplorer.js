@@ -1,12 +1,12 @@
 /**
- * UML class diagram visualization tool for InterSystems products.
+ * Class diagram visualization tool for InterSystems products.
  * @author ZitRo
  * @see http://zitros.tk
  * @param {HTMLElement} treeViewContainer
  * @param {HTMLElement} classViewContainer
  * @constructor
  */
-var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
+var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
 
     var id = function (e) { return document.getElementById(e); };
 
@@ -37,11 +37,15 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         diagramSearchButton: id("button.diagramSearch"),
         settingsView: id("settingsView"),
         closeSettings: id("closeSettings"),
+        settingsExtraText: id("settingsExtraText"),
         settings: {
             showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
+            showClassIcons: id("setting.showClassIcons"),
+            showPropertyIcons: id("setting.showPropertyIcons"),
             showParameters: id("setting.showParameters"),
             showProperties: id("setting.showProperties"),
-            showMethods: id("setting.showMethods")
+            showMethods: id("setting.showMethods"),
+            showQueries: id("setting.showQueries")
         }
     };
 
@@ -53,9 +57,12 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
     // note: this.elements is required to be modified with the same name as settings keys
     this.settings = {
         showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
+        showClassIcons: settingsValue("showClassIcons", true),
+        showPropertyIcons: settingsValue("showPropertyIcons", true),
         showParameters: settingsValue("showParameters", true),
         showProperties: settingsValue("showProperties", true),
-        showMethods: settingsValue("showMethods", true)
+        showMethods: settingsValue("showMethods", true),
+        showQueries: settingsValue("showQueries", true)
     };
 
     this.UI = new UI(this);
@@ -69,14 +76,20 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
 
 };
 
-CacheUMLExplorer.prototype.initSettings = function () {
+CacheClassExplorer.prototype.initSettings = function () {
 
-    var self = this;
+    var self = this,
+        textChanged = "Please, re-render diagram to make changes apply.";
 
     for (var st in this.elements.settings) {
+        if (!this.elements.settings[st]) {
+            console.warn(st, "is Bred Sivoi Cobyly.");
+            continue;
+        }
         this.elements.settings[st].checked = this.settings[st];
         this.elements.settings[st].addEventListener("change", (function (st) {
             return function (e) {
+                self.elements.settingsExtraText.innerHTML = textChanged;
                 localStorage.setItem(
                     st,
                     self.settings[st] = (e.target || e.srcElement).checked
@@ -91,7 +104,7 @@ CacheUMLExplorer.prototype.initSettings = function () {
  * Render namespaces.
  * @param nsData
  */
-CacheUMLExplorer.prototype.updateNamespaces = function (nsData) {
+CacheClassExplorer.prototype.updateNamespaces = function (nsData) {
 
     var ns, e;
 
@@ -111,7 +124,7 @@ CacheUMLExplorer.prototype.updateNamespaces = function (nsData) {
 /**
  * @param {string} namespace
  */
-CacheUMLExplorer.prototype.setNamespace = function (namespace) {
+CacheClassExplorer.prototype.setNamespace = function (namespace) {
 
     var self = this;
 
@@ -125,7 +138,7 @@ CacheUMLExplorer.prototype.setNamespace = function (namespace) {
 
 };
 
-CacheUMLExplorer.prototype.updateURL = function () {
+CacheClassExplorer.prototype.updateURL = function () {
 
     var obj = {
         name: this.classTree.SELECTED_NAME,
@@ -138,7 +151,7 @@ CacheUMLExplorer.prototype.updateURL = function () {
 
 };
 
-CacheUMLExplorer.prototype.restoreFromURL = function () {
+CacheClassExplorer.prototype.restoreFromURL = function () {
 
     var hash = (location.hash || "").substr(1),
         obj;
@@ -158,7 +171,7 @@ CacheUMLExplorer.prototype.restoreFromURL = function () {
 
 };
 
-CacheUMLExplorer.prototype.init = function () {
+CacheClassExplorer.prototype.init = function () {
 
     var self = this,
         restored;
@@ -177,7 +190,7 @@ CacheUMLExplorer.prototype.init = function () {
 
     this.elements.infoButton.addEventListener("click", function () {
         self.UI.displayMessage(
-            "Cach&eacute; UML explorer v"
+            "Cach&eacute; Class explorer v"
             + "[NOT-BUILT]"/*build.replace:"pkg.version"*/
             + "<br/>for InterSystems Cach&eacute;"
             + "<br/>By Nikita Savchenko"
@@ -198,6 +211,7 @@ CacheUMLExplorer.prototype.init = function () {
         self.elements.settingsView.classList.add("active");
     });
     this.elements.closeSettings.addEventListener("click", function () {
+        self.elements.settingsExtraText.textContent = "";
         self.elements.settingsView.classList.remove("active");
     });
 
