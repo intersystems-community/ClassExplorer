@@ -32,7 +32,7 @@ Logic.prototype.process = function (data) {
     if (!this.data.inheritance) this.data.inheritance = {};
     for (clsName in data.classes) {
         cls = data.classes[clsName];
-        if (cls.super) cls.super.split(",").forEach(function (name) {
+        if (cls.Super) cls.Super.split(",").forEach(function (name) {
             self.inherits(clsName, name);
         });
         if (cls.parameters && !this.umlExplorer.settings.showParameters) delete cls.parameters;
@@ -200,8 +200,8 @@ Logic.prototype.alignClassTypes = function () {
                 // try to get class type from parent
                 if (classObj.$classType) derivedObj.$classType = classObj.$classType;
                 // reassign class type from classType property
-                if (derivedObj.classType)
-                    derivedObj.$classType = self.getNormalClassType(derivedObj.classType);
+                if (derivedObj.ClassType)
+                    derivedObj.$classType = self.getNormalClassType(derivedObj.ClassType);
             }
             extendDerivedClasses(derivedClassName, derivedObj);
         });

@@ -112,7 +112,7 @@ ClassView.prototype.renderInfoGraphic = function () {
         basePackageName: "Welcome to Caché UML explorer!",
         classes: {
             "Shared object": {
-                super: "Super object",
+                Super: "Super object",
                 classType: "Serial",
                 parameters: {
                     "Also inherit Super object": {}
@@ -121,7 +121,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                 properties: {}
             },
             "Class name": {
-                super: "Super object",
+                Super: "Super object",
                 ABSTRACT: 1,
                 FINAL: 1,
                 HIDDEN: 1,
@@ -281,7 +281,7 @@ ClassView.prototype.filterInherits = function (data) {
 
     var f = function (p) {
         return filter.hasOwnProperty(p) || (data.classes[p] || {})["isDataType"] ||
-            lib.obj(((data.classes[p] || {}).super || "").split(",")).hasOwnProperty("%DataType");
+            lib.obj(((data.classes[p] || {}).Super || "").split(",")).hasOwnProperty("%DataType");
     };
 
     if (this.cacheUMLExplorer.settings.showDataTypesOnDiagram)
@@ -302,7 +302,7 @@ ClassView.prototype.filterInherits = function (data) {
 };
 
 /**
- * Returns array of signs to render or empry array.
+ * Returns array of signs to render or empty array.
  *
  * @param classMetaData
  */
@@ -319,25 +319,25 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
             });
         }
     }
-    if (classMetaData["ABSTRACT"]) signs.push({
+    if (classMetaData["Abstract"]) signs.push({
         icon: lib.image.crystalBall,
         text: "Abstract",
         textStyle: "fill:rgb(130,0,255)"
     });
-    if (classMetaData["FINAL"]) signs.push({
+    if (classMetaData["Final"]) signs.push({
         icon: lib.image.blueFlag,
         text: "Final",
         textStyle: "fill:rgb(130,0,255)"
     });
-    if (classMetaData["SYSTEM"]) signs.push({
+    if (classMetaData["System"]) signs.push({
         icon: lib.image.chip,
-        text: "System/" + classMetaData["SYSTEM"]
+        text: "System/" + classMetaData["System"]
     });
-    if (classMetaData["PROCEDUREBLOCK"] === 0) signs.push({
+    if (classMetaData["ProcedureBlock"] === 0) signs.push({
         icon: lib.image.moleculeCubeCross,
         text: "NotProcBlock"
     });
-    if (classMetaData["HIDDEN"]) signs.push({
+    if (classMetaData["Hidden"]) signs.push({
         icon: lib.image.ghost,
         text: "Hidden"
     });
@@ -445,8 +445,66 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
             // -- parameters
             "Encoded": 1,
             // -- queries
-            "SqlView": 1
+            "SqlView": 1,
+            // -- class
+            "ClientDataType": function (data, p) {
+                return !p["isDataType"] ? ""
+                    : "<span class=\"syntax-keyword\">ClientDataType</span>="
+                    + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "DdlAllowed": 1,
+            "Deployed": 1,
+            "Dynamic": 1,
+            "Inheritance": function (data) {
+                return data === "left" ? ""
+                    : "<span class=\"syntax-keyword\">Inheritance</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "Language": function (data) {
+                return data === "cache" ? ""
+                    : "<span class=\"syntax-keyword\">Language</span>="
+                + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "LegacyInstanceContext": 1,
+            // ModificationLevel ?
+            "NoExtent": 1,
+            "OdbcType": function (data, p) {
+                return !p["isOdbcType"] ? ""
+                    : "<span class=\"syntax-keyword\">OdbcType</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "ProcedureBlock": function (data) {
+                return data ? "" : "<span class=\"syntax-keyword\">Not ProcedureBlock</span>";
+            },
+            "SoapBindingStyle": function (data, p) {
+                return !p["isSoapBindingStyle"] ? ""
+                    : "<span class=\"syntax-keyword\">SoapBindingStyle</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SoapBodyUse": function (data, p) {
+                return !p["isSoapBodyUse"] ? ""
+                    : "<span class=\"syntax-keyword\">SoapBodyUse</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlCategory": function (data, p) {
+                return !p["isSqlCategory"] ? ""
+                    : "<span class=\"syntax-keyword\">SqlCategory</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlRowIdPrivate": 1,
+            "System": function (data) {
+                return !data ? ""
+                    : "<span class=\"syntax-keyword\">System</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>"
+            }
         };
+
+    if (type === "class" && prop["TimeChanged"] && prop["TimeCreated"]) {
+        desc += "<span class=\"syntax-keyword\">Changed</span>: "
+            + "<span class=\"syntax-string nowrap\">" + prop["TimeChanged"] + "</span>, "
+            + "<span class=\"syntax-keyword\">Created</span>: "
+            + "<span class=\"syntax-string nowrap\">" + prop["TimeCreated"] + "</span><br/>";
+    }
 
     if (ind = prop["index"]) {
         desc += "<span class=\"syntax-keyword\">INDEX</span> <span class=\"syntax-string\">"
@@ -462,7 +520,7 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
 
     var txt = [], val;
     for (i in prop) {
-        if (propText[i] && (prop[i] || i === "InitialExpression")) {
+        if (propText[i] && (prop[i] || i === "InitialExpression" || i === "ProcedureBlock")) {
             val = propText[i] === 1
                 ? "<span class=\"syntax-keyword\">" + i + "</span>"
                 : propText[i](prop[i], prop);
@@ -478,7 +536,7 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
 
     if (desc && type) {
         desc = "<span class=\"underlined\"><span class=\"syntax-keyword\">" + lib.capitalize(type)
-            + "</span> <span class=\"syntax-string\">" + (prop["Name"] || "") + "</span></span>:"
+            + "</span> <span class=\"syntax-other\">" + (prop["Name"] || "") + "</span></span>"
             + ("<br/>") + desc;
     }
 
@@ -504,8 +562,9 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         name: [{
             text: name,
             clickHandler: function () {
-                self.openClassDoc(name, classMetaData["NAMESPACE"]);
+                self.openClassDoc(name, self.cacheUMLExplorer.NAMESPACE);
             },
+            hover: self.getPropertyHoverText(classMetaData, "class"),
             styles: {
                 cursor: "help"
             }

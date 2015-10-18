@@ -320,3 +320,7 @@
 .clickable {
     cursor: pointer;
 }
+
+.nowrap {
+    white-space: nowrap;
+}
