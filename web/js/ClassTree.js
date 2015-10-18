@@ -186,13 +186,18 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
 
     };
 
+    var getRealName = function (modName) {
+        modName = modName + "";
+        return modName.slice((modName || "")[0] === "/" ? 1 : 0, modName.length);
+    };
+
     var build = function (rootElement, object, path, level) {
 
         var i, element, rec,
             arr = [];
 
         for (i in object) {
-            arr.push({ name: i, val: object[i] });
+            arr.push({ name: getRealName(i), val: object[i] });
         }
 
         arr.sort(function (a, b) {
@@ -209,7 +214,7 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
                     path.join("."),
                     level
                 )) {
-                build(rec, element.val, path.concat([element.name]), level + 1);
+                build(rec, element.val, path.concat([getRealName(element.name)]), level + 1);
             }
         }
 
