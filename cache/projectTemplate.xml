@@ -4,7 +4,7 @@
 <Description>
 Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63843,83200.096917</TimeChanged>
+<TimeChanged>63844,1327.122337</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -88,6 +88,7 @@ Return structured data about class.</Description>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set classDefinition = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+    set compiledClassDefinition = ##class(%Dictionary.CompiledClass).%OpenId(className)
     if (classDefinition = "") || (oData.classes.%DispatchGetProperty(classDefinition.Name) '= "") quit ""
 
     set oClass = ##class(%ZEN.proxyObject).%New()
@@ -112,6 +113,9 @@ Return structured data about class.</Description>
     }
     if (oClass.TimeChanged) { set oClass.TimeChanged = $zdatetime(oClass.TimeChanged) }
     if (oClass.TimeCreated) { set oClass.TimeCreated = $zdatetime(oClass.TimeCreated) }
+    if ((compiledClassDefinition '= "") && (compiledClassDefinition.ClassType '= "")) {
+        set oClass.ClassType = compiledClassDefinition.ClassType // set class type from all inherited classes
+    }
 
     set oClass.Super = "" // do not quit with super at this moment
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
