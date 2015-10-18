@@ -5,7 +5,7 @@
 var ClassView = function (parent, container) {
 
     this.container = container;
-    this.cacheUMLExplorer = parent;
+    this.cacheClassExplorer = parent;
 
     this.graph = null;
     this.paper = null;
@@ -82,7 +82,7 @@ ClassView.prototype.resetView = function () {
     this.graph.clear();
     this.HIGHLIGHTED_VIEW = null;
     this.SEARCH_INDEX = 0;
-    this.cacheUMLExplorer.elements.diagramSearch.value = "";
+    this.cacheClassExplorer.elements.diagramSearch.value = "";
 
 };
 
@@ -101,15 +101,15 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
  */
 ClassView.prototype.renderInfoGraphic = function () {
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME =
-        this.cacheUMLExplorer.elements.className.textContent =
-            "Welcome to Caché UML explorer!";
+    this.cacheClassExplorer.classTree.SELECTED_NAME =
+        this.cacheClassExplorer.elements.className.textContent =
+            "Welcome to Caché Class explorer!";
 
     location.hash = "{\"type\":\"help\"}";
 
     this.showLoader();
     this.render({
-        basePackageName: "Welcome to Caché UML explorer!",
+        basePackageName: "Welcome to Caché Class explorer!",
         classes: {
             "Shared object": {
                 Super: "Super object",
@@ -284,7 +284,7 @@ ClassView.prototype.filterInherits = function (data) {
             lib.obj(((data.classes[p] || {}).Super || "").split(",")).hasOwnProperty("%DataType");
     };
 
-    if (this.cacheUMLExplorer.settings.showDataTypesOnDiagram)
+    if (this.cacheClassExplorer.settings.showDataTypesOnDiagram)
         return;
 
     toFilter.forEach(function (p) {
@@ -310,7 +310,7 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 
     var signs = [], ct;
 
-    if (!this.cacheUMLExplorer.settings.showClassIcons) return signs;
+    if (!this.cacheClassExplorer.settings.showClassIcons) return signs;
 
     if (ct = classMetaData["$classType"]) {
         if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
@@ -356,6 +356,9 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 ClassView.prototype.getPropertyIcons = function (property) {
 
     var icons = [];
+
+    if (!this.cacheClassExplorer.settings.showPropertyIcons)
+        return [{ src: lib.image[(property["Private"] ? "minus" : "plus") + "Simple"] }];
 
     if (typeof property["Private"] !== "undefined") {
         icons.push({ src: lib.image[property["Private"] ? "minus" : "plus"] });
@@ -564,7 +567,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         name: [{
             text: name,
             clickHandler: function () {
-                self.openClassDoc(name, self.cacheUMLExplorer.NAMESPACE);
+                self.openClassDoc(name, self.cacheClassExplorer.NAMESPACE);
             },
             hover: self.getPropertyHoverText(classMetaData, "class"),
             styles: {
@@ -645,9 +648,9 @@ ClassView.prototype.showMethodCode = function (className, methodName) {
 
     var self = this;
 
-    this.cacheUMLExplorer.source.getMethod(className, methodName, function (err, data) {
+    this.cacheClassExplorer.source.getMethod(className, methodName, function (err, data) {
         if (err || data.error) {
-            self.cacheUMLExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
+            self.cacheClassExplorer.UI.displayMessage("Unable to get method \"" + methodName + "\"!");
             return;
         }
         self.showPanel({
@@ -682,7 +685,7 @@ ClassView.prototype.showQuery = function (className, queryData) {
  */
 ClassView.prototype.showPanel = function (data) {
 
-    var els = this.cacheUMLExplorer.elements;
+    var els = this.cacheClassExplorer.elements;
 
     data = data || {};
 
@@ -697,7 +700,7 @@ ClassView.prototype.showPanel = function (data) {
 
 ClassView.prototype.hideMethodCode = function () {
 
-    this.cacheUMLExplorer.elements.methodCodeView.classList.remove("active");
+    this.cacheClassExplorer.elements.methodCodeView.classList.remove("active");
 
 };
 
@@ -742,11 +745,11 @@ ClassView.prototype.render = function (data) {
         cS.parentNode.removeChild(cS);
         c2.parentNode.removeChild(c2);
         setTimeout(function () {
-            self.confirmRender(data); self.cacheUMLExplorer.UI.removeMessage();
+            self.confirmRender(data); self.cacheClassExplorer.UI.removeMessage();
         }, 25);
     });
     bOff.addEventListener("click", function () {
-        self.cacheUMLExplorer.UI.removeMessage();
+        self.cacheClassExplorer.UI.removeMessage();
     });
 
     c.appendChild(c1);
@@ -756,7 +759,7 @@ ClassView.prototype.render = function (data) {
     c2.appendChild(bOff);
     load.appendChild(lt);
     load.appendChild(spinner);
-    this.cacheUMLExplorer.UI.displayMessage(c, false);
+    this.cacheClassExplorer.UI.displayMessage(c, false);
 
 };
 
@@ -767,7 +770,6 @@ ClassView.prototype.confirmRender = function (data) {
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
-    console.log(data); // todo
     this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
@@ -865,22 +867,22 @@ ClassView.prototype.loadClass = function (className) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME = className;
-    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "class";
+    this.cacheClassExplorer.classTree.SELECTED_NAME = className;
+    this.cacheClassExplorer.classTree.SELECTED_TYPE = "class";
     this.showLoader();
-    this.cacheUMLExplorer.source.getClassView(className, function (err, data) {
+    this.cacheClassExplorer.source.getClassView(className, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
-            self.showLoader("Unable to get " + self.cacheUMLExplorer.classTree.SELECTED_NAME);
+            self.showLoader("Unable to get " + self.cacheClassExplorer.classTree.SELECTED_NAME);
             console.error.call(console, err);
         } else {
             self.render(data);
         }
     });
 
-    this.cacheUMLExplorer.elements.className.textContent = className;
-    this.cacheUMLExplorer.updateURL();
+    this.cacheClassExplorer.elements.className.textContent = className;
+    this.cacheClassExplorer.updateURL();
 
 };
 
@@ -888,10 +890,10 @@ ClassView.prototype.loadPackage = function (packageName) {
 
     var self = this;
 
-    this.cacheUMLExplorer.classTree.SELECTED_NAME = packageName;
-    this.cacheUMLExplorer.classTree.SELECTED_TYPE = "package";
+    this.cacheClassExplorer.classTree.SELECTED_NAME = packageName;
+    this.cacheClassExplorer.classTree.SELECTED_TYPE = "package";
     this.showLoader();
-    this.cacheUMLExplorer.source.getPackageView(packageName, function (err, data) {
+    this.cacheClassExplorer.source.getPackageView(packageName, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
@@ -902,8 +904,8 @@ ClassView.prototype.loadPackage = function (packageName) {
         }
     });
 
-    this.cacheUMLExplorer.elements.className.textContent = packageName;
-    this.cacheUMLExplorer.updateURL();
+    this.cacheClassExplorer.elements.className.textContent = packageName;
+    this.cacheClassExplorer.updateURL();
 
 };
 
@@ -919,8 +921,8 @@ ClassView.prototype.updateSizes = function () {
 ClassView.prototype.zoom = function (delta) {
 
     var scaleOld = this.PAPER_SCALE, scaleDelta;
-    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
-        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+    var sw = this.cacheClassExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheClassExplorer.elements.classViewContainer.offsetHeight,
         side = delta > 0 ? 1 : -1,
         ox = this.paper.options.origin.x,
         oy = this.paper.options.origin.y;
@@ -959,8 +961,8 @@ ClassView.prototype.focusOnInstance = function (jointInstance) {
  */
 ClassView.prototype.focusOnXY = function (x, y) {
 
-    var sw = this.cacheUMLExplorer.elements.classViewContainer.offsetWidth,
-        sh = this.cacheUMLExplorer.elements.classViewContainer.offsetHeight,
+    var sw = this.cacheClassExplorer.elements.classViewContainer.offsetWidth,
+        sh = this.cacheClassExplorer.elements.classViewContainer.offsetHeight,
         scale = this.PAPER_SCALE;
 
     this.paper.setOrigin(
@@ -1057,38 +1059,38 @@ ClassView.prototype.init = function () {
         relP.x = e.pageX; relP.y = e.pageY;
     };
 
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
-    this.cacheUMLExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("touchmove", moveHandler);
+    this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
         self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
     });
-    this.cacheUMLExplorer.elements.zoomInButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomInButton.addEventListener("click", function () {
         self.zoom(1);
     });
-    this.cacheUMLExplorer.elements.zoomOutButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomOutButton.addEventListener("click", function () {
         self.zoom(-1);
     });
-    this.cacheUMLExplorer.elements.zoomNormalButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.zoomNormalButton.addEventListener("click", function () {
         self.zoom(null);
     });
-    this.cacheUMLExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
         self.hideMethodCode();
     });
-    this.cacheUMLExplorer.elements.helpButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.helpButton.addEventListener("click", function () {
         self.renderInfoGraphic();
     });
-    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("input", function (e) {
+    this.cacheClassExplorer.elements.diagramSearch.addEventListener("input", function (e) {
         self.searchOnDiagram((e.target || e.srcElement).value);
     });
-    this.cacheUMLExplorer.elements.diagramSearch.addEventListener("keydown", function (e) {
+    this.cacheClassExplorer.elements.diagramSearch.addEventListener("keydown", function (e) {
         if (e.keyCode === 13) {
             self.SEARCH_INDEX++;
             self.searchOnDiagram((e.target || e.srcElement).value);
         }
     });
-    this.cacheUMLExplorer.elements.diagramSearchButton.addEventListener("click", function () {
+    this.cacheClassExplorer.elements.diagramSearchButton.addEventListener("click", function () {
         self.SEARCH_INDEX++;
-        self.searchOnDiagram(self.cacheUMLExplorer.elements.diagramSearch.value);
+        self.searchOnDiagram(self.cacheClassExplorer.elements.diagramSearch.value);
     });
 
     this.SYMBOL_12_WIDTH = (function () {

@@ -17217,7 +17217,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 // Shift all the <tspan> but first by one line (`1em`)
                 tspan = V('tspan', {
 					dy: (i == 0 ? '0em' : opt.lineHeight || '1em'),
-					x: xOrigin + (lines[i].icons ? lines[i].icons.length*10 + 2 : 0)
+					x: xOrigin + (lines[i].icons ? lines[i].icons.length*10 : 0)
 				});
                 tspan.addClass('line');
                 if (!lines[i].text) {
@@ -17264,7 +17264,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 						image.attr("width", 10);
 						image.attr("height", 10);
 						image.attr("y", textNode.getBoundingClientRect().top + i*(opt["font-size"] || 14) + 2);
-						image.attr("x", iconLeft);
+						image.attr("x", iconLeft - 1);
 						iconLeft += 10;
 						V(textNode.parentNode).append(image);
 						textNode.TRASH.push(image.node);

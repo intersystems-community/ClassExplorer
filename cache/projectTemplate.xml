@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 540)" ts="2015-04-28 19:50:48">
-<Class name="UMLExplorer.ClassView">
+<Class name="ClassExplorer.ClassView">
 <Description>
-Cache UML Explorer vX.X.X/*build.replace:pkg.version*/
+Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
 <TimeChanged>63843,83200.096917</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
@@ -365,19 +365,19 @@ Returns structured package data</Description>
 </Class>
 
 
-<Project name="UMLExplorer" LastModified="2015-05-24 18:14:48.579613">
+<Project name="ClassExplorer" LastModified="2015-05-24 18:14:48.579613">
   <Items>
-    <ProjectItem name="UMLExplorer.ClassView" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.Router" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.StaticContent" type="CLS"></ProjectItem>
-    <ProjectItem name="UMLExplorer.WebAppInstaller" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.ClassView" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.Router" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.StaticContent" type="CLS"></ProjectItem>
+    <ProjectItem name="ClassExplorer.WebAppInstaller" type="CLS"></ProjectItem>
   </Items>
 </Project>
 
 
-<Class name="UMLExplorer.Router">
+<Class name="ClassExplorer.Router">
 <Description>
-REST interface for UMLExplorer</Description>
+REST interface for ClassExplorer</Description>
 <Super>%CSP.REST</Super>
 <TimeChanged>63697,73073.878177</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
@@ -387,8 +387,8 @@ REST interface for UMLExplorer</Description>
 <Routes>
    <Route Url="/" Method="GET" Call="Index"/>
    <Route Url="/index" Method="GET" Call="Index"/>
-   <Route Url="/css/CacheUMLExplorer.css" Method="GET" Call="GetCss"/>
-   <Route Url="/js/CacheUMLExplorer.js" Method="GET" Call="GetJs"/>
+   <Route Url="/css/CacheClassExplorer.css" Method="GET" Call="GetCss"/>
+   <Route Url="/js/CacheClassExplorer.js" Method="GET" Call="GetJs"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
    <Route Url="/GetClassView" Method="GET" Call="GetClassView"/>
@@ -405,7 +405,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -442,7 +442,7 @@ Return the list of all namespaces</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(UMLExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -500,7 +500,7 @@ Method returns user application HTML.</Description>
 </Class>
 
 
-<Class name="UMLExplorer.StaticContent">
+<Class name="ClassExplorer.StaticContent">
 <Description>
 Cache UML Explorer vX.X.X/*build.replace:pkg.version*/ static content generator.
 Class contains methods that return JS/CSS/HTML data for single page application.</Description>
@@ -514,7 +514,7 @@ Write the contents of xData tag</Description>
 <FormalSpec>Const:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("UMLExplorer.StaticContent||"_Const).Data
+    Set xdata = ##class(%Dictionary.CompiledXData).%OpenId("ClassExplorer.StaticContent||"_Const).Data
     set status=##class(%XML.TextReader).ParseStream(xdata, .textreader)
     while textreader.Read() { if (textreader.NodeType="chars") { w textreader.Value } }
     return $$$OK
@@ -547,7 +547,7 @@ Write the contents of xData tag</Description>
 </Class>
 
 
-<Class name="UMLExplorer.WebAppInstaller">
+<Class name="ClassExplorer.WebAppInstaller">
 <Super>%Projection.AbstractProjection</Super>
 <TimeChanged>63696,65168.289869</TimeChanged>
 <TimeCreated>63696,64041.85537</TimeCreated>
@@ -574,14 +574,14 @@ This method is invoked when a class is compiled.</Description>
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for Cache UML Explorer."
     set cspProperties("IsNameSpaceDefault") = 1
-    set cspProperties("DispatchClass") = "UMLExplorer.Router"
-    if ('##class(Security.Applications).Exists("/UMLExplorer")) {
-        w !, "Creating WEB application ""/UMLExplorer""..."
-        set tSC = ##class(Security.Applications).Create("/UMLExplorer", .cspProperties)
+    set cspProperties("DispatchClass") = "ClassExplorer.Router"
+    if ('##class(Security.Applications).Exists("/ClassExplorer")) {
+        w !, "Creating WEB application ""/ClassExplorer""..."
+        set tSC = ##class(Security.Applications).Create("/ClassExplorer", .cspProperties)
         if $$$ISERR(tSC) throw ##class(%Installer.Exception).CreateFromStatus(tSC)
-        w !, "WEB application ""/UMLExplorer"" created."
+        w !, "WEB application ""/ClassExplorer"" created."
     } else {
-        w !, "WEB application ""/UMLExplorer"" already exists, so it is ready to use."
+        w !, "WEB application ""/ClassExplorer"" already exists, so it is ready to use."
     }
     zn:ns'="%SYS" ns
     quit $$$OK
@@ -597,10 +597,10 @@ This method is invoked when a class is 'uncompiled'.</Description>
 <Implementation><![CDATA[
     set ns = $NAMESPACE
     zn:ns'="%SYS" "%SYS"
-    if (##class(Security.Applications).Exists("/UMLExplorer")) {
-        w !, "Deleting WEB application ""/UMLExplorer""..."
-        do ##class(Security.Applications).Delete("/UMLExplorer")
-        w !, "WEB application ""/UMLExplorer"" was successfully removed."
+    if (##class(Security.Applications).Exists("/ClassExplorer")) {
+        w !, "Deleting WEB application ""/ClassExplorer""..."
+        do ##class(Security.Applications).Delete("/ClassExplorer")
+        w !, "WEB application ""/ClassExplorer"" was successfully removed."
     }
     zn:ns'="%SYS" ns
     QUIT $$$OK

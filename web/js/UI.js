@@ -1,11 +1,11 @@
 /**
  * User interface functions.
- * @param {CacheUMLExplorer} cacheUMLExplorer
+ * @param {CacheClassExplorer} cacheUMLExplorer
  * @constructor
  */
 var UI = function (cacheUMLExplorer) {
 
-    this.cacheUMLExplorer = cacheUMLExplorer;
+    this.cacheClassExplorer = cacheUMLExplorer;
     this.BODY = cacheUMLExplorer.elements.uiBody;
 
     /**

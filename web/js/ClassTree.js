@@ -1,6 +1,6 @@
 /**
  * Class tree representation.
- * @param {CacheUMLExplorer} parent
+ * @param {CacheClassExplorer} parent
  * @param {HTMLElement} treeViewContainer
  * @constructor
  */
@@ -8,7 +8,7 @@ var ClassTree = function (parent, treeViewContainer) {
 
     var self = this;
 
-    this.cacheUMLExplorer = parent;
+    this.cacheClassExplorer = parent;
     this.container = treeViewContainer;
     this.loader = null;
     this.SELECTED_NAME = null;
@@ -16,7 +16,7 @@ var ClassTree = function (parent, treeViewContainer) {
     this.SELECTED_ELEMENT = null;
     this.treeObject = null;
 
-    this.cacheUMLExplorer.elements.classTreeSearch.addEventListener("input", function (e) {
+    this.cacheClassExplorer.elements.classTreeSearch.addEventListener("input", function (e) {
         self.searchChanged.call(self, (e.target || e.srcElement).value);
     });
 
@@ -30,9 +30,9 @@ var ClassTree = function (parent, treeViewContainer) {
 
 ClassTree.prototype.updateSizes = function () {
 
-    var dh = this.cacheUMLExplorer.elements.searchBlock.clientHeight,
+    var dh = this.cacheClassExplorer.elements.searchBlock.clientHeight,
         h = window.innerHeight - dh,
-        b = this.cacheUMLExplorer.elements.treeViewContainer;
+        b = this.cacheClassExplorer.elements.treeViewContainer;
 
     b.style.paddingTop = 0;
     b.style.marginTop = dh + "px";
@@ -44,7 +44,7 @@ ClassTree.prototype.showLoader = function () {
 
     if (this.loader) return;
 
-    this.cacheUMLExplorer.elements.classTreeSearch.value = "";
+    this.cacheClassExplorer.elements.classTreeSearch.value = "";
     this.treeObject = null;
     this.loader = document.createElement("div");
     this.loader.className = "spinner";
@@ -56,7 +56,7 @@ ClassTree.prototype.removeLoader = function () {
 
     if (!this.loader) return;
 
-    this.cacheUMLExplorer.elements.classTreeSearch.value = "";
+    this.cacheClassExplorer.elements.classTreeSearch.value = "";
     this.loader.parentNode.removeChild(this.loader);
     this.loader = null;
 
@@ -71,7 +71,7 @@ ClassTree.prototype.classSelected = function (element, className) {
 
     if (!element.classList.contains("selected")) {
         element.classList.add("selected");
-        this.cacheUMLExplorer.classView.loadClass(className);
+        this.cacheClassExplorer.classView.loadClass(className);
     }
 
 };
@@ -85,7 +85,7 @@ ClassTree.prototype.packageSelected = function (element, packageName) {
 
     if (!element.classList.contains("selected")) {
         element.classList.add("selected");
-        this.cacheUMLExplorer.classView.loadPackage(packageName);
+        this.cacheClassExplorer.classView.loadPackage(packageName);
     }
 
 };
