@@ -41,7 +41,8 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
             showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
             showParameters: id("setting.showParameters"),
             showProperties: id("setting.showProperties"),
-            showMethods: id("setting.showMethods")
+            showMethods: id("setting.showMethods"),
+            showQueries: id("setting.showQueries")
         }
     };
 
@@ -55,7 +56,8 @@ var CacheUMLExplorer = function (treeViewContainer, classViewContainer) {
         showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
         showParameters: settingsValue("showParameters", true),
         showProperties: settingsValue("showProperties", true),
-        showMethods: settingsValue("showMethods", true)
+        showMethods: settingsValue("showMethods", true),
+        showQueries: settingsValue("showQueries", true)
     };
 
     this.UI = new UI(this);

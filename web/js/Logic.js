@@ -38,6 +38,7 @@ Logic.prototype.process = function (data) {
         if (cls.parameters && !this.umlExplorer.settings.showParameters) delete cls.parameters;
         if (cls.properties && !this.umlExplorer.settings.showProperties) delete cls.properties;
         if (cls.methods && !this.umlExplorer.settings.showMethods) delete cls.methods;
+        if (cls.queries && !this.umlExplorer.settings.showQueries) delete cls.queries;
     }
 
     this.alignClassTypes(); // call after inheritance scheme done
