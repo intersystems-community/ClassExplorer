@@ -49,6 +49,7 @@ Logic.prototype.process = function (data) {
     }
 
     this.fillAssociations();
+    this.fillIndices();
 
     delete data.classes["%Persistent"];
     delete data.classes["%Library.Persistent"];
@@ -58,6 +59,30 @@ Logic.prototype.process = function (data) {
     delete data.classes["%RegisteredObject"];
     delete data.classes["%Library.DataType"];
     delete data.classes["%DataType"];
+
+};
+
+Logic.prototype.fillIndices = function () {
+
+    var className, cls, indexName, j, index, props, propName;
+
+    for (className in this.data.classes) {
+        cls = this.data.classes[className];
+        for (indexName in cls.indices) {
+            index = cls.indices[indexName];
+            props = index["Properties"].split(",");
+            for (j in props) {
+                if (cls.properties[propName = props[j].match(/[^\(]+/)[0]]) {
+                    cls.properties[propName].index = index;
+                } else {
+                    console.warn(
+                        "No property", propName, "defined in", className,"to assign index",
+                        indexName, "to."
+                    );
+                }
+            }
+        }
+    }
 
 };
 

@@ -2,7 +2,7 @@ var HoverMessage = function (text, clickHandler) {
 
     var self = this;
 
-    this.clickHandler = typeof clickHandler === "function" ? clickHandler : function () {};
+    this.clickHandler = typeof clickHandler === "function" ? clickHandler : null;
     this.element = document.createElement("div");
     this.element.className = "hoverMessage";
     this.element.innerHTML = text;
@@ -19,9 +19,13 @@ var HoverMessage = function (text, clickHandler) {
             })(e, this))) return;
         self.detach();
     });
-    this.container.addEventListener("click", function () {
-        self.clickHandler();
-    });
+
+    if (this.clickHandler) {
+        if (this.container.classList) this.container.classList.add("clickable");
+        this.container.addEventListener("click", function () {
+            if (!lib.getSelection()) self.clickHandler();
+        });
+    }
 
 };
 
@@ -30,7 +34,8 @@ HoverMessage.prototype.attach = function (screenX, screenY) {
     var e = this.container, w;
 
     document.body.appendChild(e);
-    e.style.width = (w = Math.min(e.offsetWidth, window.innerWidth/2)) + "px";
+    // +1 to width fixes "X.4234" rational part that may appear on SVG
+    e.style.width = (w = Math.ceil(Math.min(e.offsetWidth, window.innerWidth/2) + 1)) + "px";
     e.style.top = (screenY - e.offsetHeight + 15) + "px";
     e.style.left = Math.min(window.innerWidth - w - 10, screenX - w/2) + "px";
 

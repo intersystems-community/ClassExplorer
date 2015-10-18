@@ -133,7 +133,7 @@ ClassView.prototype.renderInfoGraphic = function () {
                         abstract: 1
                     },
                     "Class method": {
-                        classMethod: 1
+                        ClassMethod: 1
                     },
                     "Client method": {
                         clientMethod: 1
@@ -349,25 +349,140 @@ ClassView.prototype.getClassSigns = function (classMetaData) {
 /**
  * Returns array of icons according to method metadata.
  *
- * @param method
+ * @param property
  */
-ClassView.prototype.getPropertyIcons = function (method) {
+ClassView.prototype.getPropertyIcons = function (property) {
 
     var icons = [];
 
-    if (typeof method["Private"] !== "undefined") {
-        icons.push({ src: lib.image[method["Private"] ? "minus" : "plus"] });
+    if (typeof property["Private"] !== "undefined") {
+        icons.push({ src: lib.image[property["Private"] ? "minus" : "plus"] });
     }
-    if (method["Abstract"]) icons.push({ src: lib.image.crystalBall });
-    if (method["ClientMethod"]) icons.push({ src: lib.image.user });
-    if (method["Final"]) icons.push({ src: lib.image.blueFlag });
-    if (method["NotInheritable"]) icons.push({ src: lib.image.redFlag });
-    if (method["SqlProc"]) icons.push({ src: lib.image.table });
-    if (method["WebMethod"]) icons.push({ src: lib.image.earth });
-    if (method["ZenMethod"]) icons.push({ src: lib.image.zed });
-    if (method["ReadOnly"]) icons.push({ src: lib.image.eye });
+    if (property["Abstract"]) icons.push({ src: lib.image.crystalBall });
+    if (property["ClientMethod"]) icons.push({ src: lib.image.user });
+    if (property["Final"]) icons.push({ src: lib.image.blueFlag });
+    if (property["NotInheritable"]) icons.push({ src: lib.image.redFlag });
+    if (property["SqlProc"]) icons.push({ src: lib.image.table });
+    if (property["WebMethod"]) icons.push({ src: lib.image.earth });
+    if (property["ZenMethod"]) icons.push({ src: lib.image.zed });
+    if (property["ReadOnly"]) icons.push({ src: lib.image.eye });
+    if (property["index"]) {
+        icons.push(
+            property["index"]["Unique"] ? { src: lib.image.keyRed }
+            : (property["index"]["PrimaryKey"] || property["index"]["IDKey"])
+            ? { src: lib.image.keyGreen } : { src: lib.image.keyYellow }
+        );
+    }
 
     return icons;
+
+};
+
+/**
+ * @param prop
+ * @param {string} type = ["parameter", "property", "method", "query"]
+ * @returns {string}
+ */
+ClassView.prototype.getPropertyHoverText = function (prop, type) {
+
+    var ind, i, desc = "",
+        indexText = {
+            "IdKey": function () { return "IdKey"; },
+            "Type": function (type) { return "Type="+type; },
+            "Internal": function () { return "Internal"; },
+            "Extent": function () { return "Extent"; },
+            "PrimaryKey": function () { return "PrimaryKey"; },
+            "Unique": function () { return "Unique"; }
+        },
+        propText = {
+            "Calculated": 1,
+            "Final": 1,
+            "Identity": 1,
+            "InitialExpression": function (data) {
+                return (data === "\"\"")
+                    ? ""
+                    : "<span class=\"syntax-keyword\">InitialExpression</span>="
+                        + lib.highlightCOS(data + "")
+            },
+            "Internal": 1,
+            "MultiDimensional": 1,
+            "NoModBit": 1,
+            "NotInheritable": 1,
+            "Private": 1,
+            "ReadOnly": 1,
+            "Relationship": function (data, p) {
+                return "<span class=\"syntax-keyword\">Relationship</span> [ Cardinality="
+                    + p["Cardinality"] + ", Inverse=" + p["Inverse"] + " ]";
+            },
+            "Required": 1,
+            "SqlComputed": function (data, p) {
+                return p["SqlComputeCode"]
+                    ? "<span class=\"syntax-keyword\">SqlComputed</span> [ SqlComputeCode={"
+                        + lib.highlightCOS(p["SqlComputeCode"]) + "} ]"
+                    : "";
+            },
+            "Transient": 1,
+            // -- methods
+            "Abstract": 1,
+            // "ClassMethod": 1, - they're underlined
+            "ClientMethod": 1,
+            "CodeMode": function (data) {
+                return data === "code" ? "" : "<span class=\"syntax-keyword\">CodeMode</span>="
+                    + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "ForceGenerate": 1,
+            "NoContext": 1,
+            "NotForProperty": 1,
+            "ReturnResultsets": 1,
+            "SoapAction": function (data) {
+                return data === "[default]" ? ""
+                    : "<span class=\"syntax-keyword\">SoapAction</span>="
+                        + "<span class=\"syntax-string\">" + data + "</span>";
+            },
+            "SqlProc": 1,
+            "WebMethod": 1,
+            "ZenMethod": 1,
+            // -- parameters
+            "Encoded": 1,
+            // -- queries
+            "SqlView": 1
+        };
+
+    if (ind = prop["index"]) {
+        desc += "<span class=\"syntax-keyword\">INDEX</span> <span class=\"syntax-string\">"
+            + ind["Name"] + "</span> " + (function () {
+                var txt = [];
+                for (i in ind) {
+                    if (indexText[i] && ind[i]) txt.push(indexText[i](ind[i]));
+                }
+                return txt.join(", ");
+            })()
+            + "\n";
+    }
+
+    var txt = [], val;
+    for (i in prop) {
+        if (propText[i] && (prop[i] || i === "InitialExpression")) {
+            val = propText[i] === 1
+                ? "<span class=\"syntax-keyword\">" + i + "</span>"
+                : propText[i](prop[i], prop);
+            if (val !== "") txt.push(val);
+        }
+    }
+    if (txt.length) desc += txt.join(", ");
+
+    // Display FormalSpec in methods?
+
+    if (desc && prop["Description"]) desc += "<hr/>";
+    desc += prop["Description"] || "";
+
+    if (desc && type) {
+        desc = "<span class=\"underlined\"><span class=\"syntax-keyword\">" + lib.capitalize(type)
+            + "</span> <span class=\"syntax-string\">" + (prop["Name"] || "") + "</span></span>:"
+            + ("<br/>") + desc;
+    }
+
+    return desc;
 
 };
 
@@ -401,7 +516,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (params[n]["Type"] ? ": " + params[n]["Type"] : ""),
-                    hover: params[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(params[n], "parameter"),
                     icons: self.getPropertyIcons(params[n])
                 });
             }
@@ -413,7 +528,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 keyWordsArray.push(n);
                 arr.push({
                     text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
-                    hover: ps[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(ps[n], "property"),
                     icons: self.getPropertyIcons(ps[n])
                 });
             }
@@ -427,11 +542,11 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                     text: n + (met[n]["ReturnType"] ? ": " + met[n]["ReturnType"] : ""),
                     styles: (function (t) {
                         return t ? { textDecoration: "underline" } : {}
-                    })(met[n]["classMethod"]),
+                    })(met[n]["ClassMethod"]),
                     clickHandler: (function (n) {
                         return function () { self.showMethodCode(name, n); }
                     })(n),
-                    hover: met[n]["Description"] || "",
+                    hover: self.getPropertyHoverText(met[n], "method"),
                     icons: self.getPropertyIcons(met[n])
                 });
             }
@@ -444,7 +559,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
                 arr.push({
                     text: n,
                     icons: self.getPropertyIcons(qrs[n]),
-                    hover: qrs[n]["SqlQuery"],
+                    hover: self.getPropertyHoverText(qrs[n], "query"),
                     clickHandler: (function (q, className) {
                         return function () { self.showQuery(className, q); }
                     })(qrs[n], name)

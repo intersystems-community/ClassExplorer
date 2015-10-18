@@ -13,6 +13,7 @@
 
 .line-hoverable {
     cursor: pointer;
+    font-style: italic;
     -webkit-transition: all .5s ease;
     -moz-transition: all .5s ease;
     -o-transition: all .5s ease;
@@ -30,6 +31,5 @@
     left: 0;
     top: 0;
     padding: 20px;
-    cursor: pointer;
 
 }
