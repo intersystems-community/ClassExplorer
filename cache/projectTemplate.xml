@@ -541,7 +541,7 @@ Issue an "304 Not Modified" status</Description>
 
 <Class name="ClassExplorer.StaticContent">
 <Description>
-Cache UML Explorer vX.X.X/*build.replace:pkg.version*/ static content generator.
+Cache Class Explorer vX.X.X/*build.replace:pkg.version*/ static content generator.
 Class contains methods that return JS/CSS/HTML data for single page application.</Description>
 <TimeChanged>63670,71368.846177</TimeChanged>
 <TimeCreated>63663,71456.865723</TimeCreated>
@@ -611,7 +611,7 @@ This method is invoked when a class is compiled.</Description>
         set cspProperties("AutheEnabled") = 32 // Password
     }
     set cspProperties("NameSpace") = ns
-    set cspProperties("Description") = "A WEB application for Cache UML Explorer."
+    set cspProperties("Description") = "A WEB application for Cache Class Explorer."
     set cspProperties("IsNameSpaceDefault") = 1
     set cspProperties("DispatchClass") = "ClassExplorer.Router"
     if ('##class(Security.Applications).Exists("/ClassExplorer")) {
