@@ -324,3 +324,12 @@
 .nowrap {
     white-space: nowrap;
 }
+
+.leftAligned {
+    text-align: left;
+}
+
+.inlineBlock {
+    display: inline-block;
+    vertical-align: top;
+}

@@ -17130,7 +17130,11 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 return box;
             }
 
-            var matrix = this.node.getTransformToElement(target || this.node.ownerSVGElement);
+            try {
+				var matrix = this.node.getTransformToElement(target || this.node.ownerSVGElement);
+			} catch (e) {
+				return box;
+			}
 
             return V.transformRect(box, matrix);
         },
@@ -17263,6 +17267,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 						image.attr("xlink:href", ic.src);
 						image.attr("width", 10);
 						image.attr("height", 10);
+						//console.log(textNode.getBoundingClientRect()); // todo: substract SVG screen Y position
 						image.attr("y", textNode.getBoundingClientRect().top + i*(opt["font-size"] || 14) + 2);
 						image.attr("x", iconLeft - 1);
 						iconLeft += 10;
@@ -17425,7 +17430,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             translateFinal.setTranslate(position.x + (position.x - finalPosition.x), position.y + (position.y - finalPosition.y));
 
             // 4. Apply transformations.
-            var ctm = this.node.getTransformToElement(target);
+            try {var ctm = this.node.getTransformToElement(target);
             var transform = svg.createSVGTransform();
             transform.setMatrix(
                 translateFinal.matrix.multiply(
@@ -17442,7 +17447,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             var decomposition = decomposeMatrix(transform.matrix);
 
             this.translate(decomposition.translateX, decomposition.translateY);
-            this.rotate(decomposition.rotation);
+            this.rotate(decomposition.rotation);}catch(e){}
             // Note that scale has been already applied, hence the following line stays commented. (it's here just for reference).
             //this.scale(decomposition.scaleX, decomposition.scaleY);
 
@@ -23293,8 +23298,8 @@ joint.dia.Paper = Backbone.View.extend({
         var viewportCTM = this.viewport.getCTM();
 
         var bbox = g.rect({
-            x: crect.left - screenCTM.e + viewportCTM.e,
-            y: crect.top - screenCTM.f + viewportCTM.f,
+            x: crect.left - (screenCTM ? screenCTM.e : 0) + (viewportCTM ? viewportCTM.e : 0),
+            y: crect.top - (screenCTM ? screenCTM.f : 0) + (viewportCTM ? viewportCTM.f : 0),
             width: crect.width,
             height: crect.height
         });
