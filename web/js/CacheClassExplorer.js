@@ -37,6 +37,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         diagramSearchButton: id("button.diagramSearch"),
         settingsView: id("settingsView"),
         closeSettings: id("closeSettings"),
+        helpView: id("helpView"),
+        closeHelp: id("closeHelp"),
         settingsExtraText: id("settingsExtraText"),
         settings: {
             showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
@@ -66,13 +68,17 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
     };
 
     this.UI = new UI(this);
-    this.source = new Source(this);
-    this.classTree = new ClassTree(this, treeViewContainer);
+    if (treeViewContainer) {
+        this.source = new Source(this);
+        this.classTree = new ClassTree(this, treeViewContainer);
+    }
     this.classView = new ClassView(this, classViewContainer);
     this.NAMESPACE = null;
 
-    this.initSettings();
-    this.init();
+    if (treeViewContainer) {
+        this.initSettings();
+        this.init();
+    }
 
 };
 
@@ -206,6 +212,12 @@ CacheClassExplorer.prototype.init = function () {
         if (ns !== self.NAMESPACE) {
             self.setNamespace(ns);
         }
+    });
+    this.elements.helpButton.addEventListener("click", function () {
+        self.elements.helpView.classList.add("active");
+    });
+    this.elements.closeHelp.addEventListener("click", function () {
+        self.elements.helpView.classList.remove("active");
     });
     this.elements.showSettingsButton.addEventListener("click", function () {
         self.elements.settingsView.classList.add("active");

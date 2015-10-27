@@ -4,7 +4,7 @@
 <Description>
 Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63844,1327.122337</TimeChanged>
+<TimeChanged>63844,1495</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">

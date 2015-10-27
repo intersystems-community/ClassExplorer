@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/joint.min.css"/>
     <link rel="stylesheet" href="css/methodCodeView.css"/>
     <link rel="stylesheet" href="css/settingsView.css"/>
+    <link rel="stylesheet" href="css/helpView.css"/>
     <link rel="stylesheet" href="css/hoverMessage.css"/>
     <!-- endbuild -->
     <!-- build:js -->
@@ -136,6 +137,155 @@
                         <p id="settingsExtraText"></p>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div id="helpView">
+            <div class="head">
+                <div id="closeHelp" class="icon cross"></div>
+                <h2>Caché Class Explorer Help</h2>
+            </div>
+            <div class="body">
+                <p>
+                    This info graphics below shows all the basics of designations on the diagram.
+                </p>
+                <div>
+                    <div class="inlineBlock">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th colspan="4" class="leftAligned"><h2>Class Types</h2></th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Registered": {  } }
+                                        }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Persistent": { "ClassType": "Persistent" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Serial": { "ClassType": "Serial" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Data Type": { "ClassType": "DataType" } }
+                                    }</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th colspan="2" class="leftAligned"><h2>Connection Types</h2></th>
+                            </tr>
+                            <tr>
+                                <th class="leftAligned">Association</th>
+                                <td>
+                                    <div name="injector">{
+                                        "layoutDirection": "LR",
+                                        "classes": {
+                                            "Class A": { "properties": { "Property": { "Type": "Class B" } } },
+                                            "Class B": { "ClassType": "Persistent" }
+                                        }
+                                    }</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="leftAligned">One - to - Many</th>
+                                <td>
+                                    <div name="injector">{
+                                        "layoutDirection": "LR",
+                                        "classes": {
+                                            "Class A": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "one", "Type": "Class B" } } },
+                                            "Class B": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "many", "Type": "Class A" } } }
+                                        }
+                                    }</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="leftAligned">Parent - to - Child</th>
+                                <td>
+                                    <div name="injector">{
+                                        "layoutDirection": "LR",
+                                        "classes": {
+                                            "Class B": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "child", "Type": "Class A" } } },
+                                            "Class A": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "parent", "Type": "Class B" } } }
+                                        }
+                                    }</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="leftAligned">Inheritance</th>
+                                <td>
+                                    <div name="injector">{
+                                        "layoutDirection": "LR",
+                                        "classes": {
+                                            "Derived Class": { "ClassType": "Persistent", "Super": "Inherited Class", "properties": { "Property": { "Type": "Nothing" } } },
+                                            "Inherited Class": { "ClassType": "DataType", "properties": { "Property": { "Type": "Nothing" } } }
+                                        }
+                                    }</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="inlineBlock">
+                        <h2>Icons Description</h2>
+                        <table>
+                            <tr><td name="icon">crystalBall</td><td>Abstract</td></tr>
+                            <tr><td name="icon">blueFlag</td><td>Final</td></tr>
+                            <tr><td name="icon">moleculeCubeCross</td><td>Not a Procedure Block</td></tr>
+                            <tr><td name="icon">ghost</td><td>Hidden</td></tr>
+                            <tr><td name="icon">minus</td><td>Private</td></tr>
+                            <tr><td name="icon">plus</td><td>Public</td></tr>
+                            <tr><td name="icon">keyRed</td><td>Unique Key</td></tr>
+                            <tr><td name="icon">keyGreen</td><td>Primary Key or ID Key</td></tr>
+                            <tr><td name="icon">keyYellow</td><td>Just a Key</td></tr>
+                            <tr><td name="icon">user</td><td>Client Method</td></tr>
+                            <tr><td name="icon">redFlag</td><td>Not Inheritable</td></tr>
+                            <tr><td name="icon">table</td><td>SQL Procedure</td></tr>
+                            <tr><td name="icon">earth</td><td>WEB Method</td></tr>
+                            <tr><td name="icon">zed</td><td>ZEN Method</td></tr>
+                            <tr><td name="icon">eye</td><td>Read Only</td></tr>
+
+                        </table>
+                    </div>
+                </div>
+                <p>
+                    Some of the class properties or parameters and all of the methods and SQL procedures
+                    <b>are clickable</b>. You can click them and get additional information such as code of
+                    the method or code of SQL procedure.
+                </p>
+                <p>
+                    Elements which have italic font are <b>hoverable</b>. You can hover over them
+                    to get additional information. Non-hoverable elements are usually those which
+                    does not have any keywords or comments defined.
+                </p>
+                <script>
+                    var cont = [].slice.call(document.querySelectorAll("#helpView *[name=injector]")),
+                        cont2 = [].slice.call(document.querySelectorAll("#helpView *[name=icon]")), i;
+                    for (i in cont) {
+                        var ue, json = {
+                            classes: { "Unable to parse JSON": {  } }
+                        };
+                        try { json = JSON.parse(cont[i].textContent) } catch (e) {  }
+                        cont[i].textContent = "";
+                        ue = new CacheClassExplorer(null, cont[i]);
+                        ue.classView.injectView(json);
+                    }
+                    for (i in cont2) {
+                        var ico = lib.image[cont2[i].textContent];
+                        if (ico) {
+                            cont2[i].innerHTML = "<img src=\"" + ico + "\"/>"
+                        }
+                    }
+                </script>
             </div>
         </div>
     </div>

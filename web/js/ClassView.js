@@ -97,6 +97,29 @@ ClassView.prototype.openClassDoc = function (className, nameSpace) {
 };
 
 /**
+ * This function is useful when there is a need to render any user content.
+ * @param data
+ * @param fitSize
+ */
+ClassView.prototype.injectView = function (data, fitSize) {
+
+    if (typeof fitSize === "undefined") fitSize = true;
+
+    this.showLoader();
+    this.render(data);
+    this.paper.setOrigin(0.5, 0.5);
+    this.removeLoader();
+
+    if (!fitSize) return;
+
+    var content = this.paper.getContentBBox();
+    this.container.style.width = (content.width + 1) + "px";
+    this.container.style.height = (content.height + 1) + "px";
+    this.updateSizes();
+
+};
+
+/**
  * Render help info
  */
 ClassView.prototype.renderInfoGraphic = function () {
@@ -111,148 +134,12 @@ ClassView.prototype.renderInfoGraphic = function () {
     this.render({
         basePackageName: "Welcome to Caché Class explorer!",
         classes: {
-            "Shared object": {
-                Super: "Super object",
-                classType: "Serial",
-                parameters: {
-                    "Also inherit Super object": {}
-                },
-                methods: {},
-                properties: {}
-            },
-            "Class name": {
-                Super: "Super object",
-                ABSTRACT: 1,
-                FINAL: 1,
-                HIDDEN: 1,
-                NAMESPACE: "SAMPLES",
-                PROCEDUREBLOCK: 0,
-                SYSTEM: 4,
-                methods: {
-                    "Abstract public method": {
-                        abstract: 1
-                    },
-                    "Class method": {
-                        ClassMethod: 1
-                    },
-                    "Client method": {
-                        clientMethod: 1
-                    },
-                    "Final method": {
-                        final: 1
-                    },
-                    "Not inheritable method": {
-                        notInheritable: 1
-                    },
-                    "Private method": {
-                        private: 1
-                    },
-                    "Sql procedure": {
-                        sqlProc: 1
-                    },
-                    "Web method": {
-                        webMethod: 1
-                    },
-                    "ZEN method": {
-                        zenMethod: 1
-                    },
-                    "Method": {
-                        returns: "%ReturnType"
-                    }
-                },
-                parameters: {
-                    "PARAMETER WITHOUT TYPE": {},
-                    "PARAMETER": {
-                        type: "Type"
-                    }
-                },
+            "Need Help?": {
                 properties: {
-                    "Public property name": {
-                        private: 0
-                    },
-                    "Private property name": {
-                        private: 1
-                    },
-                    "Public read-only property": {
-                        private: 0,
-                        readOnly: 1
-                    },
-                    "Property": {
-                        type: "Type of property"
-                    },
-                    "Other object": {
-                        private: 0,
-                        type: "Any other object"
-                    },
-                    "Another object": {
-                        private: 1,
-                        type: "Not shared object"
-                    }
-                }
-            },
-            "Super object": {
-                classType: "Persistent",
-                methods: {},
-                properties: {},
-                parameters: {
-                    "(This class is %Persistent)": {}
-                }
-            },
-            "HELP": {
-                parameters: {
-                    "See the basics here!": {}
-                }
-            },
-            "Registered class": {
-                $classType: "Registered"
-            },
-            "Persistent class (one)": {
-                $classType: "Persistent"
-            },
-            "Serial class": {
-                $classType: "Serial"
-            },
-            "DataType class (many)": {
-                $classType: "DataType"
-            },
-            "Associated object": {
-                properties: {
-                    "Association": {
-                        type: "Class name"
-                    }
+                    "Click the \"?\" button above!": {}
                 }
             }
-        },
-        association: {
-            "Registered class": {
-                "Serial class": {}
-            },
-            "Serial class": {
-                "Persistent class (one)": {}
-            },
-            "DataType class (many)": {
-                "Registered class": {}
-            }
-        },
-        aggregation: {
-            "Persistent class (one)": {
-                "DataType class (many)": {
-                    left: "many",
-                    right: "one"
-                }
-            }
-        },
-        composition: {},
-        //aggregation: {
-        //    "Class name": {
-        //        "Shared object": "1..1"
-        //    }
-        //},
-        inheritance: {
-            "Class name": { "Super object": 1 },
-            "Shared object": { "Super object": 1 }
-        },
-        restrictPackage: 1
+        }
     });
 
     this.removeLoader();
@@ -308,19 +195,19 @@ ClassView.prototype.filterInherits = function (data) {
  */
 ClassView.prototype.getClassSigns = function (classMetaData) {
 
-    var signs = [], ct;
+    var signs = [];
 
     if (!this.cacheClassExplorer.settings.showClassIcons) return signs;
 
-    if (ct = classMetaData["$classType"]) {
-        if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
-            signs.push({
-                icon: lib.image.greenPill,
-                text: ct,
-                textStyle: "fill:rgb(130,0,255)"
-            });
-        }
-    }
+    //if (ct = classMetaData["$classType"]) {
+    //    if (ct !== "Serial" && ct !== "Registered" && ct !== "Persistent" && ct !== "DataType") {
+    //        signs.push({
+    //            icon: lib.image.greenPill,
+    //            text: ct,
+    //            textStyle: "fill:rgb(130,0,255)"
+    //        });
+    //    }
+    //}
     if (classMetaData["Abstract"]) signs.push({
         icon: lib.image.crystalBall,
         text: "Abstract",
@@ -844,7 +731,8 @@ ClassView.prototype.confirmRender = function (data) {
         setLinkVertices: false,
         nodeSep: 100,
         rankSep: 100,
-        edgeSep: 20
+        edgeSep: 20,
+        rankDir: data.layoutDirection || "TB"
     });
 
     this.updateSizes();
@@ -1064,6 +952,25 @@ ClassView.prototype.init = function () {
     this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousewheel", function (e) {
         self.zoom(Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail))));
     });
+
+    this.SYMBOL_12_WIDTH = (function () {
+        var e = document.createElementNS("http://www.w3.org/2000/svg", "text"),
+        s = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
+        w;
+        s.appendChild(e);
+        s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        s.setAttribute("version", "1.1");
+        e.setAttribute("font-family", "monospace");
+        e.setAttribute("font-size", "12");
+        e.textContent = "aBcDeFgGhH";
+        document.body.appendChild(s);
+        w = e.getBBox().width / 10;
+        s.parentNode.removeChild(s);
+        return w;
+    })();
+
+    if (!this.cacheClassExplorer.elements.treeViewContainer) return; //          DEAD END         \\
+
     this.cacheClassExplorer.elements.zoomInButton.addEventListener("click", function () {
         self.zoom(1);
     });
@@ -1075,9 +982,6 @@ ClassView.prototype.init = function () {
     });
     this.cacheClassExplorer.elements.closeMethodCodeView.addEventListener("click", function () {
         self.hideMethodCode();
-    });
-    this.cacheClassExplorer.elements.helpButton.addEventListener("click", function () {
-        self.renderInfoGraphic();
     });
     this.cacheClassExplorer.elements.diagramSearch.addEventListener("input", function (e) {
         self.searchOnDiagram((e.target || e.srcElement).value);
@@ -1092,22 +996,6 @@ ClassView.prototype.init = function () {
         self.SEARCH_INDEX++;
         self.searchOnDiagram(self.cacheClassExplorer.elements.diagramSearch.value);
     });
-
-    this.SYMBOL_12_WIDTH = (function () {
-        var e = document.createElementNS("http://www.w3.org/2000/svg", "text"),
-            s = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
-            w;
-        s.appendChild(e);
-        s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        s.setAttribute("version", "1.1");
-        e.setAttribute("font-family", "monospace");
-        e.setAttribute("font-size", "12");
-        e.textContent = "aBcDeFgGhH";
-        document.body.appendChild(s);
-        w = e.getBBox().width / 10;
-        s.parentNode.removeChild(s);
-        return w;
-    })();
 
 };
 
