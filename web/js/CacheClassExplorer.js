@@ -74,6 +74,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
     }
     this.classView = new ClassView(this, classViewContainer);
     this.NAMESPACE = null;
+    this.HELP_INITIALIZED = false;
 
     if (treeViewContainer) {
         this.initSettings();
@@ -177,6 +178,31 @@ CacheClassExplorer.prototype.restoreFromURL = function () {
 
 };
 
+CacheClassExplorer.prototype.initHelp = function () {
+
+    if (this.HELP_INITIALIZED) return;
+    this.HELP_INITIALIZED = true;
+
+    var cont = [].slice.call(document.querySelectorAll("#helpView *[name=injector]")),
+    cont2 = [].slice.call(document.querySelectorAll("#helpView *[name=icon]")), i;
+    for (i in cont) {
+        var ue, json = {
+            classes: { "Unable to parse JSON": {  } }
+        };
+        try { json = JSON.parse(cont[i].textContent) } catch (e) {  }
+        cont[i].textContent = "";
+        ue = new CacheClassExplorer(null, cont[i]);
+        ue.classView.injectView(json);
+    }
+    for (i in cont2) {
+        var ico = lib.image[cont2[i].textContent];
+        if (ico) {
+            cont2[i].innerHTML = "<img src=\"" + ico + "\"/>"
+        }
+    }
+
+};
+
 CacheClassExplorer.prototype.init = function () {
 
     var self = this,
@@ -214,6 +240,7 @@ CacheClassExplorer.prototype.init = function () {
         }
     });
     this.elements.helpButton.addEventListener("click", function () {
+        self.initHelp();
         self.elements.helpView.classList.add("active");
     });
     this.elements.closeHelp.addEventListener("click", function () {

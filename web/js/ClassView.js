@@ -331,6 +331,9 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
                     : "<span class=\"syntax-keyword\">SoapAction</span>="
                         + "<span class=\"syntax-string\">" + data + "</span>";
             },
+            "Default": function (data) {
+                return "Default = " + lib.highlightCOS(data + "");
+            },
             "SqlProc": 1,
             "WebMethod": 1,
             "ZenMethod": 1,
@@ -412,7 +415,7 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
 
     var txt = [], val;
     for (i in prop) {
-        if (propText[i] && (prop[i] || i === "InitialExpression" || i === "ProcedureBlock")) {
+        if (propText[i] && (prop[i] || i === "InitialExpression" || i === "ProcedureBlock" || i === "Default")) {
             val = propText[i] === 1
                 ? "<span class=\"syntax-keyword\">" + i + "</span>"
                 : propText[i](prop[i], prop);
@@ -466,6 +469,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in params) {
                 keyWordsArray.push(n);
                 arr.push({
+                    name: n,
                     text: n + (params[n]["Type"] ? ": " + params[n]["Type"] : ""),
                     hover: self.getPropertyHoverText(params[n], "parameter"),
                     icons: self.getPropertyIcons(params[n])
@@ -478,6 +482,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in ps) {
                 keyWordsArray.push(n);
                 arr.push({
+                    name: n,
                     text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
                     hover: self.getPropertyHoverText(ps[n], "property"),
                     icons: self.getPropertyIcons(ps[n])
@@ -490,6 +495,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in met) {
                 keyWordsArray.push(n);
                 arr.push({
+                    name: n,
                     text: n + (met[n]["ReturnType"] ? ": " + met[n]["ReturnType"] : ""),
                     styles: (function (t) {
                         return t ? { textDecoration: "underline" } : {}
@@ -508,7 +514,8 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             for (n in qrs) {
                 keyWordsArray.push(n);
                 arr.push({
-                    text: n,
+                    name: n,
+                    text: n + (qrs[n]["Type"] ? ": " + qrs[n]["Type"] : ""),
                     icons: self.getPropertyIcons(qrs[n]),
                     hover: self.getPropertyHoverText(qrs[n], "query"),
                     clickHandler: (function (q, className) {
@@ -519,7 +526,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             return arr;
         })(classQueries),
         classSigns: this.getClassSigns(classMetaData),
-        classType: classMetaData.$classType,
+        classType: classMetaData.ClassType || "registered",
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
     });
 
@@ -678,7 +685,8 @@ ClassView.prototype.confirmRender = function (data) {
     var link = function (type) {
         var name = type === "inheritance" ? "Generalization" :
                 type === "aggregation" ? "Aggregation" : type === "composition" ? "Composition"
-                : "Association";
+                : "Association",
+            linkData;
         for (p in data[type]) {
             relFrom = (classes[p] || {}).instance;
             for (pp in data[type][p]) {
@@ -714,8 +722,16 @@ ClassView.prototype.confirmRender = function (data) {
                             if (link.left) arr.push(getLabel(link.left, LINK_TEXT_MARGIN));
                             if (link.right) arr.push(getLabel(link.right, -LINK_TEXT_MARGIN));
                             return arr;
-                        })(data[type][p][pp] || {})
+                        })(linkData = data[type][p][pp] || {})
                     }));
+                    if (linkData.from) {
+                        connector._fromClass = linkData.from;
+                        connector._fromClass.instance = relTo;
+                    }
+                    if (linkData.to) {
+                        connector._toClass = linkData.to;
+                        connector._toClass.instance = relFrom;
+                    }
                     self.links.push(connector);
                 }
             }
@@ -893,6 +909,53 @@ ClassView.prototype.searchOnDiagram = function (text) {
 
 };
 
+ClassView.prototype.bindLinkHighlight = function () {
+
+    var self = this,
+        highlighted = false,
+        fields = [];
+
+    var freeFields = function () {
+        fields.forEach(function (f) {
+            if (f.classList) f.classList.remove("line-selected");
+        });
+        fields = [];
+    };
+
+    this.paper.on("cell:mouseover", function (e) {
+        var link, view, el;
+        freeFields();
+        link = e.model || null;
+        if (!link) return;
+        if (link._fromClass && link._fromClass.instance && link._fromClass.in
+            && (view = self.paper.findViewByModel(link._fromClass.instance))
+            && view.el && view.el._LINE_ELEMENTS && view.el._LINE_ELEMENTS[link._fromClass.in]
+            && (el = view.el._LINE_ELEMENTS[link._fromClass.in][link._fromClass.name])) {
+            fields.push(el);
+        }
+        if (link._toClass && link._toClass.instance && link._toClass.in
+            && (view = self.paper.findViewByModel(link._toClass.instance))
+            && view.el && view.el._LINE_ELEMENTS && view.el._LINE_ELEMENTS[link._toClass.in]
+            && (el = view.el._LINE_ELEMENTS[link._toClass.in][link._toClass.name])) {
+            fields.push(el);
+        }
+        fields.forEach(function (f) {
+            if (f.classList) {
+                f.classList.add("line-selected");
+            } else {
+                console.warn("Your browser does not support CSS3 classList property.");
+            }
+        });
+        highlighted = !!fields.length;
+    });
+
+    this.paper.on("cell:mouseout", function (e) {
+        highlighted = false;
+        freeFields();
+    });
+
+};
+
 ClassView.prototype.init = function () {
 
     var p, self = this,
@@ -911,6 +974,8 @@ ClassView.prototype.init = function () {
             y: 0
         }
     });
+
+    this.bindLinkHighlight();
 
     // enables links re-routing when dragging objects
     this.graph.on("change:position", function (object) {

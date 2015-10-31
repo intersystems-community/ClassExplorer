@@ -41,8 +41,6 @@ Logic.prototype.process = function (data) {
         if (cls.queries && !this.umlExplorer.settings.showQueries) delete cls.queries;
     }
 
-    this.alignClassTypes(); // call after inheritance scheme done
-
     if (!this.umlExplorer.settings.showDataTypesOnDiagram) {
         for (clsName in data.classes) {
             if (/%Library\..*/.test(clsName)) delete data.classes[clsName];
@@ -105,17 +103,23 @@ Logic.prototype.fillAssociations = function () {
                 if (!aggr[po["Type"]]) aggr[po["Type"]] = {};
                 aggr[po["Type"]][className] = {
                     left: "many",
-                    right: "one"
+                    right: "one",
+                    from: { in: "properties", name: propertyName },
+                    to: { in: "properties", name: po["Inverse"] }
                 };
             } else if (po["Cardinality"] === "parent") {
                 if (!compos[po["Type"]]) compos[po["Type"]] = {};
                 compos[po["Type"]][className] = {
                     left: "child",
-                    right: "parent"
+                    right: "parent",
+                    from: { in: "properties", name: propertyName },
+                    to: { in: "properties", name: po["Inverse"] }
                 };
             } else if (self.data.classes[po["Type"]] && !po["Cardinality"]) {
                 if (!assoc[po["Type"]]) assoc[po["Type"]] = {};
-                assoc[po["Type"]][className] = {};
+                assoc[po["Type"]][className] = {
+                    from: { in: "properties", name: propertyName }
+                };
             }
         }
     }
@@ -139,75 +143,5 @@ Logic.prototype.inherits = function (className, inhName) {
     if (!this.data.classes[inhName]) {
         this.data.classes[inhName] = {};
     }
-
-};
-
-/**
- * @private
- * @param {string} className
- * @returns {string[]} - derived class names
- */
-Logic.prototype.getDerivedClasses = function (className) {
-
-    var arr = [];
-
-    for (var a in this.data.inheritance) {
-        if (this.data.inheritance[a][className]) arr.push(a);
-    }
-
-    return arr;
-
-};
-
-Logic.prototype.getNonInheritingClasses = function () {
-
-    var arr = [];
-
-    for (var className in this.data.classes) {
-        if (!this.data.inheritance[className]) arr.push(className);
-    }
-
-    return arr;
-
-};
-
-/**
- * Correcting Cache's class keyword "ClassType".
- * @param classType
- * @returns {*}
- */
-Logic.prototype.getNormalClassType = function (classType) {
-
-    if (classType === "datatype") return "DataType";
-    else if (classType === "serial") return "Serial";
-    else if (classType === "persistent") return "Persistent";
-    else return lib.capitalize(classType); // (Registered), Stream, View, Index
-
-};
-
-/**
- * Fills $classType
- * @private
- */
-Logic.prototype.alignClassTypes = function () {
-
-    var self = this;
-
-    var extendDerivedClasses = function (className, classObj, root) {
-        (root ? self.getNonInheritingClasses() : self.getDerivedClasses(className)).forEach(
-            function (derivedClassName) {
-            var derivedObj = self.data.classes[derivedClassName];
-            if (!derivedObj.$classType) { // not assigned yet
-                // try to get class type from parent
-                if (classObj.$classType) derivedObj.$classType = classObj.$classType;
-                // reassign class type from classType property
-                if (derivedObj.ClassType)
-                    derivedObj.$classType = self.getNormalClassType(derivedObj.ClassType);
-            }
-            extendDerivedClasses(derivedClassName, derivedObj);
-        });
-    };
-
-    extendDerivedClasses("", {}, true);
 
 };

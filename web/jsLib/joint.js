@@ -17213,6 +17213,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 			}
 			textNode.TRASH = [];
 
+			var theParent = ((this.node || {}).parentNode || {}).parentNode;
+			if (theParent && !theParent._LINE_ELEMENTS) theParent._LINE_ELEMENTS = {};
+
             for (; i < lines.length; i++) {
 
 				var jj, setup, iconLeft, xOrigin = this.attr('x') || 0,
@@ -17257,7 +17260,12 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 		// space (an invisible character) so that following lines are correctly
 		// relatively positioned. `dy=1em` won't work with empty lines otherwise.
                 tspan.node.textContent = lines[i].text || ' ';
-                
+
+				if (theParent && lines[i]._BLOCK) {
+					if (!theParent._LINE_ELEMENTS[lines[i]._BLOCK]) theParent._LINE_ELEMENTS[lines[i]._BLOCK] = {};
+					theParent._LINE_ELEMENTS[lines[i]._BLOCK][lines[i].name] = tspan.node;
+				}
+
                 V(textNode).append(tspan);
 
 				if (lines[i].icons instanceof Array) {

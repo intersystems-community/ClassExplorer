@@ -100,10 +100,10 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         var o,
             rects = [
                 { type: 'name', text: this.getClassName() },
-                { type: 'params', text:  (o = this.get('params'))    , o: o },
-                { type: 'attrs', text:   (o = this.get('attributes')), o: o },
-                { type: 'methods', text: (o = this.get('methods'))   , o: o },
-                { type: 'queries', text: (o = this.get('queries'))   , o: o }
+                { type: 'params', text:  (o = this.get('params'))    , o: (o.forEach(function(e){e._BLOCK="parameters"}) && o) },
+                { type: 'attrs', text:   (o = this.get('attributes')), o: (o.forEach(function(e){e._BLOCK="properties"}) && o) },
+                { type: 'methods', text: (o = this.get('methods'))   , o: (o.forEach(function(e){e._BLOCK="methods"}) && o) },
+                { type: 'queries', text: (o = this.get('queries'))   , o: (o.forEach(function(e){e._BLOCK="queries"}) && o) }
             ],
             self = this,
             classSigns = this.get('classSigns'),
@@ -114,13 +114,13 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         // set color head according to class type
         var headColor;
         switch (CLASS_TYPE) {
-            case "Persistent": headColor = "rgb(255,219,170)"; break; // light orange
-            case "Serial": headColor = "rgb(252,255,149)"; break; // light yellow
+            case "persistent": headColor = "rgb(255,219,170)"; break; // light orange
+            case "serial": headColor = "rgb(252,255,149)"; break; // light yellow
             //case "Registered": headColor = "rgb(192,255,170)"; break; // light green
-            case "DataType": headColor = "rgb(193,250,255)"; break; // light blue
-            case "Stream": headColor = "rgb(246,188,255)"; break; // light magenta
-            case "View": headColor = "rgb(255,188,188)"; break; // light red
-            case "Index": headColor = "rgb(228,228,228)"; break; // light gray
+            case "datatype": headColor = "rgb(193,250,255)"; break; // light blue
+            case "stream": headColor = "rgb(246,188,255)"; break; // light magenta
+            case "view": headColor = "rgb(255,188,188)"; break; // light red
+            case "index": headColor = "rgb(228,228,228)"; break; // light gray
         }
         if (headColor) this.attributes.attrs[".uml-class-name-rect"].fill = headColor;
 

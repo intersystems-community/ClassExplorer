@@ -159,21 +159,36 @@
                                 <td>
                                     <div name="injector">{
                                         "classes": { "Registered": {  } }
-                                        }</div>
-                                </td>
-                                <td>
-                                    <div name="injector">{
-                                        "classes": { "Persistent": { "ClassType": "Persistent" } }
                                     }</div>
                                 </td>
                                 <td>
                                     <div name="injector">{
-                                        "classes": { "Serial": { "ClassType": "Serial" } }
+                                        "classes": { "Persistent": { "ClassType": "persistent" } }
                                     }</div>
                                 </td>
                                 <td>
                                     <div name="injector">{
-                                        "classes": { "Data Type": { "ClassType": "DataType" } }
+                                        "classes": { "Serial": { "ClassType": "serial" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Data Type": { "ClassType": "datatype" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Index": { "ClassType": "index" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "View": { "ClassType": "view" } }
+                                    }</div>
+                                </td>
+                                <td>
+                                    <div name="injector">{
+                                        "classes": { "Stream": { "ClassType": "stream" } }
                                     }</div>
                                 </td>
                             </tr>
@@ -185,13 +200,13 @@
                                 <th colspan="2" class="leftAligned"><h2>Connection Types</h2></th>
                             </tr>
                             <tr>
-                                <th class="leftAligned">Association</th>
+                                <th class="leftAligned">Class Mention</th>
                                 <td>
                                     <div name="injector">{
                                         "layoutDirection": "LR",
                                         "classes": {
                                             "Class A": { "properties": { "Property": { "Type": "Class B" } } },
-                                            "Class B": { "ClassType": "Persistent" }
+                                            "Class B": { "ClassType": "persistent" }
                                         }
                                     }</div>
                                 </td>
@@ -202,8 +217,8 @@
                                     <div name="injector">{
                                         "layoutDirection": "LR",
                                         "classes": {
-                                            "Class A": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "one", "Type": "Class B" } } },
-                                            "Class B": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "many", "Type": "Class A" } } }
+                                            "Class A": { "ClassType": "persistent", "properties": { "Property": { "Cardinality": "one", "Type": "Class B", "Inverse": "Property" } } },
+                                            "Class B": { "ClassType": "persistent", "properties": { "Property": { "Cardinality": "many", "Type": "Class A", "Inverse": "Property" } } }
                                         }
                                     }</div>
                                 </td>
@@ -214,8 +229,8 @@
                                     <div name="injector">{
                                         "layoutDirection": "LR",
                                         "classes": {
-                                            "Class B": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "child", "Type": "Class A" } } },
-                                            "Class A": { "ClassType": "Persistent", "properties": { "Property": { "Cardinality": "parent", "Type": "Class B" } } }
+                                            "Class B": { "ClassType": "persistent", "properties": { "Property": { "Cardinality": "child", "Type": "Class A", "Inverse": "Property" } } },
+                                            "Class A": { "ClassType": "persistent", "properties": { "Property": { "Cardinality": "parent", "Type": "Class B", "Inverse": "Property" } } }
                                         }
                                     }</div>
                                 </td>
@@ -226,8 +241,8 @@
                                     <div name="injector">{
                                         "layoutDirection": "LR",
                                         "classes": {
-                                            "Derived Class": { "ClassType": "Persistent", "Super": "Inherited Class", "properties": { "Property": { "Type": "Nothing" } } },
-                                            "Inherited Class": { "ClassType": "DataType", "properties": { "Property": { "Type": "Nothing" } } }
+                                            "Derived Class": { "ClassType": "datatype", "Super": "Inherited Class", "properties": { "Property": { "Type": "Nothing" } } },
+                                            "Inherited Class": { "ClassType": "datatype", "properties": { "Property": { "Type": "Nothing" } } }
                                         }
                                     }</div>
                                 </td>
@@ -253,7 +268,6 @@
                             <tr><td name="icon">earth</td><td>WEB Method</td></tr>
                             <tr><td name="icon">zed</td><td>ZEN Method</td></tr>
                             <tr><td name="icon">eye</td><td>Read Only</td></tr>
-
                         </table>
                     </div>
                 </div>
@@ -267,25 +281,10 @@
                     to get additional information. Non-hoverable elements are usually those which
                     does not have any keywords or comments defined.
                 </p>
-                <script>
-                    var cont = [].slice.call(document.querySelectorAll("#helpView *[name=injector]")),
-                        cont2 = [].slice.call(document.querySelectorAll("#helpView *[name=icon]")), i;
-                    for (i in cont) {
-                        var ue, json = {
-                            classes: { "Unable to parse JSON": {  } }
-                        };
-                        try { json = JSON.parse(cont[i].textContent) } catch (e) {  }
-                        cont[i].textContent = "";
-                        ue = new CacheClassExplorer(null, cont[i]);
-                        ue.classView.injectView(json);
-                    }
-                    for (i in cont2) {
-                        var ico = lib.image[cont2[i].textContent];
-                        if (ico) {
-                            cont2[i].innerHTML = "<img src=\"" + ico + "\"/>"
-                        }
-                    }
-                </script>
+                <p>
+                    All links except inheritance are <b>hoverable</b> too. Hovering over links will
+                    highlight appropriate fields in linked classes.
+                </p>
             </div>
         </div>
     </div>
