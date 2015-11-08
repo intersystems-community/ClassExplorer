@@ -61,6 +61,41 @@ Logic.prototype.process = function (data) {
 
 };
 
+/**
+ * This method inherits all property properties from inherited classes.
+ * @param {string} className
+ * @param {string} propertyName
+ * @returns {boolean} - if property name was taken (exists in inherited classes)
+ */
+Logic.prototype.takePropertyFromSuper = function (className, propertyName) {
+
+    var self = this, cls,
+        newProperty;
+
+    if (!this.data || !this.data.classes || !(cls = this.data.classes[className])) return false;
+
+    function getP (cls) {
+        var sups, prop = {}, p;
+        cls = cls || {};
+        sups = (cls.Super || "").split(",");
+        if (cls.Inheritance === "right") sups.reverse();
+        sups.forEach(function (sup) {
+            if (!(p = self.data.classes[sup])) return;
+            prop = lib.extend(prop, getP(p));
+        });
+        if (cls.properties && (p = cls.properties[propertyName])) {
+            prop = lib.extend(prop, p);
+        }
+        return prop;
+    }
+
+    if (!lib.isEmptyObject(newProperty = getP(cls))) {
+        cls.properties[propertyName] = newProperty;
+        return true;
+    } else return false;
+
+};
+
 Logic.prototype.fillIndices = function () {
 
     var className, cls, indexName, j, index, props, propName;
@@ -69,9 +104,10 @@ Logic.prototype.fillIndices = function () {
         cls = this.data.classes[className];
         for (indexName in cls.indices) {
             index = cls.indices[indexName];
-            props = index["Properties"].split(",");
+            props = (index["Properties"] || "?").split(",");
             for (j in props) {
-                if (cls.properties[propName = props[j].match(/[^\(]+/)[0]]) {
+                if (cls.properties[propName = props[j].match(/[^\(]+/)[0]]
+                    || this.takePropertyFromSuper(className, propName)) {
                     cls.properties[propName].index = index;
                 } else {
                     console.warn(

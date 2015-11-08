@@ -42,6 +42,37 @@ Lib.prototype.countProperties = function (object) {
 };
 
 /**
+ * extObject properties extends baseObject.
+ * @param baseObject
+ * @param extObject
+ */
+Lib.prototype.extend = function (baseObject, extObject) {
+
+    var i, newObj = {};
+
+    for (i in baseObject) { if (!baseObject.hasOwnProperty(i)) continue;
+        newObj[i] = baseObject[i];
+    }
+
+    for (i in extObject) { if (!extObject.hasOwnProperty(i)) continue;
+        newObj[i] = extObject[i];
+    }
+
+    return newObj;
+
+};
+
+Lib.prototype.isEmptyObject = function (obj) {
+
+    var empty = true;
+
+    for (var i in obj) { if (!obj.hasOwnProperty(i)) continue; empty = false; break; }
+
+    return empty;
+
+};
+
+/**
  * Convert array to associative array.
  * @param {Array} array
  */
