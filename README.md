@@ -7,10 +7,10 @@ An UML Class explorer for InterSystems Caché.
 + Edit diagrams after build;
 + Switch between strict UML notation and designed view;
 + Export diagrams as an image;
-+ See Class methods, properties, parameters, SQL queries and more;
++ See Class methods, properties, parameters, SQL queries, xDatas and more;
 + See any keywords and related information by hovering over everything with pointer;
 + Check which fields are connected by hovering over link; 
-+ View class methods code with syntax highlighting;
++ View methods code, sql queries and xDatas with syntax highlighting;
 + Zoom in and out;
 + Search on diagram or in class tree;
 + Explore!

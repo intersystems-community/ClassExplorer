@@ -19,7 +19,7 @@ svg {
     /*fill: lightgray;*/
 }
 
-.uml-class-attrs-rect, .uml-class-methods-rect, .uml-class-queries-rect {
+.uml-class-attrs-rect, .uml-class-methods-rect, .uml-class-queries-rect, .uml-class-xdatas-rect {
     fill: white;
 }
 
@@ -76,6 +76,12 @@ text {
     font-family: monospace;
     font-weight: 900;
     fill: magenta;
+}
+
+.uml-class-xdatas-label {
+    font-family: monospace;
+    font-weight: 900;
+    fill: #0ab;
 }
 
 .line-clickable {

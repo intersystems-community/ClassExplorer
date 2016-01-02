@@ -4,7 +4,7 @@
 <Description>
 Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63844,1495</TimeChanged>
+<TimeChanged>63919,67431.456639</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -97,6 +97,7 @@ Return structured data about class.</Description>
     set oProperties = ##class(%ZEN.proxyObject).%New()
     set oQueries = ##class(%ZEN.proxyObject).%New()
     set oIndices = ##class(%ZEN.proxyObject).%New()
+    set oXDatas = ##class(%ZEN.proxyObject).%New()
 
     set oClass.isDataType = classDefinition.ClientDataTypeIsDefined()
     set oClass.isOdbcType = classDefinition.OdbcTypeIsDefined()
@@ -182,6 +183,19 @@ Return structured data about class.</Description>
             set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(q, pname)
         }
         do oQueries.%DispatchSetProperty(q.Name, oProp)
+    }
+
+    #dim xd as %Dictionary.XDataDefinition
+    set oClass.xdatas = oXDatas
+    set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.XDataDefinition")
+    for i=1:1:classDefinition.XDatas.Count() {
+        set oProp = ##class(%ZEN.proxyObject).%New()
+        set xd = classDefinition.XDatas.GetAt(i)
+        for j=1:1:props.Properties.Count() {
+            set pname = props.Properties.GetAt(j).Name
+            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(xd, pname)
+        }
+        do oXDatas.%DispatchSetProperty(xd.Name, oProp)
     }
 
     #dim ind as %Dictionary.IndexDefinition
