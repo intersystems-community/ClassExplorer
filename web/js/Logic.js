@@ -39,6 +39,7 @@ Logic.prototype.process = function (data) {
         if (cls.properties && !this.umlExplorer.settings.showProperties) delete cls.properties;
         if (cls.methods && !this.umlExplorer.settings.showMethods) delete cls.methods;
         if (cls.queries && !this.umlExplorer.settings.showQueries) delete cls.queries;
+        if (cls.xdatas && !this.umlExplorer.settings.showXDatas) delete cls.xdatas;
     }
 
     if (!this.umlExplorer.settings.showDataTypesOnDiagram) {

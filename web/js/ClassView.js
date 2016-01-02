@@ -341,6 +341,10 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
             "Encoded": 1,
             // -- queries
             "SqlView": 1,
+            // -- xDatas
+            "MimeType": function (data) {
+                return "MimeType = " + data;
+            },
             // -- class
             "ClientDataType": function (data, p) {
                 return !p["isDataType"] ? ""
@@ -450,6 +454,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classProps = classMetaData["properties"],
         classMethods = classMetaData["methods"],
         classQueries = classMetaData["queries"],
+        classXDatas = classMetaData["xdatas"],
         keyWordsArray = [name],
         self = this;
 
@@ -525,6 +530,22 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
             }
             return arr;
         })(classQueries),
+        xdatas: (function (xds) {
+            var arr = [], n;
+            for (n in xds) {
+                keyWordsArray.push(n);
+                arr.push({
+                    name: n,
+                    text: n + (xds[n]["MimeType"] ? ": " + xds[n]["MimeType"] : ""),
+                    hover: self.getPropertyHoverText(xds[n], "xdata"),
+                    icons: self.getPropertyIcons(xds[n]),
+                    clickHandler: (function (d, className) {
+                        return function () { self.showXData(className, d); }
+                    })(xds[n], name)
+                });
+            }
+            return arr;
+        })(classXDatas),
         classSigns: this.getClassSigns(classMetaData),
         classType: classMetaData.ClassType || "registered",
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
@@ -567,6 +588,22 @@ ClassView.prototype.showQuery = function (className, queryData) {
             + (queryData["FormalSpec"] || "").replace(/,/g, ", ").replace(/:/g, ": ") + ")",
         comment: queryData["Description"],
         body: lib.highlightSQL(queryData["SqlQuery"] || "")
+    });
+
+};
+
+/**
+ * @param {string} className
+ * @param {string} xData
+ */
+ClassView.prototype.showXData = function (className, xData) {
+
+    xData = xData || "";
+
+    this.showPanel({
+        header: "##class(" + className + ")." + xData["Name"] + (xData["MimeType"] ? " (" + xData["MimeType"] + ")" : xData["MimeType"]),
+        comment: xData["Description"],
+        body: lib.highlightXML(xData["Data"] || "")
     });
 
 };
@@ -949,7 +986,7 @@ ClassView.prototype.bindLinkHighlight = function () {
         highlighted = !!fields.length;
     });
 
-    this.paper.on("cell:mouseout", function (e) {
+    this.paper.on("cell:mouseout", function () {
         highlighted = false;
         freeFields();
     });

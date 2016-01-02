@@ -47,7 +47,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
             showParameters: id("setting.showParameters"),
             showProperties: id("setting.showProperties"),
             showMethods: id("setting.showMethods"),
-            showQueries: id("setting.showQueries")
+            showQueries: id("setting.showQueries"),
+            showXDatas: id("setting.showXDatas")
         }
     };
 
@@ -64,7 +65,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         showParameters: settingsValue("showParameters", true),
         showProperties: settingsValue("showProperties", true),
         showMethods: settingsValue("showMethods", true),
-        showQueries: settingsValue("showQueries", true)
+        showQueries: settingsValue("showQueries", true),
+        showXDatas: settingsValue("showXDatas", true)
     };
 
     this.UI = new UI(this);

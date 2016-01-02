@@ -178,9 +178,7 @@ Lib.prototype.sqlKeyWords = {
  */
 Lib.prototype.highlightCOS = function (code) {
     var self = this;
-    return code.replace(/[<>&]/g, function (r) {
-            return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
-        }).replace(/(&[lgtamp]{2,3};)|(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
+    return this.replaceSpecial(code).replace(/(&[lgtamp]{2,3};)|(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
             var i = -1, c;
             [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
                 i++;
@@ -201,15 +199,19 @@ Lib.prototype.highlightCOS = function (code) {
         });
 };
 
+Lib.prototype.replaceSpecial = function (str) {
+    return str.replace(/[<>&]/g, function (r) {
+        return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;";
+    });
+};
+
 /**
  * Highlight SQL code.
  * @param {string} code
  */
 Lib.prototype.highlightSQL = function (code) {
     var self = this;
-    return code.replace(/[<>&]/g, function (r) {
-        return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
-    }).replace(/(&[lgtamp]{2,3};)|([a-zA-Z]+)/gi, function (part, a, kw) {
+    return this.replaceSpecial(code).replace(/(&[lgtamp]{2,3};)|([a-zA-Z]+)/gi, function (part, a, kw) {
         var i = -1, c;
         [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
             i++;
@@ -222,6 +224,47 @@ Lib.prototype.highlightSQL = function (code) {
         }
         return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });
     });
+};
+
+/**
+ * Highlight XML code.
+ * @param {string} code
+ */
+Lib.prototype.highlightXML = function (code) {
+
+    var replaceSpecial = this.replaceSpecial,
+        level = 0,
+        regex = new RegExp("<!\\[CDATA\\[([^]*?)]]" // this line break is done to avoid xData
+            // injection fail, as CDATA cannot have the closing character sequence inside.
+            // DO NOT join these three characters in one inline string
+            // KEEP THIS LINE
+            + [].join("")
+            + ">|<(\\/?)[\\w](?:.*(?=\\/>)|.*(?=>))(\\/?)>|(<!--[^]*?-->)"
+            + "|(<\\?[^]*?\\?>)|(<[^]*?>)", "g");
+
+    function stringFill (n) {
+        return new Array(n + 1).join("  ")
+    }
+
+    return code.replace(regex, function (part, cData, tagS, tagG, comment, special, etc) {
+        return typeof tagS !== "undefined" ? part.replace(/<\/?([^\s]+)(.*(?=\/>)|.*(?=>))\/?>/ig, function (p, tagName, attrs) {
+            if (tagS) level--;
+            var s = stringFill(level) + " &lt;" + tagS + "<span class=\"syntax-keyword\">"
+                + tagName + "</span>"
+                + attrs.replace(/(\s*[^=]+)=(\s*(?:'[^']*'|"[^"]*"))/g, function (part, a, b) {
+                    return "<span class=\"syntax-names\">" + a
+                        + "</span>=<span class=\"syntax-string\">" + b + "</span>";
+                })
+                + tagG + "&gt;";
+            if (!tagS && !tagG) level++;
+            return s;
+        }) : comment ? "<span class=\"syntax-comment\">" + replaceSpecial(comment) + "</span>"
+           : special ? replaceSpecial(special)
+           : etc ? replaceSpecial(etc)
+                : "<span class=\"syntax-other\">&lt;![CDATA[</span>"
+                    + replaceSpecial(cData) + "<span class=\"syntax-other\">]]&gt;</span>";
+    });
+
 };
 
 Lib.prototype.getSelection = function () {
