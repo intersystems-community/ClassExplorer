@@ -4,7 +4,7 @@
 <Description>
 Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63919,67431.456639</TimeChanged>
+<TimeChanged>63928,63957.580821</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -193,7 +193,7 @@ Return structured data about class.</Description>
         set xd = classDefinition.XDatas.GetAt(i)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(xd, pname)
+            set:((pname '= "parent") && (pname '= "Object")) $PROPERTY(oProp, pname) = $PROPERTY(xd, pname)
         }
         do oXDatas.%DispatchSetProperty(xd.Name, oProp)
     }
@@ -319,7 +319,7 @@ Returns new (correct) super</Description>
 <Description>
 Setup basic output data object</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>packageName:%String</FormalSpec>
+<FormalSpec>packageName:%String,baseNamespace:%String,savedName:%String</FormalSpec>
 <Private>1</Private>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
@@ -327,6 +327,14 @@ Setup basic output data object</Description>
     set oData.basePackageName = packageName
     set oData.restrictPackage = 1 // expand classes only in base package
     set oData.classes = ##class(%ZEN.proxyObject).%New()
+
+    set ns = $namespace
+    zn baseNamespace
+    if $get(^ClassExplorer("savedView", ns_":"_savedName)) '= "" {
+        set oData.savedView = $get(^ClassExplorer("savedView", ns_":"_savedName))
+    }
+    zn ns
+
     quit oData
 ]]></Implementation>
 </Method>
@@ -348,9 +356,10 @@ Returns structured class data</Description>
 <FormalSpec>className:%String,namespace:%String</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
+    set baseNamespace = $namespace
     zn:$GET(namespace)'="" namespace
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, *-1), ".")
-    set oData = ..getBaseOData(package)
+    set oData = ..getBaseOData(package, baseNamespace, "CLASS:"_className)
     do ..fillClassData(oData, className)
     quit oData
 ]]></Implementation>
@@ -363,8 +372,9 @@ Returns structured package data</Description>
 <FormalSpec>rootPackageName:%String,namespace:%String</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
+    set baseNamespace = $namespace
     zn:$GET(namespace)'="" namespace
-    set oData = ..getBaseOData(rootPackageName)
+    set oData = ..getBaseOData(rootPackageName, baseNamespace, "PACKAGE:"_rootPackageName)
     set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
     do classes.Execute()
     set listLen = $LISTLENGTH($LISTFROMSTRING(rootPackageName, ".")) // bottom level of package to extract
@@ -397,7 +407,7 @@ Returns structured package data</Description>
 <Description>
 REST interface for ClassExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63697,73073.878177</TimeChanged>
+<TimeChanged>63928,63486.89174</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -413,6 +423,8 @@ REST interface for ClassExplorer</Description>
    <Route Url="/GetAllNamespacesList" Method="GET" Call="GetAllNamespacesList"/>
    <Route Url="/GetPackageView" Method="GET" Call="GetPackageView"/>
    <Route Url="/GetMethod" Method="GET" Call="GetMethod"/>
+   <Route Url="/SaveView" Method="POST" Call="SaveView"/>
+   <Route Url="/ResetView" Method="GET" Call="ResetView"/>
 </Routes>
 ]]></Data>
 </XData>
@@ -437,6 +449,34 @@ Returns classTree by given class name</Description>
     set className = %request.Get("name")
     set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"))
     do classData.%ToJSON(, "o")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SaveView">
+<Description>
+Saves the view preferences</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set name = %request.Get("name")
+    set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb
+    set ^test = name
+    set ^ClassExplorer("savedView", name) = content
+    write "{""OK"":true}"
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ResetView">
+<Description>
+Saves the view preferences</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set name = %request.Get("name")
+    kill ^ClassExplorer("savedView", name)
+    write "{""OK"":true}"
     return $$$OK
 ]]></Implementation>
 </Method>
