@@ -7,7 +7,7 @@ var Logic = function (parent) {
 /**
  * Modify data, add relations, connections, helpers.
  *
- * @param {{basePackageName: string, classes: object<string,*>, restrictPackage: number}} data
+ * @param {*} data
  */
 Logic.prototype.process = function (data) {
 
@@ -15,6 +15,13 @@ Logic.prototype.process = function (data) {
         cls, clsName;
 
     this.data = data;
+
+    if (data.savedView) try {
+        data.savedView = JSON.parse(data.savedView);
+    } catch (e) {
+        delete data.savedView;
+        console.log("! Unable to deserialize savedView.");
+    }
 
     data.classes["%Persistent"] = data.classes["%Library.Persistent"] = {
         $classType: "Persistent"

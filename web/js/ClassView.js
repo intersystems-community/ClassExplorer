@@ -25,6 +25,16 @@ var ClassView = function (parent, container) {
     this.HIGHLIGHTED_VIEW = null;
     this.SEARCH_INDEX = 0;
 
+    this.CURRENT_RENDER_NAME = "";
+
+    this.viewSaving = false;
+
+    /**
+     * Not to perform save too frequentry, this variable is used to control saving frequency.
+     * @type {number}
+     */
+    this.saveTimeout = 0;
+
     this.init();
 
 };
@@ -446,9 +456,10 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
 /**
  * @param {string} name
  * @param classMetaData
+ * @param saved - Object with saved data.
  * @returns {joint.shapes.uml.Class}
  */
-ClassView.prototype.createClassInstance = function (name, classMetaData) {
+ClassView.prototype.createClassInstance = function (name, classMetaData, saved) {
 
     var classParams = classMetaData["parameters"],
         classProps = classMetaData["properties"],
@@ -458,7 +469,7 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         keyWordsArray = [name],
         self = this;
 
-    var classInstance = new joint.shapes.uml.Class({
+    var setup = {
         name: [{
             text: name,
             clickHandler: function () {
@@ -549,13 +560,31 @@ ClassView.prototype.createClassInstance = function (name, classMetaData) {
         classSigns: this.getClassSigns(classMetaData),
         classType: classMetaData.ClassType || "registered",
         SYMBOL_12_WIDTH: self.SYMBOL_12_WIDTH
+    };
+
+    if (saved && saved.position) setup.position = saved.position;
+
+    var classInstance = new joint.shapes.uml.Class(setup);
+
+    classInstance.on("change:position", function () {
+        self.prepareToSave();
     });
 
     classInstance.SEARCH_KEYWORDS = keyWordsArray.join(",").toLowerCase();
+    classInstance.NAME = name;
     this.objects.push(classInstance);
     this.graph.addCell(classInstance);
 
     return classInstance;
+
+};
+
+ClassView.prototype.prepareToSave = function () {
+
+    if (!this.viewSaving) return;
+
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(this.saveView.bind(this), 700);
 
 };
 
@@ -701,6 +730,8 @@ ClassView.prototype.confirmRender = function (data) {
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
+    this.switchViewSave(!!data.savedView);
+
     this.filterInherits(data);
 
     // Reset view and zoom again because it may cause visual damage to icons.
@@ -715,7 +746,11 @@ ClassView.prototype.confirmRender = function (data) {
 
     for (className in data["classes"]) {
         classes[className] = {
-            instance: this.createClassInstance(className, data["classes"][className])
+            instance: this.createClassInstance(
+                className,
+                data["classes"][className],
+                ((data.savedView || {}).classes || {})[className]
+            )
         };
     }
 
@@ -730,7 +765,11 @@ ClassView.prototype.confirmRender = function (data) {
                 relTo = (classes[pp] || {}).instance;
                 if (!relTo) {
                     classes[pp] = {
-                        instance: relTo = self.createClassInstance(pp, {})
+                        instance: relTo = self.createClassInstance(
+                            pp,
+                            {},
+                            ((data.savedView || {}).classes || {})[pp]
+                        )
                     };
                 }
                 if (relFrom && relTo) {
@@ -780,13 +819,15 @@ ClassView.prototype.confirmRender = function (data) {
     link("aggregation");
     link("association");
 
-    joint.layout.DirectedGraph.layout(this.graph, {
-        setLinkVertices: false,
-        nodeSep: 100,
-        rankSep: 100,
-        edgeSep: 20,
-        rankDir: data.layoutDirection || "TB"
-    });
+    if (!data.savedView) {
+        joint.layout.DirectedGraph.layout(this.graph, {
+            setLinkVertices: false,
+            nodeSep: 100,
+            rankSep: 100,
+            edgeSep: 20,
+            rankDir: data.layoutDirection || "TB"
+        });
+    }
 
     this.updateSizes();
 
@@ -794,13 +835,63 @@ ClassView.prototype.confirmRender = function (data) {
         this.paper.findViewByModel(this.links[i]).update();
     }
 
-    var bb = this.paper.getContentBBox(), q = this.paper;
+    var bb = this.paper.getContentBBox(),
+        q = this.paper;
+
     this.paper.setOrigin(
         q.options.width/2 - bb.width/2,
         q.options.height/2 - Math.min(q.options.height/2 - 100, bb.height/2)
     );
 
+    if (data.savedView) this.restoreView(data.savedView);
+
     this.onRendered();
+
+};
+
+ClassView.prototype.switchViewSave = function ( saving ) {
+
+    if (typeof saving === "undefined") saving = !this.viewSaving;
+    this.viewSaving = !!saving;
+    this.cacheClassExplorer.elements.saveViewIcon.src = lib.image["pin" + (saving ? "Active" : "")];
+
+};
+
+ClassView.prototype.saveView = function () {
+
+    if (!this.CURRENT_RENDER_NAME || !this.cacheClassExplorer.NAMESPACE) return;
+
+    var self = this,
+        name = this.cacheClassExplorer.NAMESPACE + ":" + this.CURRENT_RENDER_NAME;
+
+    var saved = {
+        classes: {},
+        zoom: this.PAPER_SCALE,
+        origin: {
+            x: Math.round(self.paper.options.origin.x),
+            y: Math.round(self.paper.options.origin.y)
+        }
+    };
+
+    this.graph.getElements().forEach(function (element) {
+        if (!element.NAME) return;
+        saved.classes[element.NAME] = {
+            position: element.attributes.position
+        }
+    });
+
+    this.cacheClassExplorer.source.saveView(name, saved);
+
+};
+
+ClassView.prototype.restoreView = function (data) {
+
+    // data.classes are parsed during class creation
+    if (data.zoom) { // do not swap with origin set
+        this.PAPER_SCALE = data.zoom;
+        this.zoom(0);
+    }
+    if (data.origin && data.origin.x && data.origin.y) this.paper.setOrigin(data.origin.x, data.origin.y);
 
 };
 
@@ -823,6 +914,7 @@ ClassView.prototype.loadClass = function (className) {
     });
 
     this.cacheClassExplorer.elements.className.textContent = className;
+    this.CURRENT_RENDER_NAME = "CLASS:" + className;
     this.cacheClassExplorer.updateURL();
 
 };
@@ -846,6 +938,7 @@ ClassView.prototype.loadPackage = function (packageName) {
     });
 
     this.cacheClassExplorer.elements.className.textContent = packageName;
+    this.CURRENT_RENDER_NAME = "PACKAGE:" + packageName;
     this.cacheClassExplorer.updateURL();
 
 };
@@ -880,6 +973,8 @@ ClassView.prototype.zoom = function (delta) {
         ox - (sw/2 - ox)*scaleDelta,
         oy - (sh/2 - oy)*scaleDelta
     );
+
+    if (delta) this.prepareToSave(); // delta = null,0 when restore triggered
 
 };
 
@@ -1047,6 +1142,7 @@ ClassView.prototype.init = function () {
             self.paper.options.origin.y + e.pageY - relP.y
         );
         relP.x = e.pageX; relP.y = e.pageY;
+        self.prepareToSave();
     };
 
     this.cacheClassExplorer.elements.classViewContainer.addEventListener("mousemove", moveHandler);

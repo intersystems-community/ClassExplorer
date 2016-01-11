@@ -22,6 +22,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         showSettingsButton: id("button.showSettings"),
         helpButton: id("button.showHelp"),
         infoButton: id("button.showInfo"),
+        saveViewButton: id("button.saveView"),
+        saveViewIcon: id("saveViewIcon"),
         methodCodeView: id("methodCodeView"),
         closeMethodCodeView: id("closeMethodCodeView"),
         methodLabel: id("methodLabel"),
@@ -257,5 +259,16 @@ CacheClassExplorer.prototype.init = function () {
     });
 
     enableSVGDownload(this.classTree);
+
+    // default icon
+    this.elements.saveViewIcon.src = lib.image.pin;
+    this.elements.saveViewButton.addEventListener("click", function () {
+        self.classView.switchViewSave();
+        if (self.classView.viewSaving) {
+            self.classView.saveView();
+        } else {
+            self.source.resetView( self.NAMESPACE + ":" + self.classView.CURRENT_RENDER_NAME );
+        }
+    });
 
 };

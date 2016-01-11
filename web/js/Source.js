@@ -45,7 +45,8 @@ Source.prototype.getMethod = function (className, methodName, callback) {
             + encodeURIComponent(methodName)
             + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
         null,
-        callback);
+        callback
+    );
 
 };
 
@@ -60,7 +61,26 @@ Source.prototype.getClassView = function (className, callback) {
         this.URL + "/GetClassView?name=" + encodeURIComponent(className)
             + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
         null,
-        callback);
+        callback
+    );
+
+};
+
+Source.prototype.saveView = function (packageName, data) {
+
+    lib.load(
+        this.URL + "/SaveView?name=" + encodeURIComponent(packageName),
+        data,
+        function (e) { console.log("View saved."); }
+    );
+
+};
+
+Source.prototype.resetView = function (packageName) {
+
+    lib.load(
+        this.URL + "/ResetView?name=" + encodeURIComponent(packageName)
+    );
 
 };
 
