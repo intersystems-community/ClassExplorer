@@ -122,7 +122,7 @@ Return structured data about class.</Description>
 
     set oClass.Super = "" // do not quit with super at this moment
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
-    set oClass.Super = ..correctInheritance(oData, classDefinition, package) // now expand super names
+    if (+$GET(level)=0) set oClass.Super = ..correctInheritance(oData, classDefinition, package) // now expand super names
 
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
@@ -144,6 +144,7 @@ Return structured data about class.</Description>
         }  else {
             set oProp.Type = ..extendClassFromType(p.Type)
         }
+       	if (($GET(level)'="")&&(+$GET(currLevel)>1)) set oProp.Type = oProp.Type_$Char(32)
     }
 
     set oMethods = ##class(%ZEN.proxyObject).%New()
