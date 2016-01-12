@@ -1,6 +1,6 @@
 {
   "name": "CacheClassExplorer",
-  "version": "1.13.2.1",
+  "version": "1.13.2.2",
   "description": "Class Explorer for InterSystems Caché",
   "directories": {
     "test": "test"
