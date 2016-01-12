@@ -55,10 +55,10 @@ Source.prototype.getMethod = function (className, methodName, callback) {
  * @param {string} className
  * @param {Source~dataCallback} callback
  */
-Source.prototype.getClassView = function (className, callback) {
-
+Source.prototype.getClassView = function (className, level, callback) { 
     lib.load(
         this.URL + "/GetClassView?name=" + encodeURIComponent(className)
+			+ "&level=" + encodeURIComponent(level)
             + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
         null,
         callback

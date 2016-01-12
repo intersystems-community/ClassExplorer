@@ -83,10 +83,12 @@ Returns structured class tree with all classes available in current namespace</D
 <Description>
 Return structured data about class.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>oData:%ZEN.proxyObject,className:%String</FormalSpec>
+<FormalSpec>oData:%ZEN.proxyObject,className:%String,level:%Integer,currLevel:%Integer</FormalSpec>
 <Private>1</Private>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
+	if (($GET(level)'="")&&(+$GET(currLevel)>+$GET(level))) quit ""
+	set currLevel=$increment(currLevel)
     set classDefinition = ##class(%Dictionary.ClassDefinition).%OpenId(className)
     set compiledClassDefinition = ##class(%Dictionary.CompiledClass).%OpenId(className)
     if (classDefinition = "") || (oData.classes.%DispatchGetProperty(classDefinition.Name) '= "") quit ""
@@ -135,10 +137,10 @@ Return structured data about class.</Description>
         }
         if (..classExists(package _ "." _ p.Type)) {
             set oProp.Type = package _ "." _ p.Type
-            do ..fillClassData(oData, package _ "." _ p.Type)
+            do ..fillClassData(oData, package _ "." _ p.Type, $GET(level), currLevel)
         } elseif (..classExists(..extendClassFromType(p.Type))) {
             set oProp.Type = ..extendClassFromType(p.Type)
-            do ..fillClassData(oData, ..extendClassFromType(p.Type))
+            do ..fillClassData(oData, ..extendClassFromType(p.Type), $GET(level), currLevel)
         }  else {
             set oProp.Type = ..extendClassFromType(p.Type)
         }
@@ -353,14 +355,14 @@ Returns if class with given name exists.</Description>
 <Description>
 Returns structured class data</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>className:%String,namespace:%String</FormalSpec>
+<FormalSpec>className:%String,namespace:%String,level:%Integer</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     set baseNamespace = $namespace
     zn:$GET(namespace)'="" namespace
     set package = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, *-1), ".")
     set oData = ..getBaseOData(package, baseNamespace, "CLASS:"_className)
-    do ..fillClassData(oData, className)
+    do ..fillClassData(oData, className, level)
     quit oData
 ]]></Implementation>
 </Method>
@@ -447,7 +449,7 @@ Returns classTree by given class name</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set className = %request.Get("name")
-    set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"))
+    set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"), %request.Get("level"))
     do classData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
@@ -460,8 +462,7 @@ Saves the view preferences</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set name = %request.Get("name")
-    set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb
-    set ^test = name
+    set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb    
     set ^ClassExplorer("savedView", name) = content
     write "{""OK"":true}"
     return $$$OK

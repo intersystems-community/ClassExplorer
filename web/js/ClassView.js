@@ -901,8 +901,9 @@ ClassView.prototype.loadClass = function (className) {
 
     this.cacheClassExplorer.classTree.SELECTED_NAME = className;
     this.cacheClassExplorer.classTree.SELECTED_TYPE = "class";
+	this.cacheClassExplorer.classTree.SELECTED_LEVEL = this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
     this.showLoader();
-    this.cacheClassExplorer.source.getClassView(className, function (err, data) {
+    this.cacheClassExplorer.source.getClassView(className, this.cacheClassExplorer.classTree.SELECTED_LEVEL, function (err, data) {
         //console.log(data);
         self.removeLoader();
         if (err) {
