@@ -335,8 +335,8 @@ Setup basic output data object</Description>
 
     set ns = $namespace
     zn baseNamespace
-    if $get(^UClassExplorer("savedView", ns_":"_savedName)) '= "" {
-        set oData.savedView = $get(^UClassExplorer("savedView", ns_":"_savedName))
+    if $get(^ClassExplorer("savedView", ns_":"_savedName)) '= "" {
+        set oData.savedView = $get(^ClassExplorer("savedView", ns_":"_savedName))
     }
     zn ns
 
@@ -440,7 +440,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>
@@ -465,8 +465,8 @@ Saves the view preferences</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set name = %request.Get("name")
-    set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb    
-    set ^UClassExplorer("savedView", name) = content
+    set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb
+    set ^ClassExplorer("savedView", name) = content
     write "{""OK"":true}"
     return $$$OK
 ]]></Implementation>
@@ -479,7 +479,7 @@ Saves the view preferences</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set name = %request.Get("name")
-    kill ^UClassExplorer("savedView", name)
+    kill ^ClassExplorer("savedView", name)
     write "{""OK"":true}"
     return $$$OK
 ]]></Implementation>
@@ -504,7 +504,7 @@ Return the list of all namespaces</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(ClassView).getAllNamespacesList().%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getAllNamespacesList().%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>

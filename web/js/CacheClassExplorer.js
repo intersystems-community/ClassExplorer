@@ -81,7 +81,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         showMethods: settingsValue("showMethods", true),
         showQueries: settingsValue("showQueries", true),
 		showXDatas: settingsValue("showXDatas", true),
-        dependencyLevel: settingsValue("dependencyLevel", "1")
+        dependencyLevel: settingsValue("dependencyLevel", "")
     };
 
     this.UI = new UI(this);
