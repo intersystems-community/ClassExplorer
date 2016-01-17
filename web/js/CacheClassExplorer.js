@@ -54,34 +54,27 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
             dependencyLevel: id("setting.dependencyLevel")
         }
     };
-	var selfAux = this;
-    var settingsValue = function (name, defaultVal) {
-		try{
-			if (selfAux.elements.settings[name].type=="checkbox") {
-				return localStorage.getItem(name) === null ? (defaultVal || false)
-					: localStorage.getItem(name) === "true" 
-			}			
-			if (["text", "number"].indexOf(selfAux.elements.settings[name].type) >= 0) {
-				var ret = localStorage.getItem(name);
-				if (ret === null) ret = defaultVal;
-				return ret;
-			}
-		} catch (error) { 
-			return localStorage.getItem(name) === null ? (defaultVal || false)
-				: localStorage.getItem(name) === "true" }
+
+    var getSettingsValue = function (name, defaultVal) {
+        var item = localStorage.getItem(name);
+        try {
+            return item ? JSON.parse(item).data : defaultVal;
+        } catch (e) { // non-parsable data
+            return defaultVal;
+        }
     };
 
     // note: this.elements is required to be modified with the same name as settings keys
     this.settings = {
-        showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
-        showClassIcons: settingsValue("showClassIcons", true),
-        showPropertyIcons: settingsValue("showPropertyIcons", true),
-        showParameters: settingsValue("showParameters", true),
-        showProperties: settingsValue("showProperties", true),
-        showMethods: settingsValue("showMethods", true),
-        showQueries: settingsValue("showQueries", true),
-		showXDatas: settingsValue("showXDatas", true),
-        dependencyLevel: settingsValue("dependencyLevel", "")
+        showDataTypesOnDiagram: getSettingsValue("showDataTypesOnDiagram"),
+        showClassIcons: getSettingsValue("showClassIcons", true),
+        showPropertyIcons: getSettingsValue("showPropertyIcons", true),
+        showParameters: getSettingsValue("showParameters", true),
+        showProperties: getSettingsValue("showProperties", true),
+        showMethods: getSettingsValue("showMethods", true),
+        showQueries: getSettingsValue("showQueries", true),
+		showXDatas: getSettingsValue("showXDatas", true),
+        dependencyLevel: getSettingsValue("dependencyLevel", "")
     };
 
     this.UI = new UI(this);
@@ -103,28 +96,22 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
 CacheClassExplorer.prototype.initSettings = function () {
 
     var self = this,
-        textChanged = "Please, re-render diagram to make changes apply.";
+        TEXT_CHANGED = "Please, re-render diagram to make changes apply.";
 
     for (var st in this.elements.settings) {
-        if (!this.elements.settings[st]) {
-            console.warn(st, "is Bred Sivoi Cobyly.");
-            continue;
-        }
+
+        var element = this.elements.settings[st];
+
+        // dropdown ("select") support is not predicted
+        element[element.type === "checkbox" ? "checked" : "value"] = this.settings[st];
 		
-		if (["text", "number"].indexOf(this.elements.settings[st].type) >= 0) this.elements.settings[st].value = this.settings[st];
-		if (this.elements.settings[st].type == "checkbox")  this.elements.settings[st].checked = this.settings[st];
-		
-		this.elements.settings[st].addEventListener("change", (function (st) {
-			return function (e) {
-				self.elements.settingsExtraText.innerHTML = textChanged;
-				if (["text", "number"].indexOf((e.target || e.srcElement).type) >= 0) self.settings[st] = (e.target || e.srcElement).value
-				if ((e.target || e.srcElement).type == "checkbox") self.settings[st] = (e.target || e.srcElement).checked
-				localStorage.setItem(
-					st,
-					self.settings[st]
-				);
-			};
-		})(st));
+		element.addEventListener("change", (function (st, element) { return function () {
+            self.elements.settingsExtraText.innerHTML = TEXT_CHANGED;
+            localStorage.setItem(st, self.settings[st] = JSON.stringify({
+                data: element[element.type === "checkbox" ? "checked" : "value"]
+            }));
+        }; })(st, element));
+
     }
 
 };
@@ -172,7 +159,7 @@ CacheClassExplorer.prototype.updateURL = function () {
     var obj = {
         name: this.classTree.SELECTED_NAME,
         type: this.classTree.SELECTED_TYPE,
-		level: this.classTree.SELECTED_LEVEL,
+		level: this.classTree.SELECTED_LEVEL
     };
 
     if (this.NAMESPACE) obj["namespace"] = this.NAMESPACE;
