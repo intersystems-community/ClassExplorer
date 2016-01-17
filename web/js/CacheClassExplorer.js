@@ -50,13 +50,25 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
             showProperties: id("setting.showProperties"),
             showMethods: id("setting.showMethods"),
             showQueries: id("setting.showQueries"),
-            showXDatas: id("setting.showXDatas")
+			showXDatas: id("setting.showXDatas"),
+            dependencyLevel: id("setting.dependencyLevel")
         }
     };
-
+	var selfAux = this;
     var settingsValue = function (name, defaultVal) {
-        return localStorage.getItem(name) === null ? (defaultVal || false)
-            : localStorage.getItem(name) === "true"
+		try{
+			if (selfAux.elements.settings[name].type=="checkbox") {
+				return localStorage.getItem(name) === null ? (defaultVal || false)
+					: localStorage.getItem(name) === "true" 
+			}			
+			if (["text", "number"].indexOf(selfAux.elements.settings[name].type) >= 0) {
+				var ret = localStorage.getItem(name);
+				if (ret === null) ret = defaultVal;
+				return ret;
+			}
+		} catch (error) { 
+			return localStorage.getItem(name) === null ? (defaultVal || false)
+				: localStorage.getItem(name) === "true" }
     };
 
     // note: this.elements is required to be modified with the same name as settings keys
@@ -68,7 +80,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         showProperties: settingsValue("showProperties", true),
         showMethods: settingsValue("showMethods", true),
         showQueries: settingsValue("showQueries", true),
-        showXDatas: settingsValue("showXDatas", true)
+		showXDatas: settingsValue("showXDatas", true),
+        dependencyLevel: settingsValue("dependencyLevel", "")
     };
 
     this.UI = new UI(this);
@@ -97,16 +110,21 @@ CacheClassExplorer.prototype.initSettings = function () {
             console.warn(st, "is Bred Sivoi Cobyly.");
             continue;
         }
-        this.elements.settings[st].checked = this.settings[st];
-        this.elements.settings[st].addEventListener("change", (function (st) {
-            return function (e) {
-                self.elements.settingsExtraText.innerHTML = textChanged;
-                localStorage.setItem(
-                    st,
-                    self.settings[st] = (e.target || e.srcElement).checked
-                );
-            };
-        })(st));
+		
+		if (["text", "number"].indexOf(this.elements.settings[st].type) >= 0) this.elements.settings[st].value = this.settings[st];
+		if (this.elements.settings[st].type == "checkbox")  this.elements.settings[st].checked = this.settings[st];
+		
+		this.elements.settings[st].addEventListener("change", (function (st) {
+			return function (e) {
+				self.elements.settingsExtraText.innerHTML = textChanged;
+				if (["text", "number"].indexOf((e.target || e.srcElement).type) >= 0) self.settings[st] = (e.target || e.srcElement).value
+				if ((e.target || e.srcElement).type == "checkbox") self.settings[st] = (e.target || e.srcElement).checked
+				localStorage.setItem(
+					st,
+					self.settings[st]
+				);
+			};
+		})(st));
     }
 
 };
@@ -153,7 +171,8 @@ CacheClassExplorer.prototype.updateURL = function () {
 
     var obj = {
         name: this.classTree.SELECTED_NAME,
-        type: this.classTree.SELECTED_TYPE
+        type: this.classTree.SELECTED_TYPE,
+		level: this.classTree.SELECTED_LEVEL,
     };
 
     if (this.NAMESPACE) obj["namespace"] = this.NAMESPACE;
