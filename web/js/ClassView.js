@@ -730,7 +730,7 @@ ClassView.prototype.confirmRender = function (data) {
         uml = joint.shapes.uml, relFrom, relTo,
         classes = {}, connector;
 
-    this.switchViewSave(!!data.savedView);
+    if (this.cacheClassExplorer.PRIMARY) this.switchViewSave(!!data.savedView);
 
     this.filterInherits(data);
 
