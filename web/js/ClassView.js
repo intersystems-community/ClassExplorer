@@ -30,7 +30,7 @@ var ClassView = function (parent, container) {
     this.viewSaving = false;
 
     /**
-     * Not to perform save too frequentry, this variable is used to control saving frequency.
+     * Not to perform save too frequently, this variable is used to control saving frequency.
      * @type {number}
      */
     this.saveTimeout = 0;
@@ -1199,6 +1199,8 @@ ClassView.prototype.init = function () {
 };
 
 ClassView.prototype.onRendered = function () {
+
+    if (!this.cacheClassExplorer.PRIMARY) return;
 
     [].slice.call(document.querySelectorAll(".line-hoverable")).forEach(function (el) {
         var hm = new HoverMessage(el.getAttribute("hovertext"), el["clickHandler"] || null),

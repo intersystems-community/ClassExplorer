@@ -10,6 +10,13 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
 
     var id = function (e) { return document.getElementById(e); };
 
+    /**
+     * This shows if the diagram is in active view. If not, this mean an orthodox diagram and it
+     * should not interact with UI at all.
+     * @type {boolean}
+     */
+    this.PRIMARY = !!treeViewContainer;
+
     this.elements = {
         favicon: id("favicon"),
         uiBody: id("ui-body"),
@@ -78,7 +85,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
     };
 
     this.UI = new UI(this);
-    if (treeViewContainer) {
+    if (this.PRIMARY) {
         this.source = new Source(this);
         this.classTree = new ClassTree(this, treeViewContainer);
     }
@@ -86,7 +93,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
     this.NAMESPACE = null;
     this.HELP_INITIALIZED = false;
 
-    if (treeViewContainer) {
+    if (this.PRIMARY) {
         this.initSettings();
         this.init();
     }
