@@ -361,6 +361,12 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
                     : "<span class=\"syntax-keyword\">ClientDataType</span>="
                     + "<span class=\"syntax-string\">" + data + "</span>";
             },
+            "CompileAfter": function (data) {
+                return "<span class=\"syntax-keyword\">CompileAfter</span>="
+                    + data.split(",").map(function (e) {
+                        return "<span class=\"syntax-names\">" + e + "</span>"
+                    }).join(", ");
+            },
             "DdlAllowed": 1,
             "Deployed": 1,
             "Dynamic": 1,
