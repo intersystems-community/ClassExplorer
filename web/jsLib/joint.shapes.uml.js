@@ -14,22 +14,25 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
 
     markup: [
         '<g class="rotatable">',
-          '<g class="scalable">',
-            '<rect class="uml-class-name-rect"/>',
-            '<rect class="uml-class-params-rect"/>',
-            '<text class="uml-class-params-label">Parameters</text>',
-            '<rect class="uml-class-attrs-rect"/>',
-            '<text class="uml-class-attrs-label">Properties</text>',
-            '<rect class="uml-class-methods-rect"/>',
-            '<text class="uml-class-methods-label">Methods</text>',
-            '<rect class="uml-class-queries-rect"/>',
-            '<text class="uml-class-queries-label">Queries</text>',
-          '</g>',
-          '<text class="uml-class-name-text"/>',
-          '<text class="uml-class-params-text"/>',
-          '<text class="uml-class-attrs-text"/>',
-          '<text class="uml-class-methods-text"/>',
-          '<text class="uml-class-queries-text"/>',
+            '<g class="scalable">',
+                '<rect class="uml-class-name-rect"/>',
+                '<rect class="uml-class-params-rect"/>',
+                '<text class="uml-class-params-label">Parameters</text>',
+                '<rect class="uml-class-attrs-rect"/>',
+                '<text class="uml-class-attrs-label">Properties</text>',
+                '<rect class="uml-class-methods-rect"/>',
+                '<text class="uml-class-methods-label">Methods</text>',
+                '<rect class="uml-class-queries-rect"/>',
+                '<text class="uml-class-queries-label">Queries</text>',
+                '<rect class="uml-class-xdatas-rect"/>',
+                '<text class="uml-class-xdatas-label">xDatas</text>',
+            '</g>',
+            '<text class="uml-class-name-text"/>',
+            '<text class="uml-class-params-text"/>',
+            '<text class="uml-class-attrs-text"/>',
+            '<text class="uml-class-methods-text"/>',
+            '<text class="uml-class-queries-text"/>',
+            '<text class="uml-class-xdatas-text"/>',
         '</g>'
     ].join(''),
 
@@ -50,6 +53,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             '.uml-class-attrs-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
             '.uml-class-methods-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
             '.uml-class-queries-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
+            '.uml-class-xdatas-rect': { 'stroke': 'black', 'stroke-width': 1, 'fill': '#2980b9' },
 
             '.uml-class-name-text': {
                 'ref': '.uml-class-name-rect', 'ref-y': .5, 'ref-x': .5, 'text-anchor': 'middle', 'y-alignment': 'middle', 'font-weight': 'bold',
@@ -71,6 +75,10 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
                 'ref': '.uml-class-queries-rect', 'ref-y': 5, 'ref-x': 5,
                 'fill': 'black', 'font-size': 12
             },
+            '.uml-class-xdatas-text': {
+                'ref': '.uml-class-xdatas-rect', 'ref-y': 5, 'ref-x': 5,
+                'fill': 'black', 'font-size': 12
+            },
             '.uml-class-attrs-label': {
                 ref: '.uml-class-attrs-label', fill: "black", 'font-size': 10,
                 xPos: -56
@@ -83,6 +91,9 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             },
             '.uml-class-params-label': {
                 ref: '.uml-class-methods-label', fill: "black", 'font-size': 10
+            },
+            '.uml-class-xdatas-label': {
+                ref: '.uml-class-xdatas-label', fill: "black", 'font-size': 10
             }
         },
 
@@ -91,6 +102,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         attributes: [],
         methods: [],
         queries: [],
+        xdatas: [],
         classSigns: []
 
     }, joint.shapes.basic.Generic.prototype.defaults),
@@ -100,10 +112,11 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
         var o,
             rects = [
                 { type: 'name', text: this.getClassName() },
-                { type: 'params', text:  (o = this.get('params'))    , o: (o.forEach(function(e){e._BLOCK="parameters"}) && o) },
-                { type: 'attrs', text:   (o = this.get('attributes')), o: (o.forEach(function(e){e._BLOCK="properties"}) && o) },
-                { type: 'methods', text: (o = this.get('methods'))   , o: (o.forEach(function(e){e._BLOCK="methods"}) && o) },
-                { type: 'queries', text: (o = this.get('queries'))   , o: (o.forEach(function(e){e._BLOCK="queries"}) && o) }
+                { type: 'params', text:  (o = this.get('params')||[])    , o: (o.forEach(function(e){e._BLOCK="parameters"}) && o) },
+                { type: 'attrs', text:   (o = this.get('attributes')||[]), o: (o.forEach(function(e){e._BLOCK="properties"}) && o) },
+                { type: 'methods', text: (o = this.get('methods')||[])   , o: (o.forEach(function(e){e._BLOCK="methods"}) && o) },
+                { type: 'queries', text: (o = this.get('queries')||[])   , o: (o.forEach(function(e){e._BLOCK="queries"}) && o) },
+                { type: 'xdatas', text: (o = this.get('xdatas')||[])   , o: (o.forEach(function(e){e._BLOCK="xdatas"}) && o) }
             ],
             self = this,
             classSigns = this.get('classSigns'),
@@ -199,7 +212,8 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             { type: 'params', text: this.get('params') },
             { type: 'attrs', text: this.get('attributes') },
             { type: 'methods', text: this.get('methods') },
-            { type: 'queries', text: this.get('queries') }
+            { type: 'queries', text: this.get('queries') },
+            { type: 'xdatas', text: this.get('xdatas') }
         ];
 
         var offsetY = 0;

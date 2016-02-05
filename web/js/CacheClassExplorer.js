@@ -10,6 +10,13 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
 
     var id = function (e) { return document.getElementById(e); };
 
+    /**
+     * This shows if the diagram is in active view. If not, this mean an orthodox diagram and it
+     * should not interact with UI at all.
+     * @type {boolean}
+     */
+    this.PRIMARY = !!treeViewContainer;
+
     this.elements = {
         favicon: id("favicon"),
         uiBody: id("ui-body"),
@@ -22,6 +29,8 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         showSettingsButton: id("button.showSettings"),
         helpButton: id("button.showHelp"),
         infoButton: id("button.showInfo"),
+        saveViewButton: id("button.saveView"),
+        saveViewIcon: id("saveViewIcon"),
         methodCodeView: id("methodCodeView"),
         closeMethodCodeView: id("closeMethodCodeView"),
         methodLabel: id("methodLabel"),
@@ -47,28 +56,36 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
             showParameters: id("setting.showParameters"),
             showProperties: id("setting.showProperties"),
             showMethods: id("setting.showMethods"),
-            showQueries: id("setting.showQueries")
+            showQueries: id("setting.showQueries"),
+			showXDatas: id("setting.showXDatas"),
+            dependencyLevel: id("setting.dependencyLevel")
         }
     };
 
-    var settingsValue = function (name, defaultVal) {
-        return localStorage.getItem(name) === null ? (defaultVal || false)
-            : localStorage.getItem(name) === "true"
+    var getSettingsValue = function (name, defaultVal) {
+        var item = localStorage.getItem(name);
+        try {
+            return item ? JSON.parse(item).data : defaultVal;
+        } catch (e) { // non-parsable data
+            return defaultVal;
+        }
     };
 
     // note: this.elements is required to be modified with the same name as settings keys
     this.settings = {
-        showDataTypesOnDiagram: settingsValue("showDataTypesOnDiagram"),
-        showClassIcons: settingsValue("showClassIcons", true),
-        showPropertyIcons: settingsValue("showPropertyIcons", true),
-        showParameters: settingsValue("showParameters", true),
-        showProperties: settingsValue("showProperties", true),
-        showMethods: settingsValue("showMethods", true),
-        showQueries: settingsValue("showQueries", true)
+        showDataTypesOnDiagram: getSettingsValue("showDataTypesOnDiagram"),
+        showClassIcons: getSettingsValue("showClassIcons", true),
+        showPropertyIcons: getSettingsValue("showPropertyIcons", true),
+        showParameters: getSettingsValue("showParameters", true),
+        showProperties: getSettingsValue("showProperties", true),
+        showMethods: getSettingsValue("showMethods", true),
+        showQueries: getSettingsValue("showQueries", true),
+		showXDatas: getSettingsValue("showXDatas", true),
+        dependencyLevel: getSettingsValue("dependencyLevel", "")
     };
 
     this.UI = new UI(this);
-    if (treeViewContainer) {
+    if (this.PRIMARY) {
         this.source = new Source(this);
         this.classTree = new ClassTree(this, treeViewContainer);
     }
@@ -76,7 +93,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
     this.NAMESPACE = null;
     this.HELP_INITIALIZED = false;
 
-    if (treeViewContainer) {
+    if (this.PRIMARY) {
         this.initSettings();
         this.init();
     }
@@ -86,23 +103,22 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
 CacheClassExplorer.prototype.initSettings = function () {
 
     var self = this,
-        textChanged = "Please, re-render diagram to make changes apply.";
+        TEXT_CHANGED = "Please, re-render diagram to make changes apply.";
 
     for (var st in this.elements.settings) {
-        if (!this.elements.settings[st]) {
-            console.warn(st, "is Bred Sivoi Cobyly.");
-            continue;
-        }
-        this.elements.settings[st].checked = this.settings[st];
-        this.elements.settings[st].addEventListener("change", (function (st) {
-            return function (e) {
-                self.elements.settingsExtraText.innerHTML = textChanged;
-                localStorage.setItem(
-                    st,
-                    self.settings[st] = (e.target || e.srcElement).checked
-                );
-            };
-        })(st));
+
+        var element = this.elements.settings[st];
+
+        // dropdown ("select") support is not predicted
+        element[element.type === "checkbox" ? "checked" : "value"] = this.settings[st];
+		
+		element.addEventListener("change", (function (st, element) { return function () {
+            self.elements.settingsExtraText.innerHTML = TEXT_CHANGED;
+            localStorage.setItem(st, self.settings[st] = JSON.stringify({
+                data: element[element.type === "checkbox" ? "checked" : "value"]
+            }));
+        }; })(st, element));
+
     }
 
 };
@@ -149,7 +165,8 @@ CacheClassExplorer.prototype.updateURL = function () {
 
     var obj = {
         name: this.classTree.SELECTED_NAME,
-        type: this.classTree.SELECTED_TYPE
+        type: this.classTree.SELECTED_TYPE,
+		level: this.classTree.SELECTED_LEVEL
     };
 
     if (this.NAMESPACE) obj["namespace"] = this.NAMESPACE;
@@ -255,5 +272,16 @@ CacheClassExplorer.prototype.init = function () {
     });
 
     enableSVGDownload(this.classTree);
+
+    // default icon
+    this.elements.saveViewIcon.src = lib.image.pin;
+    this.elements.saveViewButton.addEventListener("click", function () {
+        self.classView.switchViewSave();
+        if (self.classView.viewSaving) {
+            self.classView.saveView();
+        } else {
+            self.source.resetView( self.NAMESPACE + ":" + self.classView.CURRENT_RENDER_NAME );
+        }
+    });
 
 };

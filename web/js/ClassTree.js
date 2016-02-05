@@ -14,6 +14,7 @@ var ClassTree = function (parent, treeViewContainer) {
     this.SELECTED_NAME = null;
     this.SELECTED_TYPE = null; // "class" || "package"
     this.SELECTED_ELEMENT = null;
+	this.SELECTED_LEVEL = null;
     this.treeObject = null;
 
     this.cacheClassExplorer.elements.classTreeSearch.addEventListener("input", function (e) {

@@ -12,10 +12,16 @@ Lib.prototype.load = function (url, data, callback) {
     var xhr = new XMLHttpRequest();
 
     xhr.open(data ? "POST" : "GET", url);
+    if (typeof callback === "undefined") callback = function () {};
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            return callback(null, JSON.parse(xhr.responseText) || {});
+            try {
+                return callback(null, JSON.parse(xhr.responseText) || {});
+            } catch (e) {
+                console.error(url, "Unable to parse:", { data: xhr.responseText });
+                return {};
+            }
         } else if (xhr.readyState === 4) {
             callback(xhr.responseText + ", " + xhr.status + ": " + xhr.statusText);
         }
@@ -38,6 +44,37 @@ Lib.prototype.countProperties = function (object) {
     }
 
     return c;
+
+};
+
+/**
+ * extObject properties extends baseObject.
+ * @param baseObject
+ * @param extObject
+ */
+Lib.prototype.extend = function (baseObject, extObject) {
+
+    var i, newObj = {};
+
+    for (i in baseObject) { if (!baseObject.hasOwnProperty(i)) continue;
+        newObj[i] = baseObject[i];
+    }
+
+    for (i in extObject) { if (!extObject.hasOwnProperty(i)) continue;
+        newObj[i] = extObject[i];
+    }
+
+    return newObj;
+
+};
+
+Lib.prototype.isEmptyObject = function (obj) {
+
+    var empty = true;
+
+    for (var i in obj) { if (!obj.hasOwnProperty(i)) continue; empty = false; break; }
+
+    return empty;
 
 };
 
@@ -147,9 +184,7 @@ Lib.prototype.sqlKeyWords = {
  */
 Lib.prototype.highlightCOS = function (code) {
     var self = this;
-    return code.replace(/[<>&]/g, function (r) {
-            return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
-        }).replace(/(&[lgtamp]{2,3};)|(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
+    return this.replaceSpecial(code).replace(/(&[lgtamp]{2,3};)|(\/\/[^\n]*)\n|("[^"]*")|([\$#]{1,3}[a-zA-Z][a-zA-Z0-9]*)|\((%?[a-zA-Z0-9\.]+)\)\.|(%?[a-zA-Z][a-zA-Z0-9]*)\(|([a-zA-Z]+)|(\/\*[^]*?\*\/)|(\^%?[a-zA-Z][a-zA-Z0-9]*)/g, function (part) {
             var i = -1, c;
             [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
                 i++;
@@ -170,15 +205,19 @@ Lib.prototype.highlightCOS = function (code) {
         });
 };
 
+Lib.prototype.replaceSpecial = function (str) {
+    return str.replace(/[<>&]/g, function (r) {
+        return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;";
+    });
+};
+
 /**
  * Highlight SQL code.
  * @param {string} code
  */
 Lib.prototype.highlightSQL = function (code) {
     var self = this;
-    return code.replace(/[<>&]/g, function (r) {
-        return r === "<" ? "&lt;" : r === ">" ? "&gt;" : "&amp;"
-    }).replace(/(&[lgtamp]{2,3};)|([a-zA-Z]+)/gi, function (part, a, kw) {
+    return this.replaceSpecial(code).replace(/(&[lgtamp]{2,3};)|([a-zA-Z]+)/gi, function (part, a, kw) {
         var i = -1, c;
         [].slice.call(arguments, 1, arguments.length - 2).every(function (e) {
             i++;
@@ -191,6 +230,47 @@ Lib.prototype.highlightSQL = function (code) {
         }
         return part.replace(arguments[i+1], function (p) { return "<span class=\"syntax-" + c + "\">" + p + "</span>" });
     });
+};
+
+/**
+ * Highlight XML code.
+ * @param {string} code
+ */
+Lib.prototype.highlightXML = function (code) {
+
+    var replaceSpecial = this.replaceSpecial,
+        level = 0,
+        regex = new RegExp("<!\\[CDATA\\[([^]*?)]]" // this line break is done to avoid xData
+            // injection fail, as CDATA cannot have the closing character sequence inside.
+            // DO NOT join these three characters in one inline string
+            // KEEP THIS LINE
+            + [].join("")
+            + ">|<(\\/?)[\\w](?:.*(?=\\/>)|.*(?=>))(\\/?)>|(<!--[^]*?-->)"
+            + "|(<\\?[^]*?\\?>)|(<[^]*?>)", "g");
+
+    function stringFill (n) {
+        return new Array(n + 1).join("  ")
+    }
+
+    return code.replace(regex, function (part, cData, tagS, tagG, comment, special, etc) {
+        return typeof tagS !== "undefined" ? part.replace(/<\/?([^\s]+)(.*(?=\/>)|.*(?=>))\/?>/ig, function (p, tagName, attrs) {
+            if (tagS) level--;
+            var s = stringFill(level) + " &lt;" + tagS + "<span class=\"syntax-keyword\">"
+                + tagName + "</span>"
+                + attrs.replace(/(\s*[^=]+)=(\s*(?:'[^']*'|"[^"]*"))/g, function (part, a, b) {
+                    return "<span class=\"syntax-names\">" + a
+                        + "</span>=<span class=\"syntax-string\">" + b + "</span>";
+                })
+                + tagG + "&gt;";
+            if (!tagS && !tagG) level++;
+            return s;
+        }) : comment ? "<span class=\"syntax-comment\">" + replaceSpecial(comment) + "</span>"
+           : special ? replaceSpecial(special)
+           : etc ? replaceSpecial(etc)
+                : "<span class=\"syntax-other\">&lt;![CDATA[</span>"
+                    + replaceSpecial(cData) + "<span class=\"syntax-other\">]]&gt;</span>";
+    });
+
 };
 
 Lib.prototype.getSelection = function () {
@@ -238,5 +318,7 @@ Lib.prototype.image = {
     keyRed: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACeklEQVQ4jX2TO0zTURTGv3vv/9F/H4Q2LZRHa4o8fASGGuJjMBEluDAQI0Tj4ICTkUQZ3YyJxsHEyRijgwZjdFBjbHQCnDAGMQqioDYgMUBttdACbf/3HheNoK1nPDnfL/m+cw7r7OxEqbKJdMlYd0QWeryrK00pzZiJu9wPdKVuC6IMAGilxHkiI6hrd08K6orOzkHEp5HK2o2j/pr2683NvVkhDgqiBC8mlkTwm+a5i5tqu1oFIKSN4WAYTy5cgrOjHWdfj0cF0R3JmK8oICeVp6O66kTQ5QQUAbaNkYataOs7g3zfKYSWs9iTTB/IcX6oqAWNs+2tlRU+ZNIAA6Bp2D35FgP9p1HzOY59UqElncVQwBstCmCM5XUh/jSEwN7UPFqvXoFOBmCUQXIGArSiFgpSjY8mU7Pg6yCMwzIMCMMAAIx4PVCMvSseoq75Mh8mJUgB/PcIAURgBRvDwQBeecvGTKXu/2NhhYv6tu+LsfaxF5G1hXk4wrUAAMU4Ug4Lg+EQbtXVzQuiY5xobgNglbGdO+y1x90zUwGLMTgmJoBPX3BtW9P7ly3VybRmuH4YxnNTyvOcKAGsO6Qc0f6IJh4eTibcTiXhFwwoKDzzeXHP5+/XQTGNCJZtb9wYANhERytM4+YRVTA90kbIMJAwLfUoUpeLVdeOWKRinKhYXOCSqNep6wM93nLTbRfQ6PEAysZgoOrNjc0NoTzn3aXEAMAVsGwB0At5RCsrwBjDkumEDgq7C7bkRN9KqgFoUqmP5Q5zqWNLUxlm4oCSuByqnx41Xcct+ZfhYgAOTOmaPvR0IbFrMZ3JZw23EWdameT8q/brZf9XPwERTf+roi2jYwAAAABJRU5ErkJggg==",
     keyGreen: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACbElEQVQ4jX2TS0iUURzFz31933wz44yOjviYERTTIjCYkLJFkCW2cSGRUrRoYW1cuHAV7aJFm2odUYvCiFpUREOt1FZGWNEblUwTmxwdfI7OzHfvv8UgIc147upy7/n97zlwWVdXF4qJXFLQrAf1ud5cWbqZp6wZNe1/Qsrch6B1AJDFzCZLlqdKPgz2U/ef2BzmxSR0ym0qH6/pKL3d0ocNcRKCkrzgZE1wKuwrLdci3b5WwAgXwdE6XHxxHW3eTqQvf4hB0ANoFioIcDOmpKGz+kKwygsNgoaLmrF96G8fQG92ACa6BhxZOoEMP1UwgpBsf6S1MpTFCvI5JWbbPuHS0CAWa39AHNNgLSugkXCscAeMZYUSoO0tBNJHE4i33kRAWQjCBjQHCLJgBJ0znxPjqVkJ8Y8JDtuxoISV72msDDDsa0GA1DI0tf5NGxgwbF+h/GI5sNEqsHdl72Gbx/9FYGnRuNm+EJ/oeFPvbiUQ9tTmDwyHTDnwDEeh7jUkSNA5cJrbCdhkh9jBreeLPRNh7jD89HzBMmbgubX3e83bmiWxYvn4svWabH0VnJL5grcfmKHjdr14unk66YdXQ1UwMBjQq3KwR+FBpShOkkCOuzMuABiXzjqV1l3vmZy9UeLCG7WQTjom8Kwh48QjY+SYODihkDhp6rO8aqi2t9Q2/hxCTSUwcOEbrv7ov7MniizvKWbOAwzWuAO4KotIrBKMMchVL0hRHfldDU6LRd0ApNFmyim1Vw90Ngd+YRqARvBG4yQb9503juvuZgYAyTgmpFIjMy+Th38vrGe3NvwWm5YBpvk8ZP7L7qa/51LzXlKvOSsAAAAASUVORK5CYII=",
     minusSimple: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAL0lEQVQ4jWP8//8/IwMFgIkSzaMGUMkAFhiDkZHxHyka////z0QVFzCOJqThYAAAIOcKHde8N5QAAAAASUVORK5CYII=",
-    plusSimple: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAARUlEQVQ4jdWRMQ4AIAjErP9/M+eiiyEyYCTeSjiagiRaIj2zHBYABlgdwR8FrDdGsvZI6ncJ3OGkWte81EusLzhKfEIwANMfFhcD7xBqAAAAAElFTkSuQmCC"
+    plusSimple: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAARUlEQVQ4jdWRMQ4AIAjErP9/M+eiiyEyYCTeSjiagiRaIj2zHBYABlgdwR8FrDdGsvZI6ncJ3OGkWte81EusLzhKfEIwANMfFhcD7xBqAAAAAElFTkSuQmCC",
+    pin: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAADBmlDQ1BpY2MAAHjaY2BgnuDo4uTKJMDAUFBUUuQe5BgZERmlwH6egY2BmYGBgYGBITG5uMAxIMCHgYGBIS8/L5UBFTAyMHy7xsDIwMDAcFnX0cXJlYE0wJpcUFTCwMBwgIGBwSgltTiZgYHhCwMDQ3p5SUEJAwNjDAMDg0hSdkEJAwNjAQMDg0h2SJAzAwNjCwMDE09JakUJAwMDg3N+QWVRZnpGiYKhpaWlgmNKflKqQnBlcUlqbrGCZ15yflFBflFiSWoKAwMD1A4GBgYGXpf8EgX3xMw8BSMDVQYqg4jIKAUICxE+CDEESC4tKoMHJQODAIMCgwGDA0MAQyJDPcMChqMMbxjFGV0YSxlXMN5jEmMKYprAdIFZmDmSeSHzGxZLlg6WW6x6rK2s99gs2aaxfWMPZ9/NocTRxfGFM5HzApcj1xZuTe4FPFI8U3mFeCfxCfNN45fhXyygI7BD0FXwilCq0A/hXhEVkb2i4aJfxCaJG4lfkaiQlJM8JpUvLS19QqZMVl32llyfvIv8H4WtioVKekpvldeqFKiaqP5UO6jepRGqqaT5QeuA9iSdVF0rPUG9V/pHDBYY1hrFGNuayJsym740u2C+02KJ5QSrOutcmzjbQDtXe2sHY0cdJzVnJRcFV3k3BXdlD3VPXS8Tbxsfd99gvwT//ID6wIlBS4N3hVwMfRnOFCEXaRUVEV0RMzN2T9yDBLZE3aSw5IaUNak30zkyLDIzs+ZmX8xlz7PPryjYVPiuWLskq3RV2ZsK/cqSql01jLVedVPrHzbqNdU0n22VaytsP9op3VXUfbpXta+x/+5Em0mzJ/+dGj/t8AyNmf2zvs9JmHt6vvmCpYtEFrcu+bYsc/m9lSGrTq9xWbtvveWGbZtMNm/ZarJt+w6rnft3u+45uy9s/4ODOYd+Hmk/Jn58xUnrU+fOJJ/9dX7SRe1LR68kXv13fc5Nm1t379TfU75/4mHeY7En+59lvhB5efB1/lv5dxc+NH0y/fzq64Lv4T8Ffp360/rP8f9/AA0ADzTzG2NJAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAACYktHRAD/h4/MvwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+ABCw0JBgCIkrwAAADNSURBVCjPdZA9DgFRFIVPMCFRSFQTBQ293z1oRWMJLECoLUHsAdEoRERjA0QvEhGNaBUa8inGzDwznFu83HvO/XlHKBQ5ZmTcTD8EHWCH7WQRhfGQVNZCtqQfEywmONhih1dYjPGxJetTcUTU63Yxj0lKqa2G0jooqrp3yVQbobUQBe4EMSZmfrPKNUBbQR9KHD166XabPux18La/9DRc+SiHwIozACcS/gTn6QIjRJErsCPyLWgCfdxzb/RM60SFCy2jlCf5LRhQQ//jDXleGJr4KuKfAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE2LTAxLTExVDEzOjA5OjA2KzAxOjAw8Rgr6AAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNi0wMS0xMVQxMzowOTowNiswMTowMIBFk1QAAAA3dEVYdGljYzpjb3B5cmlnaHQAQ29weXJpZ2h0IDE5OTkgQWRvYmUgU3lzdGVtcyBJbmNvcnBvcmF0ZWQxbP9tAAAAHHRFWHRpY2M6ZGVzY3JpcHRpb24ARG90IEdhaW4gMjAlk5c01gAAAB10RVh0aWNjOm1hbnVmYWN0dXJlcgBEb3QgR2FpbiAyMCWy7qr9AAAAFnRFWHRpY2M6bW9kZWwARG90IEdhaW4gMjAlMnX1qwAAAABJRU5ErkJggg==",
+    pinActive: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAe1BMVEX/////zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv/zBv////a7dsHAAAAJ3RSTlMAQPLg8wreGfQY6utB+GxtU/taZ7ywq+3urK+9aL6trpeZf4BeYC49Q3tiAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+ABCw0HIEwGOs8AAABlSURBVBjTXc1HEoAwCEBRYu+99879b2hGo0b+KrzJAACPKSpPY/Ckq8gz9BfAtBAtG6QcRFeewaVAf3g+ov8dgQCvwmeO4hviRECa5UVZ1U3bSVvaHv4NI4FpJrCsBLadwHGIxwkpXgeBl9dpZwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxNi0wMS0xMVQxMzowNzozMyswMTowMDNmMx8AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTYtMDEtMTFUMTM6MDc6MzIrMDE6MDDkTIAXAAAAAElFTkSuQmCC"
 };

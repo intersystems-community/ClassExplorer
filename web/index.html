@@ -60,10 +60,13 @@
                 <div class="inlineSearchBlock" id="diagramSearchBlock">
                     <input type="search" id="diagramSearch" placeholder="Search on diagram..."/>
                 </div>
-                <div id="button.diagramSearch" class="icon search"></div>
-                <div id="button.zoomIn" class="icon plus"></div>
-                <div id="button.zoomNormal" class="icon scaleNormal"></div>
-                <div id="button.zoomOut" class="icon minus"></div>
+                <div id="button.diagramSearch" class="icon search" title="Search"></div>
+                <div id="button.zoomIn" class="icon plus" title="Zoom In"></div>
+                <div id="button.zoomNormal" class="icon scaleNormal" title="Zoom Normal"></div>
+                <div id="button.zoomOut" class="icon minus" title="Zoom Out"></div>
+                <div id="button.saveView" class="icon pin" title="Keep Positions">
+                    <img id="saveViewIcon"/>
+                </div>
             </div>
             <div id="classView">
                 <div id="methodCodeView">
@@ -131,6 +134,16 @@
                                 <td><input id="setting.showQueries" type="checkbox"/></td>
                                 <td><label for="setting.showQueries">Show Queries</label></td>
                                 <td>Display block with class queries</td>
+                            </tr>
+							<tr>
+                                <td><input id="setting.showXDatas" type="checkbox"/></td>
+                                <td><label for="setting.showXDatas">Show xDatas</label></td>
+                                <td>Display block with class xDatas</td>
+                            </tr>
+							<tr>
+                                <td><input id="setting.dependencyLevel" type="number" min="0" max="9" step="1" style="width:30px;text-align: center;"></td>
+                                <td><label for="setting.dependencyLevel">Dependency level</label></td>
+                                <td>Dependency level of classes (leave blank for full structure)</td>
                             </tr>
                             </tbody>
                         </table>
