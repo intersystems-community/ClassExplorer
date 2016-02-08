@@ -42,6 +42,9 @@ gulp.task("clean", function () {
 
 gulp.task("gatherLibs", ["clean"], function () {
     return gulp.src([
+            "web/jsLib/jquery.min.js",
+            "web/jsLib/lodash.min.js",
+            "web/jsLib/backbone-min.js",
             "web/jsLib/joint.js",
             "web/jsLib/joint.shapes.uml.js",
             "web/jsLib/ImageExporter.js"
