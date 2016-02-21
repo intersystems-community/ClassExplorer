@@ -19,7 +19,7 @@ Lib.prototype.load = function (url, data, callback) {
             try {
                 return callback(null, JSON.parse(xhr.responseText) || {});
             } catch (e) {
-                console.error(url, "Unable to parse:", { data: xhr.responseText });
+                console.error(e, url, "Unable to parse:", { data: xhr.responseText });
                 return {};
             }
         } else if (xhr.readyState === 4) {
