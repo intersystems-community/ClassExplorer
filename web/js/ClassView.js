@@ -906,42 +906,6 @@ ClassView.prototype.restoreView = function (data) {
 
 };
 
-/**
- * @deprecated
- * @param className
- * @param restoring
- */
-ClassView.prototype.loadClass = function (className, restoring) {
-
-    var self = this;
-
-    this.cacheClassExplorer.classTree.SELECTED_NAME = className;
-    this.cacheClassExplorer.classTree.SELECTED_TYPE = "class";
-	if (!restoring)
-        this.cacheClassExplorer.classTree.SELECTED_LEVEL =
-            this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
-    this.showLoader();
-    this.cacheClassExplorer.source.getClassView(
-        className,
-        this.cacheClassExplorer.classTree.SELECTED_LEVEL + "",
-        function (err, data) {
-            //console.log(data);
-            self.removeLoader();
-            if (err) {
-                self.showLoader("Unable to get " + self.cacheClassExplorer.classTree.SELECTED_NAME);
-                console.error.call(console, err);
-            } else {
-                self.render(data);
-            }
-        }
-    );
-
-    this.cacheClassExplorer.elements.className.textContent = className;
-    this.CURRENT_RENDER_NAME = "CLASS:" + className;
-    this.cacheClassExplorer.updateURL();
-
-};
-
 ClassView.prototype.loadPackage = function (packageName, restoring) {
 
     var self = this;

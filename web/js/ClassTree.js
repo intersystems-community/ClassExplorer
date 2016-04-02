@@ -75,25 +75,6 @@ ClassTree.prototype.removeLoader = function () {
 
 };
 
-/**
- * @deprecated
- * @param element
- * @param className
- */
-ClassTree.prototype.classSelected = function (element, className) {
-
-    if (element !== this.SELECTED_ELEMENT) {
-        if (this.SELECTED_ELEMENT) this.SELECTED_ELEMENT.classList.remove("selected");
-        this.SELECTED_ELEMENT = element;
-    }
-
-    if (!element.classList.contains("selected")) {
-        element.classList.add("selected");
-        this.cacheClassExplorer.classView.loadClass(className);
-    }
-
-};
-
 ClassTree.prototype.packageSelected = function (element, packageName) {
 
     if (element !== this.SELECTED_ELEMENT) {
@@ -197,7 +178,6 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
     function inPath (path, classList) {
         var inside = false,
             s = path + ".";
-        console.log(s);
         classList.forEach(function (e) {
             if (e.indexOf(s) === 0)
                 inside = true;
@@ -211,14 +191,15 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
                 && sce === level && selectedClassElement[sce] === elementName ? ++sce : null,
             el1 = div(),
             el2, el3, el4, checkbox, span,
-            selectedNames = self.SELECTED_NAME ? self.SELECTED_NAME.split(",") : [];
+            selectedNames = self.SELECTED_NAME ? self.SELECTED_NAME.split(",") : [],
+            fullName = (path ? path + "." : path) + elementName;
 
         if (isPackage) {
             el1.className = "tv-package";
             (el2 = div()).className = "tv-package-name" + (
-                    sel || inPath((path ? path + "." : path) + elementName, self.selectedClassList)
-                        ? ""
-                        : " minimized");
+                sel || inPath(fullName, self.selectedClassList)
+                    ? ""
+                    : " minimized");
             el2.textContent = elementName;
             if (sel && sce === selectedClassElement.length) {
                 el2.className += " selected";
@@ -233,8 +214,7 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
                 self.packageSelected(el2, (path ? path + "." : path) + elementName);
             });
         } else {
-            if (sel) self.SELECTED_ELEMENT = el1;
-            el1.className = "tv-class-name" + (sel ? " selected" : "");
+            el1.className = "tv-class-name";
             el1.CLASS_NAME = path + (path ? "." : "") + elementName;
             checkbox = document.createElement("input");
             checkbox.setAttribute("type", "checkbox");

@@ -187,7 +187,7 @@ CacheClassExplorer.prototype.restoreFromURL = function () {
     }
 
     if (obj.namespace) this.NAMESPACE = obj.namespace;
-    if (obj.type === "class") {
+    if (obj.type === "class") { // left for older Class Explorer versions support
         this.classView.loadClasses([obj.name], true);
     } else if (obj.type === "package") {
         this.classView.loadPackage(obj.name, true);

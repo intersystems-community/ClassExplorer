@@ -361,22 +361,6 @@ Returns if class with given name exists.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="getClassView">
-<Description>
-Returns structured class data</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>className:%String,namespace:%String,level:%Integer</FormalSpec>
-<ReturnType>%ZEN.proxyObject</ReturnType>
-<Implementation><![CDATA[
-    set baseNamespace = $namespace
-    zn:$GET(namespace)'="" namespace
-    set package = $LISTTOSTRING($LIST($LISTFROMSTRING(className, "."), 1, *-1), ".")
-    set oData = ..getBaseOData(package, baseNamespace, "CLASS:"_className)
-    do ..fillClassData(oData, className, level)
-    quit oData
-]]></Implementation>
-</Method>
-
 <Method name="getPackageView">
 <Description>
 Returns structured package data</Description>
@@ -459,7 +443,6 @@ REST interface for ClassExplorer</Description>
    <Route Url="/js/CacheClassExplorer.js" Method="GET" Call="GetJs"/>
    <Route Url="/Test" Method="GET" Call="Test"/>
    <Route Url="/GetClassTree" Method="GET" Call="GetClassTree"/>
-   <Route Url="/GetClassView" Method="GET" Call="GetClassView"/>
    <Route Url="/GetAllNamespacesList" Method="GET" Call="GetAllNamespacesList"/>
    <Route Url="/GetPackageView" Method="GET" Call="GetPackageView"/>
    <Route Url="/GetArbitraryView" Method="GET" Call="GetArbitraryView"/>
@@ -477,19 +460,6 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
-    return $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="GetClassView">
-<Description>
-Returns classTree by given class name</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    set className = %request.Get("name")
-    set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"), %request.Get("level"))
-    do classData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>

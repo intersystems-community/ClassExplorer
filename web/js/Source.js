@@ -50,23 +50,6 @@ Source.prototype.getMethod = function (className, methodName, callback) {
 
 };
 
-/**
- * Return class view.
- * @param {string} className
- * @param {string} level
- * @param {Source~dataCallback} callback
- */
-Source.prototype.getClassView = function (className, level, callback) { 
-    lib.load(
-        this.URL + "/GetClassView?name=" + encodeURIComponent(className)
-			+ "&level=" + encodeURIComponent(level)
-            + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
-        null,
-        callback
-    );
-
-};
-
 Source.prototype.saveView = function (packageName, data) {
 
     lib.load(
