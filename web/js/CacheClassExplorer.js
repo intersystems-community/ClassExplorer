@@ -152,6 +152,7 @@ CacheClassExplorer.prototype.setNamespace = function (namespace) {
     var self = this;
 
     this.NAMESPACE = namespace;
+    this.classTree.setSelectedClassList([]);
 
     self.classTree.container.textContent = "";
     self.classTree.showLoader();
@@ -159,17 +160,33 @@ CacheClassExplorer.prototype.setNamespace = function (namespace) {
         if (!err) self.classTree.updateTree(data);
     });
 
+    this.updateNamespace();
+    this.updateURL();
+
+};
+
+/**
+ * Updates namespace UI.
+ */
+CacheClassExplorer.prototype.updateNamespace = function () {
+
+    this.elements.namespaces.value = this.NAMESPACE;
+
 };
 
 CacheClassExplorer.prototype.updateURL = function () {
 
     var obj = {
-        name: this.classTree.SELECTED_NAME,
-        type: this.classTree.SELECTED_TYPE,
-		level: this.classTree.SELECTED_LEVEL
+        name: this.classTree.SELECTED_NAME
     };
+    
+    if (this.classTree.SELECTED_TYPE !== null)
+        obj.type = this.classTree.SELECTED_TYPE;
+    if (this.classTree.SELECTED_LEVEL !== null)
+        obj.level = this.classTree.SELECTED_LEVEL;
 
-    if (this.NAMESPACE) obj["namespace"] = this.NAMESPACE;
+    if (this.NAMESPACE)
+        obj["namespace"] = this.NAMESPACE;
 
     location.hash = JSON.stringify(obj);
 
@@ -182,11 +199,13 @@ CacheClassExplorer.prototype.restoreFromURL = function () {
 
     try { obj = JSON.parse(hash); } catch (e) { obj = {}; }
 
-    if (obj.level) {
+    if (obj.level)
         this.classTree.SELECTED_LEVEL = obj.level;
+    if (obj.namespace) {
+        this.NAMESPACE = obj.namespace;
+        this.updateNamespace();
     }
 
-    if (obj.namespace) this.NAMESPACE = obj.namespace;
     if (obj.type === "class") { // left for older Class Explorer versions support
         this.classView.loadClasses([obj.name], true);
     } else if (obj.type === "package") {

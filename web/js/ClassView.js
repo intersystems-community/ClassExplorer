@@ -143,8 +143,6 @@ ClassView.prototype.renderInfoGraphic = function () {
         this.cacheClassExplorer.elements.className.textContent =
             "Welcome to Caché Class explorer!";
 
-    location.hash = "{\"type\":\"help\"}";
-
     this.showLoader();
     this.render({
         basePackageName: "Welcome to Caché Class explorer!",
@@ -158,6 +156,8 @@ ClassView.prototype.renderInfoGraphic = function () {
     });
 
     this.removeLoader();
+
+    this.cacheClassExplorer.updateURL();
 
 };
 
