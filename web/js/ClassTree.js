@@ -16,6 +16,11 @@ var ClassTree = function (parent, treeViewContainer) {
     this.SELECTED_ELEMENT = null;
 	this.SELECTED_LEVEL = null;
     this.treeObject = null;
+    /**
+     * @private
+     * @type {string[]}
+     */
+    this.selectedClassList = [];
 
     this.cacheClassExplorer.elements.classTreeSearch.addEventListener("input", function (e) {
         self.searchChanged.call(self, (e.target || e.srcElement).value);
@@ -27,6 +32,13 @@ var ClassTree = function (parent, treeViewContainer) {
 
     this.updateSizes();
 
+};
+
+ClassTree.prototype.setSelectedClassList = function (list) {
+
+    // this enables saved view to be consistent for any class names order
+    this.selectedClassList = list.sort();
+    
 };
 
 ClassTree.prototype.updateSizes = function () {
@@ -63,6 +75,11 @@ ClassTree.prototype.removeLoader = function () {
 
 };
 
+/**
+ * @deprecated
+ * @param element
+ * @param className
+ */
 ClassTree.prototype.classSelected = function (element, className) {
 
     if (element !== this.SELECTED_ELEMENT) {
@@ -91,6 +108,18 @@ ClassTree.prototype.packageSelected = function (element, packageName) {
 
 };
 
+/**
+ * @param {string[]} classList
+ */
+ClassTree.prototype.classesSelected = function (classList) {
+
+    if (this.SELECTED_ELEMENT) this.SELECTED_ELEMENT.classList.remove("selected");
+    this.SELECTED_ELEMENT = null;
+
+    this.cacheClassExplorer.classView.loadClasses(classList);
+
+};
+
 ClassTree.prototype.searchChanged = function (query) {
 
     var o = this.treeObject;
@@ -114,6 +143,14 @@ ClassTree.prototype.searchChanged = function (query) {
 
     this.updateTree(searchClone(o).obj || {}, true);
 
+};
+
+ClassTree.prototype.uncheckAll = function () {
+    this.setSelectedClassList([]);
+    [].slice.call(document.querySelectorAll("#treeView input[type=checkbox]"))
+        .forEach(function (cb) {
+            cb.checked = false;
+        });
 };
 
 /**
@@ -142,24 +179,46 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
 
     };
 
-    var classClick = function (e) {
+    function checkboxClick (e, checked, className) {
 
-        var el = e.target || e.srcElement;
+        e.cancelBubble = true;
 
-        self.classSelected(el, el.CLASS_NAME);
+        self.setSelectedClassList(
+            self.selectedClassList.filter(function (n) { return n !== className; })
+        );
+        if (checked) {
+            self.setSelectedClassList(self.selectedClassList.concat(className));
+        }
 
-    };
+        self.classesSelected(self.selectedClassList);
+
+    }
+
+    function inPath (path, classList) {
+        var inside = false,
+            s = path + ".";
+        console.log(s);
+        classList.forEach(function (e) {
+            if (e.indexOf(s) === 0)
+                inside = true;
+        });
+        return inside;
+    }
 
     var append = function (rootElement, elementName, isPackage, path, level) {
 
         var sel = selectedClassElement.length
                 && sce === level && selectedClassElement[sce] === elementName ? ++sce : null,
             el1 = div(),
-            el2, el3, el4;
+            el2, el3, el4, checkbox, span,
+            selectedNames = self.SELECTED_NAME ? self.SELECTED_NAME.split(",") : [];
 
         if (isPackage) {
             el1.className = "tv-package";
-            (el2 = div()).className = "tv-package-name" + (sel ? "" : " minimized");
+            (el2 = div()).className = "tv-package-name" + (
+                    sel || inPath((path ? path + "." : path) + elementName, self.selectedClassList)
+                        ? ""
+                        : " minimized");
             el2.textContent = elementName;
             if (sel && sce === selectedClassElement.length) {
                 el2.className += " selected";
@@ -176,9 +235,27 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
         } else {
             if (sel) self.SELECTED_ELEMENT = el1;
             el1.className = "tv-class-name" + (sel ? " selected" : "");
-            el1.textContent = elementName;
-            el1.addEventListener("click", classClick);
             el1.CLASS_NAME = path + (path ? "." : "") + elementName;
+            checkbox = document.createElement("input");
+            checkbox.setAttribute("type", "checkbox");
+            if (selectedNames.indexOf(el1.CLASS_NAME) !== -1)
+                checkbox.setAttribute("checked", "true");
+            span = document.createElement("span");
+            span.textContent = elementName;
+            span.setAttribute("title", elementName);
+            el1.appendChild(checkbox);
+            el1.appendChild(span);
+            el1.addEventListener("click", (function (el, cbx, clsName) {
+                return function (e) {
+                    cbx["checked"] = !cbx["checked"];
+                    checkboxClick(e, cbx["checked"], clsName);
+                };
+            })(el1, checkbox, el1.CLASS_NAME));
+            checkbox.addEventListener("click", (function (cb, name) {
+                return function (e) {
+                    checkboxClick(e, cb["checked"], name);
+                };
+            })(checkbox, el1.CLASS_NAME));
         }
 
         rootElement.appendChild(el1);

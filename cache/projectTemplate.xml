@@ -4,7 +4,7 @@
 <Description>
 Cache Class Explorer vX.X.X/*build.replace:pkg.version*/
 Class contains methods that return structured classes/packages data.</Description>
-<TimeChanged>63934,52160.80625</TimeChanged>
+<TimeChanged>64010,55351.57242</TimeChanged>
 <TimeCreated>63653,67019.989197</TimeCreated>
 
 <Method name="getAllNamespacesList">
@@ -87,8 +87,8 @@ Return structured data about class.</Description>
 <Private>1</Private>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
-    if ((level'="")&&(+currLevel>+level)) quit ""
-    set currLevel=$increment(currLevel)
+    if ((level'="") && (+currLevel>+level)) { quit "" }
+    set currLevel = $increment(currLevel)
     set classDefinition = ##class(%Dictionary.ClassDefinition).%OpenId(className)
     set compiledClassDefinition = ##class(%Dictionary.CompiledClass).%OpenId(className)
     if (classDefinition = "") || (oData.classes.%DispatchGetProperty(classDefinition.Name) '= "") quit ""
@@ -248,10 +248,20 @@ Return method data.</Description>
 <Description><![CDATA[
 Returns if <var>packageName</var> is in <var>basePackageName</var>.]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>basePackageName:%String,packageName:%String</FormalSpec>
+<FormalSpec>basePackageNames:%String,packageName:%String</FormalSpec>
 <Private>1</Private>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[    quit $FIND(packageName, basePackageName) - $LENGTH(basePackageName) = 1
+<Implementation><![CDATA[
+	set pack = $PIECE(packageName, ".", 1)
+	set list = $LISTFROMSTRING(basePackageNames, ",")
+	set OK = 0
+	for i=1:1:$LISTLENGTH(list) {
+		if ($LISTGET(list, i) = pack) {
+			set OK = 1
+			quit
+		}
+	}
+    quit OK
 ]]></Implementation>
 </Method>
 
@@ -392,6 +402,34 @@ Returns structured package data</Description>
     quit oData
 ]]></Implementation>
 </Method>
+
+<Method name="getArbitraryView">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>classList:%String,namespace:%String,level:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	set baseNamespace = $namespace
+    zn:$GET(namespace)'="" namespace
+    set list = $LISTFROMSTRING(classList, ",")
+
+    set basePackages = $LB()
+    set count = 0
+    for i=1:1:$LISTLENGTH(list) {
+	    set packName = $PIECE($LISTGET(list, i), ".", 1)
+	    if ($LISTFIND(basePackages, packName) = 0) {
+		    set $LIST(basePackages, count + 1) = packName
+		    set count = count + 1
+	    }
+    }
+
+    set oData = ..getBaseOData($LISTTOSTRING(basePackages, ",", 1), baseNamespace, "ARBITRARY:"_classList)
+
+    for i=1:1:$LISTLENGTH(list) {
+		do ..fillClassData(oData, $LISTGET(list, i), level)
+    }
+
+    quit oData
+]]></Implementation>
+</Method>
 </Class>
 
 
@@ -409,7 +447,7 @@ Returns structured package data</Description>
 <Description>
 REST interface for ClassExplorer</Description>
 <Super>%CSP.REST</Super>
-<TimeChanged>63928,63486.89174</TimeChanged>
+<TimeChanged>64010,52108.241141</TimeChanged>
 <TimeCreated>63648,30450.187229</TimeCreated>
 
 <XData name="UrlMap">
@@ -424,6 +462,7 @@ REST interface for ClassExplorer</Description>
    <Route Url="/GetClassView" Method="GET" Call="GetClassView"/>
    <Route Url="/GetAllNamespacesList" Method="GET" Call="GetAllNamespacesList"/>
    <Route Url="/GetPackageView" Method="GET" Call="GetPackageView"/>
+   <Route Url="/GetArbitraryView" Method="GET" Call="GetArbitraryView"/>
    <Route Url="/GetMethod" Method="GET" Call="GetMethod"/>
    <Route Url="/SaveView" Method="POST" Call="SaveView"/>
    <Route Url="/ResetView" Method="GET" Call="ResetView"/>
@@ -450,6 +489,19 @@ Returns classTree by given class name</Description>
 <Implementation><![CDATA[
     set className = %request.Get("name")
     set classData = ##class(ClassView).getClassView(className, %request.Get("namespace"), %request.Get("level"))
+    do classData.%ToJSON(, "o")
+    return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetArbitraryView">
+<Description>
+Returns classTree by given class name</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set classList = %request.Get("list")
+    set classData = ##class(ClassView).getArbitraryView(classList, %request.Get("namespace"), %request.Get("level"))
     do classData.%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>

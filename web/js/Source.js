@@ -53,6 +53,7 @@ Source.prototype.getMethod = function (className, methodName, callback) {
 /**
  * Return class view.
  * @param {string} className
+ * @param {string} level
  * @param {Source~dataCallback} callback
  */
 Source.prototype.getClassView = function (className, level, callback) { 
@@ -71,7 +72,7 @@ Source.prototype.saveView = function (packageName, data) {
     lib.load(
         this.URL + "/SaveView?name=" + encodeURIComponent(packageName),
         data,
-        function (e) { console.log("View saved."); }
+        function () { console.log("View saved."); }
     );
 
 };
@@ -85,14 +86,34 @@ Source.prototype.resetView = function (packageName) {
 };
 
 /**
- * Return class view.
+ * Return package view.
  * @param {string} packageName
+ * @param {string} level
  * @param {Source~dataCallback} callback
  */
-Source.prototype.getPackageView = function (packageName, callback) {
+Source.prototype.getPackageView = function (packageName, level, callback) {
 
     lib.load(
         this.URL + "/GetPackageView?name=" + encodeURIComponent(packageName)
+            + "&level=" + encodeURIComponent(level)
+            + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
+        null,
+        callback
+    );
+
+};
+
+/**
+ * Return arbitrary class list view.
+ * @param {string[]} classList
+ * @param {string} level
+ * @param {Source~dataCallback} callback
+ */
+Source.prototype.getArbitraryView = function (classList, level, callback) {
+
+    lib.load(
+        this.URL + "/GetArbitraryView?list=" + encodeURIComponent(classList.join(","))
+            + "&level=" + encodeURIComponent(level)
             + (this.cue.NAMESPACE ? "&namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
         null,
         callback

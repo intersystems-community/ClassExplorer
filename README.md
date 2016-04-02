@@ -2,8 +2,8 @@
 An UML Class explorer for InterSystems Caché.
 
 ##### Key features
-+ Build class diagrams;
-+ Build diagrams for any package or subpackage;
++ Build class diagrams for arbitrary list of classes;
++ Build diagrams for whole package or subpackage;
 + Edit diagrams after build;
 + Switch between strict UML notation and designed view;
 + Export diagrams as an image;

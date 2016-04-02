@@ -30,10 +30,17 @@ html, body {
     position: absolute;
     top: 0;
     left: 0;
-    padding: .5em;
+    padding: .5em 200px .5em .5em;
     font-weight: 600;
-    font-size: 18pt;
+    font-size: 14pt;
     z-index: 1;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.ui-wrapTextOverflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ui-rightBottomToolBar {

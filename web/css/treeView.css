@@ -48,10 +48,30 @@
     user-select: none;
 }
 
-.tv-class-name:hover, .tv-package-name:hover {
+.tv-package-name:hover {
     background: #ffcc1b;
     font-weight: 900;
     padding-left: 30px;
+}
+
+.tv-class-name:hover {
+    background: #ffcc1b;
+    font-weight: 900;
+}
+
+.tv-class-name > input[type=checkbox] {
+    vertical-align: top;
+}
+
+.tv-class-name > span {
+    -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
+}
+
+.tv-class-name:hover > span {
+    padding-left: 10px;
 }
 
 .tv-package-name:hover {
@@ -110,10 +130,10 @@
 
 .tv-class-name {
     position: relative;
-    padding-left: 20px;
+    white-space: pre;
 }
 
-.tv-class-name:after {
+/*.tv-class-name:after {
     content: "";
     box-sizing: border-box;
     position: absolute;
@@ -125,7 +145,7 @@
     background: black;
     border: 1px solid gray;
     border-radius: 5px 5px 5px 5px;
-}
+}*/
 
 .tv-package .tv-package-content {
     padding-left: 20px;

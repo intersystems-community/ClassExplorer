@@ -182,11 +182,21 @@ CacheClassExplorer.prototype.restoreFromURL = function () {
 
     try { obj = JSON.parse(hash); } catch (e) { obj = {}; }
 
+    if (obj.level) {
+        this.classTree.SELECTED_LEVEL = obj.level;
+    }
+
     if (obj.namespace) this.NAMESPACE = obj.namespace;
     if (obj.type === "class") {
-        this.classView.loadClass(obj.name);
+        this.classView.loadClasses([obj.name], true);
     } else if (obj.type === "package") {
-        this.classView.loadPackage(obj.name);
+        this.classView.loadPackage(obj.name, true);
+    } else if (obj.type === "arbitrary") {
+        try {
+            this.classView.loadClasses(obj.name.split(","), true);
+        } catch (e) {
+            console.error("Unable to parse class list " + obj.name);
+        }
     } else {
         this.classView.renderInfoGraphic();
     }

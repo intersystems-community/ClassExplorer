@@ -18,6 +18,7 @@ var ClassView = function (parent, container) {
     this.PAPER_SCALE = 1;
     this.MIN_PAPER_SCALE = 0.2;
     this.MAX_PAPER_SCALE = 4;
+    this.GRID_SIZE = 22;
 
     this.CLASS_DOC_PATH = "/csp/documatic/%25CSP.Documatic.cls";
     this.SYMBOL_12_WIDTH = 6.6;
@@ -25,6 +26,10 @@ var ClassView = function (parent, container) {
     this.HIGHLIGHTED_VIEW = null;
     this.SEARCH_INDEX = 0;
 
+    /**
+     * This name has influence on "save view" function.
+     * @type {string}
+     */
     this.CURRENT_RENDER_NAME = "";
 
     this.viewSaving = false;
@@ -828,9 +833,9 @@ ClassView.prototype.confirmRender = function (data) {
     if (!data.savedView) {
         joint.layout.DirectedGraph.layout(this.graph, {
             setLinkVertices: false,
-            nodeSep: 100,
-            rankSep: 100,
-            edgeSep: 20,
+            nodeSep: this.GRID_SIZE*5,
+            rankSep: this.GRID_SIZE*5,
+            edgeSep: this.GRID_SIZE,
             rankDir: data.layoutDirection || "TB"
         });
     }
@@ -901,24 +906,35 @@ ClassView.prototype.restoreView = function (data) {
 
 };
 
-ClassView.prototype.loadClass = function (className) {
+/**
+ * @deprecated
+ * @param className
+ * @param restoring
+ */
+ClassView.prototype.loadClass = function (className, restoring) {
 
     var self = this;
 
     this.cacheClassExplorer.classTree.SELECTED_NAME = className;
     this.cacheClassExplorer.classTree.SELECTED_TYPE = "class";
-	this.cacheClassExplorer.classTree.SELECTED_LEVEL = this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
+	if (!restoring)
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL =
+            this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
     this.showLoader();
-    this.cacheClassExplorer.source.getClassView(className, this.cacheClassExplorer.classTree.SELECTED_LEVEL, function (err, data) {
-        //console.log(data);
-        self.removeLoader();
-        if (err) {
-            self.showLoader("Unable to get " + self.cacheClassExplorer.classTree.SELECTED_NAME);
-            console.error.call(console, err);
-        } else {
-            self.render(data);
+    this.cacheClassExplorer.source.getClassView(
+        className,
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL + "",
+        function (err, data) {
+            //console.log(data);
+            self.removeLoader();
+            if (err) {
+                self.showLoader("Unable to get " + self.cacheClassExplorer.classTree.SELECTED_NAME);
+                console.error.call(console, err);
+            } else {
+                self.render(data);
+            }
         }
-    });
+    );
 
     this.cacheClassExplorer.elements.className.textContent = className;
     this.CURRENT_RENDER_NAME = "CLASS:" + className;
@@ -926,26 +942,73 @@ ClassView.prototype.loadClass = function (className) {
 
 };
 
-ClassView.prototype.loadPackage = function (packageName) {
+ClassView.prototype.loadPackage = function (packageName, restoring) {
 
     var self = this;
 
+    this.cacheClassExplorer.classTree.uncheckAll();
     this.cacheClassExplorer.classTree.SELECTED_NAME = packageName;
+    this.cacheClassExplorer.classTree.setSelectedClassList([]);
     this.cacheClassExplorer.classTree.SELECTED_TYPE = "package";
+    if (!restoring)
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL =
+            this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
     this.showLoader();
-    this.cacheClassExplorer.source.getPackageView(packageName, function (err, data) {
-        //console.log(data);
-        self.removeLoader();
-        if (err) {
-            self.showLoader("Unable to get package " + packageName);
-            console.error.call(console, err);
-        } else {
-            self.render(data);
+    this.cacheClassExplorer.source.getPackageView(
+        packageName,
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL + "",
+        function (err, data) {
+            //console.log(data);
+            self.removeLoader();
+            if (err) {
+                self.showLoader("Unable to get package " + packageName);
+                console.error.call(console, err);
+            } else {
+                self.render(data);
+            }
         }
-    });
+    );
 
     this.cacheClassExplorer.elements.className.textContent = packageName;
     this.CURRENT_RENDER_NAME = "PACKAGE:" + packageName;
+    this.cacheClassExplorer.updateURL();
+
+};
+
+/**
+ * Loads arbitrary list of classes.
+ * @param {String[]} classList
+ * @param {boolean} [restoring] - If restoring from URL, do not re-write settings.
+ */
+ClassView.prototype.loadClasses = function (classList, restoring) {
+
+    var self = this;
+
+    this.cacheClassExplorer.classTree.SELECTED_NAME = classList.join(",");
+    this.cacheClassExplorer.classTree.setSelectedClassList(classList);
+    this.cacheClassExplorer.classTree.SELECTED_TYPE = "arbitrary";
+    if (!restoring)
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL =
+            this.cacheClassExplorer.elements.settings["dependencyLevel"].value;
+    this.showLoader();
+    this.cacheClassExplorer.source.getArbitraryView(
+        classList,
+        this.cacheClassExplorer.classTree.SELECTED_LEVEL + "",
+        function (err, data) {
+            //console.log(data);
+            self.removeLoader();
+            if (err) {
+                self.showLoader("Unable to get view for " + classList.join(", ") + " classes.");
+                console.error.call(console, err);
+            } else {
+                self.render(data);
+            }
+        }
+    );
+
+    this.cacheClassExplorer.elements.className.textContent =
+        this.cacheClassExplorer.classTree.SELECTED_NAME;
+    this.CURRENT_RENDER_NAME = "ARBITRARY:" + classList.join(",");
     this.cacheClassExplorer.updateURL();
 
 };
@@ -1106,7 +1169,7 @@ ClassView.prototype.init = function () {
         el: this.container,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
-        gridSize: 20,
+        gridSize: this.GRID_SIZE,
         model: this.graph,
         origin: {
             x: 0,
