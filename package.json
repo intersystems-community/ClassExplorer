@@ -25,7 +25,7 @@
     "gulp-zip": "^2.0.2"
   },
   "scripts": {
-    "test": "node test/testServer"
+    "gulp": "gulp"
   },
   "repository": {
     "type": "git",

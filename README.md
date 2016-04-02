@@ -37,8 +37,7 @@ application.
 
 To build project, you need [NodeJS](https://nodejs.org) platform to be installed. Then, clone source
 code and run <code>npm install</code> from the root of the project. This will install all necessary
-modules from NPM. Also run <code>npm install -g gulp</code> if you have no gulp builder in your
-modules.
+modules from NPM for the project.
 
-After that and each next time just run <code>gulp</code> command from the project root. This will
-generate <code>build</code> directory, where you will found all what you need.
+After that and each next time just run <code>npm run gulp</code> command from the project root.
+This will generate <code>build</code> directory, where you will find XML file ready to import.
