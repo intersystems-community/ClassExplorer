@@ -47,6 +47,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         settingsView: id("settingsView"),
         closeSettings: id("closeSettings"),
         helpView: id("helpView"),
+        subLabel: id("subLabel"),
         closeHelp: id("closeHelp"),
         settingsExtraText: id("settingsExtraText"),
         settings: {
@@ -172,6 +173,25 @@ CacheClassExplorer.prototype.updateNamespace = function () {
 
     this.elements.namespaces.value = this.NAMESPACE;
 
+};
+
+/**
+ * Sets the subLabel on the diagram.
+ * @param {string} [text]
+ * @param {string} [style]
+ */
+CacheClassExplorer.prototype.setSubLabel = function (text, style) {
+    
+    if (!text) {
+        this.elements.subLabel.textContent = "";
+        this.elements.subLabel.setAttribute("style", "");
+        return;
+    }
+
+    this.elements.subLabel.innerHTML = text;
+    if (style)
+        this.elements.subLabel.setAttribute("style", style);
+    
 };
 
 CacheClassExplorer.prototype.updateURL = function () {

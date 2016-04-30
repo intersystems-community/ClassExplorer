@@ -71,6 +71,13 @@ html, body {
     text-shadow: 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
 }
 
+#subLabel {
+    position: absolute;
+    font-size: initial;
+    font-style: initial;
+    font-weight: initial;
+}
+
 .central {
     position: absolute;
     left: 0;

@@ -749,6 +749,7 @@ ClassView.prototype.confirmRender = function (data) {
     // Don't ask me why. Just believe we need this peace of code.
     this.zoom(null);
     this.resetView();
+    this.cacheClassExplorer.setSubLabel();
 
     if (!data["classes"]) {
         console.error("Wrong data: no 'classes' property.", data);
@@ -820,6 +821,13 @@ ClassView.prototype.confirmRender = function (data) {
                         connector._toClass.instance = relFrom;
                     }
                     self.links.push(connector);
+                    connector.on("all", function (e) {
+                        if (e !== "remove") return;
+                        self.cacheClassExplorer.setSubLabel(
+                            "*Some links are removed on this diagram.",
+                            "color:red"
+                        );
+                    });
                 }
             }
         }
