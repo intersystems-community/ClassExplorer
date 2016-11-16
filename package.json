@@ -1,46 +1,20 @@
 {
   "name": "CacheClassExplorer",
-  "version": "1.16.3",
+  "version": "1.17.0",
   "description": "Class Explorer for InterSystems Caché",
-  "directories": {
-    "test": "test"
-  },
+  "directories": { "test": "test" },
   "dependencies": {},
-  "devDependencies": {
-    "autoprefixer-core": "^5.1.11",
-    "express": "^5.0.0-alpha.1",
-    "gulp": "^3.9.0",
-    "gulp-add-src": "^0.2.0",
-    "gulp-clean": "^0.3.1",
-    "gulp-concat": "^2.4.1",
-    "gulp-header": "^1.2.2",
-    "gulp-html-replace": "^1.4.1",
-    "gulp-minify-css": "^0.3.11",
-    "gulp-postcss": "^5.1.3",
-    "gulp-rename": "^1.2.0",
-    "gulp-replace": "^0.5.3",
-    "gulp-strip-comments": "^1.0.1",
-    "gulp-uglify": "^1.2.0",
-    "gulp-wrap": "^0.5.0",
-    "gulp-zip": "^2.0.2"
-  },
-  "scripts": {
-    "gulp": "gulp"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ZitRos/CacheUMLExplorer"
-  },
-  "keywords": [
-    "UMLExplorer",
-    "Caché",
-    "UML",
-    "diagram"
-  ],
+  "devDependencies": { "autoprefixer-core": "^5.1.11", "express": "^5.0.0-alpha.1",
+    "gulp": "^3.9.0", "gulp-add-src": "^0.2.0", "gulp-clean": "^0.3.1", "gulp-concat": "^2.4.1",
+    "gulp-header": "^1.2.2", "gulp-html-replace": "^1.4.1", "gulp-minify-css": "^0.3.11",
+    "gulp-postcss": "^5.1.3", "gulp-rename": "^1.2.0", "gulp-replace": "^0.5.3",
+    "gulp-strip-comments": "^1.0.1", "gulp-uglify": "^1.2.0", "gulp-wrap": "^0.5.0",
+    "gulp-zip": "^2.0.2" },
+  "scripts": { "gulp": "gulp" },
+  "repository": { "type": "git", "url": "https://github.com/ZitRos/CacheUMLExplorer" },
+  "keywords": [ "UMLExplorer", "Caché", "UML", "diagram" ],
   "author": "ZitRo",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ZitRos/CacheUMLExplorer/issues"
-  },
+  "bugs": { "url": "https://github.com/ZitRos/CacheUMLExplorer/issues" },
   "homepage": "https://github.com/ZitRos/CacheUMLExplorer"
 }

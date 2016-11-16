@@ -248,16 +248,18 @@ Return method data.</Description>
 <Description><![CDATA[
 Returns if <var>packageName</var> is in <var>basePackageName</var>.]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>basePackageNames:%String,packageName:%String</FormalSpec>
+<FormalSpec>basePackageName:%String,packageName:%String</FormalSpec>
 <Private>1</Private>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-	set pack = $PIECE(packageName, ".", 1)
-	set list = $LISTFROMSTRING(basePackageNames, ",")
-	set OK = 0
+	set pack = $LISTFROMSTRING(packageName, ".")
+	set list = $LISTFROMSTRING(basePackageName, ".")
+	set OK = 1
 	for i=1:1:$LISTLENGTH(list) {
-		if ($LISTGET(list, i) = pack) {
+		if ($LISTGET(list, i) = $LISTGET(pack, i)) {
 			set OK = 1
+		} else {
+			set OK = 0
 			quit
 		}
 	}
