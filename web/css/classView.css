@@ -124,6 +124,15 @@ text {
     outline: 4px solid rgba(255, 0, 0, 0.6);
 }
 
+.element.uml.Class .tool-remove {
+    display: none;
+    cursor: pointer;
+}
+
+.element.uml.Class:hover .tool-remove {
+    display: block;
+}
+
 .marker-source, .marker-target {
     vector-effect: none !important;
 }

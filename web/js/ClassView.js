@@ -824,7 +824,7 @@ ClassView.prototype.confirmRender = function (data) {
                     connector.on("all", function (e) {
                         if (e !== "remove") return;
                         self.cacheClassExplorer.setSubLabel(
-                            "*Some links are removed on this diagram.",
+                            "*Some elements are removed on this diagram.",
                             "color:red"
                         );
                     });
@@ -861,6 +861,25 @@ ClassView.prototype.confirmRender = function (data) {
         q.options.width/2 - bb.width/2,
         q.options.height/2 - Math.min(q.options.height/2 - 100, bb.height/2)
     );
+
+    this.paper.on('cell:pointerclick', function(cellView, evt, x, y) {
+        var e = evt.target || evt.srcElement;
+        // https://upload.wikimedia.org/wikipedia/commons/a/ae/Elleboogkruk.jpg
+        if (!((e && e.getAttribute("event") === "remove") ||
+            (e.parentNode && e.parentNode.getAttribute("event") === "remove")))
+            return;
+        cellView.remove();
+        for (var p in self.links) {
+            if (self.paper.getModelById(self.links[p].attributes.source) === cellView.model
+                || self.paper.getModelById(self.links[p].attributes.target) === cellView.model) {
+                self.links[p].remove();
+            }
+        }
+        self.cacheClassExplorer.setSubLabel(
+            "*Some elements are removed on this diagram.",
+            "color:red"
+        );
+    });
 
     if (data.savedView) this.restoreView(data.savedView);
 

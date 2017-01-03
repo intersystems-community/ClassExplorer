@@ -33,6 +33,7 @@ joint.shapes.uml.Class = joint.shapes.basic.Generic.extend({
             '<text class="uml-class-methods-text"/>',
             '<text class="uml-class-queries-text"/>',
             '<text class="uml-class-xdatas-text"/>',
+            '<g class="tool-remove" event="remove" x="" transform="translate(0,0)"><circle r="11" style="fill: red;"></circle><path transform="scale(.8) translate(-16, -16)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z"></path><title>Remove class</title></g>',
         '</g>'
     ].join(''),
 
