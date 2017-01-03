@@ -18,7 +18,7 @@ var ClassView = function (parent, container) {
     this.PAPER_SCALE = 1;
     this.MIN_PAPER_SCALE = 0.2;
     this.MAX_PAPER_SCALE = 4;
-    this.GRID_SIZE = 22;
+    this.GRID_SIZE = 25;
 
     this.CLASS_DOC_PATH = "/csp/documatic/%25CSP.Documatic.cls";
     this.SYMBOL_12_WIDTH = 6.6;
