@@ -9,13 +9,15 @@ var Source = function (cacheUMLExplorer) {
 
 /**
  * Return class tree.
+ * @param {boolean} includeMapped
  * @param {Source~dataCallback} callback
  */
-Source.prototype.getClassTree = function (callback) {
+Source.prototype.getClassTree = function (includeMapped, callback) {
 
     lib.load(
         this.URL + "/GetClassTree"
-            + (this.cue.NAMESPACE ? "?namespace=" + encodeURIComponent(this.cue.NAMESPACE) : ""),
+            + (this.cue.NAMESPACE ? "?namespace=" + encodeURIComponent(this.cue.NAMESPACE) : "")
+            + "&mapped=" + (includeMapped ? "1" : "0"),
         null,
         callback
     );

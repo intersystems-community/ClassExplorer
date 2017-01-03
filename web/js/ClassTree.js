@@ -15,6 +15,7 @@ var ClassTree = function (parent, treeViewContainer) {
     this.SELECTED_TYPE = null; // "class" || "package"
     this.SELECTED_ELEMENT = null;
 	this.SELECTED_LEVEL = null;
+	this.INCLUDE_MAPPED = this.cacheClassExplorer.elements.showMappedCheckbox.checked;
     this.treeObject = null;
     /**
      * @private
@@ -25,12 +26,29 @@ var ClassTree = function (parent, treeViewContainer) {
     this.cacheClassExplorer.elements.classTreeSearch.addEventListener("input", function (e) {
         self.searchChanged.call(self, (e.target || e.srcElement).value);
     });
+    this.cacheClassExplorer.elements.showMappedCheckbox.addEventListener("change", function () {
+        self.INCLUDE_MAPPED = self.cacheClassExplorer.elements.showMappedCheckbox.checked;
+        self.update();
+    });
 
     window.addEventListener("resize", function () {
         self.updateSizes();
     });
 
     this.updateSizes();
+
+};
+
+ClassTree.prototype.update = function () {
+
+    var self = this;
+
+    this.cacheClassExplorer.elements.classTreeSearch.value = "";
+    this.container.textContent = "";
+    this.showLoader();
+    this.cacheClassExplorer.source.getClassTree(this.INCLUDE_MAPPED, function (err, data) {
+        if (!err) self.updateTree(data);
+    });
 
 };
 
@@ -70,7 +88,8 @@ ClassTree.prototype.removeLoader = function () {
     if (!this.loader) return;
 
     this.cacheClassExplorer.elements.classTreeSearch.value = "";
-    this.loader.parentNode.removeChild(this.loader);
+    if (this.loader.parentNode)
+        this.loader.parentNode.removeChild(this.loader);
     this.loader = null;
 
 };
@@ -255,7 +274,7 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
             arr = [];
 
         for (i in object) {
-            arr.push({ name: getRealName(i), val: object[i] });
+            arr.push({ name: getRealName(i), val: object[i], isPackage: i[0] === "/" });
         }
 
         arr.sort(function (a, b) {
@@ -268,7 +287,7 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
             if (rec = append(
                     rootElement,
                     element.name,
-                    typeof element.val === "object",
+                    element.isPackage,
                     path.join("."),
                     level
                 )) {
@@ -282,4 +301,8 @@ ClassTree.prototype.updateTree = function (treeObject, doNotChangeRoot) {
 
     if (!doNotChangeRoot) this.treeObject = treeObject;
 
+};
+
+ClassTree.prototype.init = function () {
+    this.update();
 };

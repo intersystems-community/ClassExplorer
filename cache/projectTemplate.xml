@@ -32,23 +32,24 @@ Return list with all namespaces</Description>
 <Description>
 Returns structured class tree with all classes available in current namespace</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>namespace:%String</FormalSpec>
+<FormalSpec>namespace:%String,showMapped=0</FormalSpec>
 <ReturnType>%ZEN.proxyObject</ReturnType>
 <Implementation><![CDATA[
     zn:$GET(namespace)'="" namespace
     set resp = ##class(%ZEN.proxyObject).%New()
 
-    set classes = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
+    set showSystem = (namespace="%SYS")
+    do $System.OBJ.GetClassList(.classes, "/system="_showSystem_" /percent="
+        _showSystem_" /mapped=" _ showMapped)
     set objects = ##class(%Library.ArrayOfObjects).%New()
     set lastParts = $LB()
 
     set level = 1
     do objects.SetAt(resp, level)
 
-    do classes.Execute()
-    while (classes.Next()) {
-        set name = classes.Data("Name")
-        if ($EXTRACT(name, 1, 1) = "%") && ($NAMESPACE '= "%SYS") { continue }
+	set name = $order(classes(""))
+    while (name '= "") {
+        //if ($EXTRACT(name, 1, 1) = "%") && ($NAMESPACE '= "%SYS") { continue }
         set parts = $LISTFROMSTRING(name, ".")
         set level = 1
         while ((level < $LISTLENGTH(parts)) && ($LISTGET(lastParts, level) = ("/"_$LISTGET(parts, level)))) {
@@ -67,12 +68,13 @@ Returns structured class tree with all classes available in current namespace</D
             do objects.SetAt(resp, level)
         }
         if ($LISTLENGTH(parts) = level) {
-            do resp.%DispatchSetProperty($LISTGET(parts, level), classes.Data("Hidden"))
+            do resp.%DispatchSetProperty($LISTGET(parts, level), 0)
         }
         set lastParts = parts
         for i=1:1:$LISTLENGTH(lastParts)-1 {
             set $LIST(lastParts, i) = "/"_$LISTGET(lastParts, i)
         }
+        set name = $order(classes(name))
     }
 
     quit objects.GetAt(1)
@@ -461,7 +463,7 @@ Method returns whole class tree visible in the current namespace.</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace")).%ToJSON(, "o")
+    do ##class(ClassExplorer.ClassView).getClassTree(%request.Get("namespace"), %request.Get("mapped")).%ToJSON(, "o")
     return $$$OK
 ]]></Implementation>
 </Method>

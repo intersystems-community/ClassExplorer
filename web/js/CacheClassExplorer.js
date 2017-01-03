@@ -50,6 +50,7 @@ var CacheClassExplorer = function (treeViewContainer, classViewContainer) {
         subLabel: id("subLabel"),
         closeHelp: id("closeHelp"),
         settingsExtraText: id("settingsExtraText"),
+        showMappedCheckbox: id("showMappedCheckbox"),
         settings: {
             showDataTypesOnDiagram: id("setting.showDataTypesOnDiagram"),
             showClassIcons: id("setting.showClassIcons"),
@@ -150,16 +151,10 @@ CacheClassExplorer.prototype.updateNamespaces = function (nsData) {
  */
 CacheClassExplorer.prototype.setNamespace = function (namespace) {
 
-    var self = this;
-
     this.NAMESPACE = namespace;
     this.classTree.setSelectedClassList([]);
 
-    self.classTree.container.textContent = "";
-    self.classTree.showLoader();
-    this.source.getClassTree(function (err, data) {
-        if (!err) self.classTree.updateTree(data);
-    });
+    this.classTree.update();
 
     this.updateNamespace();
     this.updateURL();
@@ -269,9 +264,7 @@ CacheClassExplorer.prototype.init = function () {
 
     restored = this.restoreFromURL();
     this.classTree.showLoader();
-    this.source.getClassTree(function (err, data) {
-        if (!err) self.classTree.updateTree(data);
-    });
+    this.classTree.init();
     this.source.getNamespacesInfo(function (err, data) {
         if (restored && restored.namespace) data.currentNamespace = restored.namespace;
         if (!err) self.updateNamespaces(data);

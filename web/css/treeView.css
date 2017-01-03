@@ -16,7 +16,7 @@
     z-index: 1;
 }
 
-.ui-sideSearchBlock > input {
+.ui-sideSearchBlock input[type=search] {
     display: block;
     box-sizing: border-box;
     border: 1px solid gray;
@@ -24,6 +24,17 @@
     width: 196px;
     margin: 1px 1px 1px 2px;
     height: 22px;
+}
+
+.ui-sideSearchBlock label {
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.ui-sideSearchBlock input[type=checkbox] {
+    vertical-align: middle;
 }
 
 .tv-package-name.minimized + .tv-package-content {
