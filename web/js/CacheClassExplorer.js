@@ -249,18 +249,9 @@ CacheClassExplorer.prototype.initHelp = function () {
     if (this.HELP_INITIALIZED) return;
     this.HELP_INITIALIZED = true;
 
-    var cont = [].slice.call(document.querySelectorAll("#helpView *[name=injector]")),
-    cont2 = [].slice.call(document.querySelectorAll("#helpView *[name=icon]")), i;
-    for (i in cont) {
-        var ue, json = {
-            classes: { "Unable to parse JSON": {  } }
-        };
-        try { json = JSON.parse(cont[i].textContent) } catch (e) {  }
-        cont[i].textContent = "";
-        ue = new CacheClassExplorer(null, cont[i]);
-        ue.classView.injectView(json);
-    }
-    for (i in cont2) {
+    var cont2 = [].slice.call(document.querySelectorAll("#helpView *[name=icon]"));
+
+    for (var i in cont2) {
         var ico = lib.image[cont2[i].textContent];
         if (ico) {
             cont2[i].innerHTML = "<img src=\"" + ico + "\"/>"

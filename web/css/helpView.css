@@ -40,3 +40,9 @@
     height: 100%;
     overflow: auto;
 }
+
+.help-class-box {
+    border: 1px solid black;
+    padding: 3px 10px;
+    font-weight: bold;
+}
