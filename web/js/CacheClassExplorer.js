@@ -282,11 +282,13 @@ CacheClassExplorer.prototype.init = function () {
             "Cach&eacute; Class explorer v"
             + "[NOT-BUILT]"/*build.replace:"pkg.version"*/
             + "<br/>for InterSystems Cach&eacute;"
-            + "<br/>By Nikita Savchenko"
+            + "<br/>By <a target=\"_blank\" href='https://github.com/ZitRos'>Nikita Savchenko</a>"
             + "<br/><a target=\"_blank\" href=\"https://github.com/intersystems-ru/UMLExplorer\">"
             + "Project page</a> / <a target=\"_blank\" "
             + "href=\"https://github.com/intersystems-ru/UMLExplorer/issues\">Bug tracker</a>"
-            + "<br/><br/>Enjoy!"
+            + "<br/><a target=\"_blank\" href='https://community.intersystems.com/post/"
+            + "cach%C3%A9-class-explorer-%E2%80%94-exploring-cach%C3%A9-uml-notation'>Article on "
+            + "Developer Community</a><br/><br/>Enjoy!"
         );
     });
     this.elements.namespaces.addEventListener("change", function (e) {
