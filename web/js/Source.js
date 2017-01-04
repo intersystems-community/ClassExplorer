@@ -14,10 +14,12 @@ var Source = function (cacheUMLExplorer) {
  */
 Source.prototype.getClassTree = function (includeMapped, callback) {
 
+    var ns = (this.cue.NAMESPACE ? "?namespace=" + encodeURIComponent(this.cue.NAMESPACE) : "");
+
     lib.load(
         this.URL + "/GetClassTree"
-            + (this.cue.NAMESPACE ? "?namespace=" + encodeURIComponent(this.cue.NAMESPACE) : "")
-            + "&mapped=" + (includeMapped ? "1" : "0"),
+            + ns
+            + (ns ? "&" : "?") + "mapped=" + (includeMapped ? "1" : "0"),
         null,
         callback
     );
