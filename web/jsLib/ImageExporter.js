@@ -22,6 +22,9 @@ var enableSVGDownload = function (classView) {
 
             var par = svg.parentNode;
             svg = svg.cloneNode(true);
+            svg.style.position = "fixed";
+            svg.style.left = 0;
+            svg.style.top = 0;
             par.appendChild(svg);
             var gGroup = svg.childNodes[0];
 
@@ -40,9 +43,12 @@ var enableSVGDownload = function (classView) {
                 svg.setAttributeNS(prefix.xmlns, "xmlns:xlink", prefix.xlink);
             }
 
+            svg.style.zIndex = 0;
+            gGroup.setAttribute("transform", "");
+            var gRect = gGroup.getBoundingClientRect();
+            gGroup.setAttribute("transform", "translate("+(-gRect.left)+","+(-gRect.top)+")");
             svg.setAttribute("width", gGroup.getBBox().width);
             svg.setAttribute("height", gGroup.getBBox().height);
-            gGroup.setAttribute("transform", "");
 
             setInlineStyles(svg, emptySvgDeclarationComputed);
 
@@ -82,12 +88,17 @@ var enableSVGDownload = function (classView) {
 
         img.onload = function () {
             ctx.drawImage(img, 0, 0);
-            var dataURL = canvas.toDataURL("image/png");
-            var a = document.createElement("a");
-            a.setAttribute("download", filename + ".png");
-            a.setAttribute("href", dataURL/*url*/);
-            document.body.appendChild(a);
-            a.click();
+            try {
+                var a = document.createElement("a");
+                a.setAttribute("download", filename + ".png");
+                var dataURL = canvas.toDataURL("image/png");
+                a.setAttribute("href", dataURL/*url*/);
+                document.body.appendChild(a);
+                a.click();
+            } catch (e) {
+                alert("This browser does not allow usage of canvas.toDataURL function. Please,"
+                    + " use different browser to download the image.");
+            }
             setTimeout(function () {
                 a.parentNode.removeChild(a);
                 document.body.removeChild(emptySvg);
