@@ -693,7 +693,7 @@ This method is invoked when a class is compiled.</Description>
 <Implementation><![CDATA[
 	set properties("NameSpace") = $Namespace
     set properties("Description") = "A WEB application for Cache UML Explorer."
-    set properties("IsNameSpaceDefault") = $$$YES
+    set properties("IsNameSpaceDefault") = $$$NO
     set properties("DispatchClass") = ..#DispatchClass
 	
     new $Namespace
