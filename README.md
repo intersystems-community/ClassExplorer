@@ -41,3 +41,7 @@ modules from NPM for the project.
 
 After that and each next time just run <code>npm run gulp</code> command from the project root.
 This will generate <code>build</code> directory, where you will find XML file ready to import.
+
+## Related Discussion
+See the detailed description and discussion  [in this article](https://community.intersystems.com/node/407056).
+Have a look at [InterSystems Developer Community](community.intersystems.com) to learn about InterSystems technology, sharing solutions and staying up-to-date on the latest developments.
