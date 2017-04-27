@@ -16,8 +16,23 @@ Lib.prototype.load = function (url, data, callback) {
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
+            var res = {};
             try {
-                return callback(null, JSON.parse(xhr.responseText) || {});
+                res = JSON.parse(xhr.responseText);
+            } catch (e) {
+                var text = xhr.responseText.replace(/\\x([0-9a-fA-F]{2})/g, "\\u00$1");
+                try {
+                    res = JSON.parse(text);
+                } catch (e) {
+                    try {
+                        res = eval(text);
+                    } catch (e) {
+                        console.error("Unable to parse server response:", text);
+                    }
+                }
+            }
+            try {
+                return callback(null, res);
             } catch (e) {
                 console.error(e, url, "Unable to parse:", { data: xhr.responseText });
                 return {};
@@ -275,7 +290,7 @@ Lib.prototype.highlightXML = function (code) {
 
 Lib.prototype.getSelection = function () {
     var html = "";
-    if (typeof window.getSelection != "undefined") {
+    if (typeof window.getSelection !== "undefined") {
         var sel = window.getSelection();
         if (sel.rangeCount) {
             var container = document.createElement("div");
@@ -284,8 +299,8 @@ Lib.prototype.getSelection = function () {
             }
             html = container.innerHTML;
         }
-    } else if (typeof document.selection != "undefined") {
-        if (document.selection.type == "Text") {
+    } else if (typeof document.selection !== "undefined") {
+        if (document.selection.type === "Text") {
             html = document.selection.createRange().htmlText;
         }
     }
