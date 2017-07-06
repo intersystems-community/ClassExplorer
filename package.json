@@ -1,8 +1,10 @@
 {
   "name": "CacheClassExplorer",
-  "version": "1.20.1",
+  "version": "1.21.0",
   "description": "Class Explorer for InterSystems Caché",
-  "directories": { "test": "test" },
+  "directories": {
+    "test": "test"
+  },
   "dependencies": {},
   "devDependencies": {
     "autoprefixer-core": "^6.0.1",
@@ -14,6 +16,7 @@
     "gulp-html-replace": "^1.6.2",
     "gulp-minify-css": "^1.2.4",
     "gulp-postcss": "^6.4.0",
+    "gulp-preprocess": "^2.0.0",
     "gulp-rename": "^1.2.0",
     "gulp-replace": "^0.5.3",
     "gulp-strip-comments": "^2.4.5",
@@ -21,11 +24,27 @@
     "gulp-wrap": "^0.13.0",
     "gulp-zip": "^4.0.0"
   },
-  "scripts": { "gulp": "gulp" },
-  "repository": { "type": "git", "url": "https://github.com/ZitRos/CacheUMLExplorer" },
-  "keywords": [ "UMLExplorer", "Caché", "UML", "diagram" ],
+  "scripts": {
+    "gulp": "gulp",
+    "zip": "gulp zipRelease"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZitRos/CacheUMLExplorer"
+  },
+  "keywords": [
+    "UMLExplorer",
+    "Caché",
+    "Class",
+    "Explorer",
+    "UML",
+    "diagram",
+    "builder"
+  ],
   "author": "ZitRo",
   "license": "MIT",
-  "bugs": { "url": "https://github.com/ZitRos/CacheUMLExplorer/issues" },
+  "bugs": {
+    "url": "https://github.com/ZitRos/CacheUMLExplorer/issues"
+  },
   "homepage": "https://github.com/ZitRos/CacheUMLExplorer"
 }

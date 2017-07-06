@@ -14,7 +14,10 @@ var gulp = require("gulp"),
     autoprefixer = require('autoprefixer-core'),
     pkg = require("./package.json"),
     zip = require("gulp-zip"),
-    rename = require("gulp-rename");
+    rename = require("gulp-rename"),
+    preprocess = require("gulp-preprocess");
+
+var INSTALLER_CLASS_NAME = "ClassExplorer.Installer";
 
 var banner = [
     "",
@@ -26,7 +29,12 @@ var banner = [
     " ** @see https://github.com/ZitRos/CacheClassExplorer",
     " **/",
     ""
-].join("\n");
+].join("\n"),
+    context = {
+        context: {
+            package: pkg
+        }
+    };
 
 var specialReplace = function () {
     return replace(/[^\s]+\/\*build\.replace:(.*)\*\//g, function (part, match) {
@@ -42,12 +50,12 @@ gulp.task("clean", function () {
 
 gulp.task("gatherLibs", ["clean"], function () {
     return gulp.src([
-            "web/jsLib/jquery.min.js",
-            "web/jsLib/lodash.min.js",
-            "web/jsLib/backbone-min.js",
-            "web/jsLib/joint.js",
-            "web/jsLib/joint.shapes.uml.js",
-            "web/jsLib/ImageExporter.js"
+            "src/web/jsLib/jquery.min.js",
+            "src/web/jsLib/lodash.min.js",
+            "src/web/jsLib/backbone-min.js",
+            "src/web/jsLib/joint.js",
+            "src/web/jsLib/joint.shapes.uml.js",
+            "src/web/jsLib/ImageExporter.js"
         ])
         .pipe(uglify({
             output: {
@@ -58,18 +66,18 @@ gulp.task("gatherLibs", ["clean"], function () {
             preserveComments: "some"
         }))
         .pipe(addsrc.append([
-            "web/jsLib/joint.layout.DirectedGraph.min.js"
+            "src/web/jsLib/joint.layout.DirectedGraph.min.js"
         ]))
         .pipe(stripComments({ safe: true }))
-        .pipe(concat("CacheClassExplorer.js"))
+        .pipe(concat("index.js"))
         .pipe(replace(//g, "\\x0B"))
         .pipe(replace(/\x1b/g, "\\x1B"))
         .pipe(gulp.dest("build/web/js/"));
 });
 
 gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
-    return gulp.src("web/js/*.js")
-        .pipe(concat("CacheClassExplorer.js"))
+    return gulp.src("src/web/js/*.js")
+        .pipe(concat("index.js"))
         .pipe(specialReplace())
         .pipe(wrap("CacheClassExplorer = (function(){<%= contents %> return CacheClassExplorer;}());"))
         .pipe(uglify({
@@ -81,25 +89,25 @@ gulp.task("gatherScripts", ["clean", "gatherLibs"], function () {
             preserveComments: "some"
         }))
         .pipe(header(banner, { pkg: pkg }))
-        .pipe(addsrc.prepend("build/web/js/CacheClassExplorer.js"))
-        .pipe(concat("CacheClassExplorer.js"))
+        .pipe(addsrc.prepend("build/web/js/index.js"))
+        .pipe(concat("index.js"))
         .pipe(replace(/\x1b/g, "\\x1B"))
         .pipe(gulp.dest("build/web/js/"));
 });
 
 gulp.task("gatherCSS", ["clean"], function () {
-    return gulp.src("web/css/*.css")
-        .pipe(concat("CacheClassExplorer.css"))
+    return gulp.src("src/web/css/*.css")
+        .pipe(concat("index.css"))
         .pipe(postcss([ autoprefixer({ browsers: ["last 3 version"] }) ]))
         .pipe(minifyCSS({ keepSpecialComments: 0 }))
         .pipe(gulp.dest("build/web/css/"));
 });
 
 gulp.task("addHTMLFile", ["clean"], function () {
-    return gulp.src("web/index.html")
+    return gulp.src("src/web/index.html")
         .pipe(htmlReplace({
-            "css": "css/CacheClassExplorer.css",
-            "js": "js/CacheClassExplorer.js"
+            "css": "css/index.css",
+            "js": "js/index.js"
         }))
         .pipe(gulp.dest("build/web/"));
 });
@@ -114,33 +122,32 @@ gulp.task("copyREADME", ["clean"], function () {
         .pipe(gulp.dest("build/"));
 });
 
-gulp.task("exportCacheXML", [
-    "clean", "gatherCSS", "gatherScripts", "addHTMLFile", "copyLICENSE", "copyREADME"
-], function () {
-    return gulp.src("cache/projectTemplate.xml")
-        .pipe(specialReplace())
-        .pipe(replace(
-            /\{\{replace:css}}/,
-            function () { return fs.readFileSync("build/web/css/CacheClassExplorer.css", "utf-8"); }
-        ))
-        .pipe(replace(
-            /\{\{replace:js}}/,
-            function () { return fs.readFileSync("build/web/js/CacheClassExplorer.js", "utf-8"); }
-        ))
-        .pipe(replace(
-            /\{\{replace:html}}/,
-            function () { return fs.readFileSync("build/web/index.html", "utf-8"); }
-        ))
-        .pipe(rename(function (path) { path.basename = "CacheClassExplorer-v" + pkg["version"]; }))
-        .pipe(gulp.dest("build/Cache"));
+gulp.task("pre-cls", ["clean"], function () {
+    return gulp.src(["src/cls/**/*.cls"])
+        .pipe(rename(function (f) {
+            f.basename = (f.dirname === "." ? "" : f.dirname + ".") + f.basename;
+            f.dirname = ".";
+            if (f.basename !== INSTALLER_CLASS_NAME)
+                context.context.compileAfter +=
+                    (context.context.compileAfter ? "," : "") + f.basename;
+        }))
+        .pipe(gulp.dest("build/cls/"));
 });
 
-gulp.task("zipRelease", ["exportCacheXML"], function () {
-    return gulp.src(["build/**/*", "!build/web/**/*"])
+gulp.task("cls", ["pre-cls", "copyLICENSE", "copyREADME", "addHTMLFile", "gatherScripts",
+        "gatherCSS"], function () {
+    return gulp.src(["build/cls/**/*.cls"])
+        .pipe(preprocess(context))
+        .pipe(gulp.dest("build/cls"));
+});
+
+gulp.task("zipRelease", function () {
+    return gulp.src(["build/**/*", "!build/web/**/*.*", "!build/cls/**/*.*"])
         .pipe(zip("CacheClassExplorer-v" + pkg["version"] + ".zip", {
             comment: "Cache UML explorer v" + pkg["version"] + " by Nikita Savchenko\n\n" +
             "+ Cache folder holds XML file to import to InterSystems Cache.\n\n" +
-            "For further information about installation and information, check README.md file."
+            "For further information about installation and information, check README.md file.\n\n"
+            + "See https://github.com/intersystems-ru/UMLExplorer"
         }))
         .pipe(gulp.dest("build"));
 });
@@ -150,4 +157,4 @@ gulp.task("desktop", ["default"], function () {
         .pipe(gulp.dest("C:/Users/ZitRo/Desktop"));
 });
 
-gulp.task("default", ["zipRelease"]);
+gulp.task("default", ["cls"]);
