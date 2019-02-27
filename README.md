@@ -1,7 +1,9 @@
-# Cache Class Explorer
-An UML Class explorer for InterSystems Caché.
+# ObjectScript Class Explorer
+
+An UML class explorer for InterSystems products: IRIS, Ensemble, HealthShare, Caché. Read more about class explorer [on InterSystems Developer Community](https://community.intersystems.com/post/cach%C3%A9-class-explorer-%E2%80%94-exploring-cach%C3%A9-uml-notation).
 
 ##### Key features
+
 + Build class diagrams for arbitrary list of classes;
 + Build diagrams for whole package or subpackage;
 + Edit diagrams after build;
@@ -26,10 +28,13 @@ archive from [latest releases](https://github.com/intersystems-ru/UMLExplorer/re
 <code>Cache/CacheClassExplorer-vX.X.X.xml</code> file.
 
 ###### Web application
+
 Note that importing ClassExplorer.WebAppInstaller class will also create a /ClassExplorer application.
 If you want to create WEB application manually, please, do not import this class. Anyway, <b>
 importing this class requires %SYS permission.</b>
+
 ## Usage
+
 Visit <code>[server domain and port]/ClassExplorer/</code> (slash at end required) to enter
 application.
 
@@ -43,5 +48,6 @@ After that and each next time just run <code>npm run gulp</code> command from th
 This will generate <code>build</code> directory, where you will find XML file ready to import.
 
 ## Related Discussion
+
 See the detailed description and discussion  [in this article](https://community.intersystems.com/node/407056).
 Have a look at [InterSystems Developer Community](community.intersystems.com) to learn about InterSystems technology, sharing solutions and staying up-to-date on the latest developments.
