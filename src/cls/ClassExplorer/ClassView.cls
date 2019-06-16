@@ -94,9 +94,13 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
     set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.ClassDefinition")
     for j=1:1:props.Properties.Count() {
         set pname = props.Properties.GetAt(j).Name
-        set:((pname '= "parent")
-             && ('props.Properties.GetAt(j).Private)
-             && ('$IsObject($PROPERTY(classDefinition, pname)))) $PROPERTY(oClass, pname) = $PROPERTY(classDefinition, pname)
+        try {
+            set:((pname '= "parent")
+                && ('props.Properties.GetAt(j).Private)
+                && ('$IsObject($PROPERTY(classDefinition, pname)))) $PROPERTY(oClass, pname) = $PROPERTY(classDefinition, pname)
+        } catch (e) {
+            // Skip private properties that InterSystems may add in any future versions
+        }
     }
     if (oClass.TimeChanged) { set oClass.TimeChanged = $zdatetime(oClass.TimeChanged) }
     if (oClass.TimeCreated) { set oClass.TimeCreated = $zdatetime(oClass.TimeCreated) }
@@ -117,7 +121,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         do oProperties.%DispatchSetProperty(p.Name, oProp)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(p, pname)
+            try {
+                set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(p, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
         if (..classExists(package _ "." _ p.Type)) {
             set oProp.Type = package _ "." _ p.Type
@@ -140,7 +148,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         do oMethods.%DispatchSetProperty(met.Name, oMeth)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:((pname '= "parent") && (pname '= "Implementation")) $PROPERTY(oMeth, pname) = $PROPERTY(met, pname)
+            try {
+                set:((pname '= "parent") && (pname '= "Implementation")) $PROPERTY(oMeth, pname) = $PROPERTY(met, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
     }
 
@@ -153,7 +165,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         set p = classDefinition.Parameters.GetAt(i)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:(pname '= "parent") $PROPERTY(oPar, pname) = $PROPERTY(p, pname)
+            try {
+                set:(pname '= "parent") $PROPERTY(oPar, pname) = $PROPERTY(p, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
         do oParameters.%DispatchSetProperty(p.Name, oPar)
     }
@@ -166,7 +182,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         set q = classDefinition.Queries.GetAt(i)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(q, pname)
+            try {
+                set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(q, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
         do oQueries.%DispatchSetProperty(q.Name, oProp)
     }
@@ -179,7 +199,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         set xd = classDefinition.XDatas.GetAt(i)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:((pname '= "parent") && (pname '= "Object")) $PROPERTY(oProp, pname) = $PROPERTY(xd, pname)
+            try {
+                set:((pname '= "parent") && (pname '= "Object")) $PROPERTY(oProp, pname) = $PROPERTY(xd, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
         do oXDatas.%DispatchSetProperty(xd.Name, oProp)
     }
@@ -192,7 +216,11 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
         set ind = classDefinition.Indices.GetAt(i)
         for j=1:1:props.Properties.Count() {
             set pname = props.Properties.GetAt(j).Name
-            set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(ind, pname)
+            try {
+                set:(pname '= "parent") $PROPERTY(oProp, pname) = $PROPERTY(ind, pname)
+            } catch (e) {
+                // Skip private properties that InterSystems may add in any future versions
+            }
         }
         do oIndices.%DispatchSetProperty(ind.Name, oProp)
     }
