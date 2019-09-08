@@ -303,6 +303,10 @@ ClassView.prototype.getPropertyHoverText = function (prop, type) {
         },
         propText = {
             "Calculated": 1,
+            "Collection": function (data) {
+                return "<span class=\"syntax-keyword\">Collection</span>="
+                + data
+            },
             "Final": 1,
             "Identity": 1,
             "InitialExpression": function (data) {
@@ -510,7 +514,11 @@ ClassView.prototype.createClassInstance = function (name, classMetaData, saved) 
                 keyWordsArray.push(n);
                 arr.push({
                     name: n,
-                    text: n + (ps[n]["Type"] ? ": " + ps[n]["Type"] : ""),
+                    text: n + (ps[n]["Type"]
+                        ? ps[n]["Collection"]
+                            ? ": " + ps[n]["Collection"] + " of " + ps[n]["Type"]
+                            : ": " + ps[n]["Type"]
+                        : ""),
                     hover: self.getPropertyHoverText(ps[n], "property"),
                     icons: self.getPropertyIcons(ps[n])
                 });
