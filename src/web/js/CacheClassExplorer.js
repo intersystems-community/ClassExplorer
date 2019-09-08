@@ -212,7 +212,7 @@ CacheClassExplorer.prototype.restoreFromURL = function () {
     var hash = (location.hash || "").substr(1),
         obj;
 
-    try { obj = JSON.parse(hash); } catch (e) { obj = {}; }
+    try { obj = JSON.parse(decodeURIComponent(hash)); } catch (e) { console.error(e); obj = {}; }
 
     if (obj.level)
         this.classTree.SELECTED_LEVEL = obj.level;

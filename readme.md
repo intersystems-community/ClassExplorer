@@ -51,3 +51,7 @@ This will generate <code>build</code> directory, where you will find XML file re
 
 See the detailed description and discussion  [in this article](https://community.intersystems.com/node/407056).
 Have a look at [InterSystems Developer Community](community.intersystems.com) to learn about InterSystems technology, sharing solutions and staying up-to-date on the latest developments.
+
+## License
+
+[MIT](LICENSE) © [Nikita Savchenko](https://nikita.tk)
