@@ -21,7 +21,12 @@ An UML class explorer for InterSystems products: IRIS, Ensemble, HealthShare, Ca
 
 ![Demo](https://cloud.githubusercontent.com/assets/4989256/14227108/bad7a9ae-f8fd-11e5-85c6-06e746d281be.png)
 
-## Installation
+## Docker Quick Demo
+
+1. Clone the repository and run `docker-compose up -d --build` to bring up ClassExplorer to a docker container.
+2. Check `localhost:52773/ClassExplorer/` in a little while - it should have the app already.
+
+## Full Installation from XML File
 
 To install latest Caché Class Explorer, you just need to import ClassExplorer package. Download the
 archive from [latest releases](https://github.com/intersystems-ru/UMLExplorer/releases), and then import
@@ -38,7 +43,7 @@ importing this class requires %SYS permission.</b>
 Visit <code>[server domain and port]/ClassExplorer/</code> (slash at end required) to enter
 application.
 
-## Build
+## Development
 
 To build project, you need [NodeJS](https://nodejs.org) platform to be installed. Then, clone source
 code and run <code>npm install</code> from the root of the project. This will install all necessary
@@ -46,6 +51,33 @@ modules from NPM for the project.
 
 After that and each next time just run <code>npm run gulp</code> command from the project root.
 This will generate <code>build</code> directory, where you will find XML file ready to import.
+
+One can import/export the built source to the local Cache/URIS instance (see `import.bat`):
+
+```
+./import.bat
+```
+
+This will bring `ClassExplorer-v*.*.*.xml` to the `build` directory, which you can then package with `npm run zip`.
+
+### ZPM
+
+[ZPM](https://github.com/intersystems-community/zpm) is the package manager for InterSystems products. Currently,
+the release pipeline for it is manual. The ZPM release should happen once the package is uploaded
+to [InterSystems OpenExchange](https://openexchange.intersystems.com/) with the "ZPM" option checked in. This
+should grab **manually moved** files from `build-for-zpm/ClassExplorer` directory for the release.
+
+Locally, one can run and test the application using Docker:
+
+0. Before each release, **manually** patch the version in the `module.xml` file.
+1. Run `docker-compose up -d --build` in the repository root to bring up ClassExplorer to a docker container.
+2. Check `localhost:52773/ClassExplorer/` in a little while - it should have the app already.
+3. Run `docker-compose exec iris iris session iris` and then type `zn "IRISAPP" zpm` to start ZPM session in the "IRISAPP" namespace.
+4. Type `load /irisdev/app` to test whether ZPM can parse the repository root.
+5. Type `classexplorer package` to try to compile the package. It should say something like `Module package generated: /tmp/dirymgtBA/classexplorer-1.20.0.tgz`.
+6. Configure the test registry to publish the package `repo -n registry -r -url https://test.pm.community.intersystems.com/registry/ -user test -pass test` (type `search` to see the registries list).
+7. Finally publish the package `classexplorer publish`.
+8. Further steps to test it: [https://community.intersystems.com/post/testing-packages-zpm](https://community.intersystems.com/post/testing-packages-zpm)
 
 ## Related Discussion
 

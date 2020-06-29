@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="classexplorer.ZPM">
+    <Module>
+      <Name>classexplorer</Name>
+      <Version>1.21.3</Version>
+      <Packaging>module</Packaging>
+      <SourcesRoot>build-for-zpm</SourcesRoot>
+      <Resource Name="ClassExplorer.PKG"/>
+       <CSPApplication 
+        Url="/ClassExplorer"
+        DispatchClass="ClassExplorer.Router"
+        MatchRoles=":{$dbrole}"
+        PasswordAuthEnabled="1"
+        UnauthenticatedEnabled="0"
+        Recurse="1"
+        UseCookies="2"
+        CookiePath="/ClassExplorer"
+       />
+    </Module>
+  </Document>
+</Export>
