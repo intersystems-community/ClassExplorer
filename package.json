@@ -1,7 +1,7 @@
 {
   "name": "CacheClassExplorer",
-  "version": "1.21.3",
-  "description": "Class Explorer for InterSystems Caché",
+  "version": "1.21.4",
+  "description": "UML Class Diagram Builder for InterSystems Data Platforms",
   "directories": {
     "test": "test"
   },
