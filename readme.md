@@ -1,5 +1,6 @@
 # ObjectScript Class Explorer
-
+ [![Quality Gate Status](https://community.objectscriptquality.com/api/project_badges/measure?project=intersystems_iris_community%2Fclassexplorer&metric=alert_status)](https://community.objectscriptquality.com/dashboard?id=intersystems_iris_community%2Fclassexplorer)
+ 
 An UML class explorer for InterSystems products: IRIS, Ensemble, HealthShare, Caché. Read more about class explorer [on InterSystems Developer Community](https://community.intersystems.com/post/cach%C3%A9-class-explorer-%E2%80%94-exploring-cach%C3%A9-uml-notation).
 
 ##### Key features
