@@ -5,21 +5,23 @@ ARG IMAGE=store/intersystems/iris-community:2019.4.0.379.0
 ARG IMAGE=store/intersystems/iris-community:2020.1.0.197.0
 ARG IMAGE=intersystemsdc/iris-community:2020.1.0.209.0-zpm
 ARG IMAGE=intersystemsdc/iris-community:2020.1.0.215.0-zpm
-ARG IMAGE=intersystemsdc/iris-community
+ARG IMAGE=intersystemsdc/iris-community:latest
 FROM $IMAGE
 
-USER root
+USER irisowner
 
 WORKDIR /opt/irisapp
-RUN chown ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /opt/irisapp
-
-USER irisowner
 
 COPY  Installer.cls .
 COPY  src src
 COPY  build-for-zpm build-for-zpm
-COPY irissession.sh /
-SHELL ["/irissession.sh"]
+COPY irissession.sh .
+
+USER root
+
+RUN chmod +x ./irissession.sh
+USER irisowner
+SHELL ["./irissession.sh"]
 
 RUN \
   do $SYSTEM.OBJ.Load("Installer.cls", "ck") \
