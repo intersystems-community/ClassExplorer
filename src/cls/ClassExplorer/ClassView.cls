@@ -321,12 +321,23 @@ ClassMethod getBaseOData(packageName As %String, baseNamespace As %String, saved
 
     set ns = $namespace
     zn baseNamespace
-    if $get(^ClassExplorer("savedView", ns_":"_savedName)) '= "" {
-        set oData.savedView = $get(^ClassExplorer("savedView", ns_":"_savedName))
+    set shortName = ..shortenSavedName(ns_":"_savedName)
+    if $get(^ClassExplorer("savedView", shortName)) '= "" {
+        set oData.savedView = $get(^ClassExplorer("savedView", shortName))
     }
     zn ns
 
     quit oData
+}
+
+/// Shorten the saved name to avoid SUBSCRIPT errors when saving into ^ClassExplorer
+ClassMethod shortenSavedName(savedName as %String) As %String [ Internal ]
+{
+    // this is not watertight, but should be sufficient for this use case
+    if $l(savedName)>100 {
+        return $e(savedName, 1, 100) _ $zcrc(savedName, 7)
+    }
+    return savedName
 }
 
 /// Returns if class with given name exists.
