@@ -3,7 +3,7 @@
   <Document name="classexplorer.ZPM">
     <Module>
       <Name>classexplorer</Name>
-      <Version>1.21.4</Version>
+      <Version>1.21.5</Version>
       <Description>UML Class Diagram Builder for InterSystems Data Platforms</Description>
       <Packaging>module</Packaging>
       <SourcesRoot>build-for-zpm</SourcesRoot>
