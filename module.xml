@@ -8,7 +8,7 @@
       <Packaging>module</Packaging>
       <SourcesRoot>build-for-zpm</SourcesRoot>
       <Resource Name="ClassExplorer.PKG"/>
-       <CSPApplication 
+       <WebApplication 
         Url="/ClassExplorer"
         DispatchClass="ClassExplorer.Router"
         MatchRoles=":{$dbrole}"
