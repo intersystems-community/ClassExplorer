@@ -112,6 +112,16 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
     if (oData.restrictPackage) && ('..inPackage(oData.basePackageName, package)) quit oClass
     set oClass.Super = ..correctInheritance(oData, classDefinition, package) // now expand super names
 
+    // prebuild a list of properties that are part of an FK
+    kill propToFK
+    for i = 1:1:classDefinition.ForeignKeys.Count() {
+        set fk = classDefinition.ForeignKeys.GetAt(i)
+        for j = 1:1:$l(fk.Properties,",") {
+            set prop = $piece(fk.Properties,",")
+            set propToFK(prop) = fk
+        }
+    }
+
     set oClass.properties = oProperties
     set count = classDefinition.Properties.Count()
     set props = ##class(%Dictionary.ClassDefinition).%OpenId("%Dictionary.PropertyDefinition")
@@ -127,14 +137,26 @@ ClassMethod fillClassData(oData As %ZEN.proxyObject, className As %String, level
                 // Skip private properties that InterSystems may add in any future versions
             }
         }
-        if (..classExists(package _ "." _ p.Type)) {
-            set oProp.Type = package _ "." _ p.Type
-            do ..fillClassData(oData, package _ "." _ p.Type, level, currLevel)
-        } elseif (..classExists(..extendClassFromType(p.Type))) {
-            set oProp.Type = ..extendClassFromType(p.Type)
-            do ..fillClassData(oData, ..extendClassFromType(p.Type), level, currLevel)
+
+        set pType = p.Type
+
+        // check if this property has an outgoing FK reference
+        if $d(propToFK(p.Name), fk) {
+            // if so, override target type and class relationship traits
+            set pType = fk.ReferencedClass,
+                oProp.Relationship = 1,
+                oProp.Cardinality = "one",
+                oProp.Inverse = "[foreign key]"
+        }
+
+        if (..classExists(package _ "." _ pType)) {
+            set oProp.Type = package _ "." _ pType
+            do ..fillClassData(oData, package _ "." _ pType, level, currLevel)
+        } elseif (..classExists(..extendClassFromType(pType))) {
+            set oProp.Type = ..extendClassFromType(pType)
+            do ..fillClassData(oData, ..extendClassFromType(pType), level, currLevel)
         }  else {
-            set oProp.Type = ..extendClassFromType(p.Type)
+            set oProp.Type = ..extendClassFromType(pType)
         }
     }
 
