@@ -1,0 +1,4 @@
+do $SYSTEM.OBJ.LoadDir("/opt/irisapp/src/","c",,1)
+do $SYSTEM.OBJ.ExportPackage("ClassExplorer", "/opt/irisapp/export/ClassExplorer-v0.xml")
+
+halt

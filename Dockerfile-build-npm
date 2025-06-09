@@ -1,0 +1,35 @@
+ARG IMAGE=intersystemsdc/iris-community
+FROM $IMAGE
+
+USER root
+
+# install curl
+RUN apt update && apt install curl -y
+
+# set env
+ENV NVM_DIR=/root/.nvm
+
+# install nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# install node
+RUN bash -c "source $NVM_DIR/nvm.sh && nvm install 10 && nvm use 10"
+
+# copy code
+WORKDIR /opt/irisapp
+COPY src ./src
+COPY gulpfile.js .
+COPY package.json .
+COPY iris-build-npm.script .
+
+# build npm
+RUN bash -c "source $NVM_DIR/nvm.sh && npm install && npm run gulp"
+
+RUN mkdir /opt/irisapp/export/
+RUN chown -R ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /opt/irisapp
+USER ${ISC_PACKAGE_MGRUSER}
+
+# import/export IRIS
+RUN iris start iris && \
+    iris session iris < iris-build-npm.script && \
+    iris stop iris quietly

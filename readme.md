@@ -46,6 +46,8 @@ application.
 
 ## Development
 
+### Local
+
 To build project, you need [NodeJS](https://nodejs.org) platform to be installed. Then, clone source
 code and run <code>npm install</code> from the root of the project. This will install all necessary
 modules from NPM for the project.
@@ -60,6 +62,17 @@ One can import/export the built source to the local Cache/URIS instance (see `im
 ```
 
 This will bring `ClassExplorer-v*.*.*.xml` to the `build` directory, which you can then package with `npm run zip`.
+
+### Using docker
+
+:warning: incomplete procedure
+
+```Shell
+docker build -f .\Dockerfile-build-npm -t build-npm .
+docker run --rm -d --name build-npm build-npm
+docker cp build-npm:/opt/irisapp/
+docker stop build-npm
+```
 
 ### ZPM
 
