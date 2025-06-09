@@ -68,9 +68,11 @@ This will bring `ClassExplorer-v*.*.*.xml` to the `build` directory, which you c
 :warning: incomplete procedure
 
 ```Shell
-docker build -f .\Dockerfile-build-npm -t build-npm .
+docker build -f ./Dockerfile-build-npm -t build-npm .
 docker run --rm -d --name build-npm build-npm
-docker cp build-npm:/opt/irisapp/
+docker cp build-npm:/opt/irisapp/build/cls/ClassExplorer.ClassView.cls ./build-for-zpm/ClassExplorer/ClassView.cls
+docker cp build-npm:/opt/irisapp/build/cls/ClassExplorer.Router.cls ./build-for-zpm/ClassExplorer/Router.cls
+docker cp build-npm:/opt/irisapp/build/cls/ClassExplorer.StaticContent.cls ./build-for-zpm/ClassExplorer/StaticContent.cls
 docker stop build-npm
 ```
 

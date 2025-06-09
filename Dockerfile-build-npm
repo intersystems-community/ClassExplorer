@@ -25,11 +25,11 @@ COPY iris-build-npm.script .
 # build npm
 RUN bash -c "source $NVM_DIR/nvm.sh && npm install && npm run gulp"
 
-RUN mkdir /opt/irisapp/export/
-RUN chown -R ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /opt/irisapp
+#RUN mkdir /opt/irisapp/export/
+#RUN chown -R ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /opt/irisapp
 USER ${ISC_PACKAGE_MGRUSER}
 
 # import/export IRIS
-RUN iris start iris && \
-    iris session iris < iris-build-npm.script && \
-    iris stop iris quietly
+#RUN iris start iris && \
+#    iris session iris < iris-build-npm.script && \
+#    iris stop iris quietly
