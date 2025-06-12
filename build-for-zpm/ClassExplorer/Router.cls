@@ -42,7 +42,7 @@ ClassMethod SaveView() As %Status
 {
     set name = %request.Get("name")
     set content = %request.Content.Read($$$MaxStringLength) // ~ 7mb
-    set ^ClassExplorer("savedView", name) = content
+    set ^ClassExplorer("savedView", ##class(ClassExplorer.ClassView).shortenSavedName(name)) = content
     write "{""OK"":true}"
     return $$$OK
 }
@@ -51,7 +51,7 @@ ClassMethod SaveView() As %Status
 ClassMethod ResetView() As %Status
 {
     set name = %request.Get("name")
-    kill ^ClassExplorer("savedView", name)
+    kill ^ClassExplorer("savedView", ##class(ClassExplorer.ClassView).shortenSavedName(name))
     write "{""OK"":true}"
     return $$$OK
 }

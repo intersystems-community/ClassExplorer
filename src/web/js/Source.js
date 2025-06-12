@@ -1,7 +1,19 @@
 var Source = function (cacheUMLExplorer) {
 
+    // need to figure out path prefix when not at /ClassExplorer
+    var prefix = '';
+    try {
+        var path = window.location.pathname.split('/');
+        for (var i = 1; i < path.length; i++) {
+            if (path[i]=='ClassExplorer') break;
+            prefix += '/'+path[i];
+        }
+    } catch (ex) {
+        // shrug it off
+    }
+
     this.URL = window.location.protocol + "//" + window.location.hostname + ":" +
-        57772/*build.replace:window.location.port*/ + "/ClassExplorer";
+        57772/*build.replace:window.location.port*/ + prefix + "/ClassExplorer";
 
     this.cue = cacheUMLExplorer;
 

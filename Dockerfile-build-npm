@@ -1,0 +1,30 @@
+FROM ubuntu:latest
+ARG NODE_VERSION=10
+
+# install curl
+RUN apt update && apt install curl -y
+
+# install nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# set env
+ENV NVM_DIR=/root/.nvm
+
+# install node
+RUN bash -c "source $NVM_DIR/nvm.sh && nvm install ${NODE_VERSION} && nvm use ${NODE_VERSION}"
+
+# copy code
+WORKDIR /opt/irisapp
+COPY src ./src
+COPY gulpfile.js .
+COPY package.json .
+
+# build npm
+RUN bash -c "source $NVM_DIR/nvm.sh && npm install && npm run gulp"
+
+
+# set ENTRYPOINT for reloading nvm-environment
+ENTRYPOINT ["bash", "-c", "source $NVM_DIR/nvm.sh && exec \"$@\"", "--"]
+
+# set cmd to bash
+CMD ["/bin/bash"]
